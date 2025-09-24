@@ -1,19 +1,20 @@
+import { Routes, Route } from "react-router-dom";
 import Header from "../Components/Header";
-import './App.css';
-import '../Components/Header.css';
-import Home from '../Pages/Home';
+import "./App.css";
+import "../Components/Header.css";
+import Home from "../Pages/Home";
+import Browse from "../Pages/Browse";
 
-function App() {
+export default function App() {
   return (
     <div className="App">
-      <header className="App-header">
-          <Header></Header>
-          <Home></Home>
-        <p>
-        </p>
-      </header>
+      <Header />
+      <main className="App-main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/browse" element={<Browse />} />
+        </Routes>
+      </main>
     </div>
   );
 }
-
-export default App;
