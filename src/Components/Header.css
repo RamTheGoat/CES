@@ -1,4 +1,4 @@
-/* Need to implement fonts later */
+/* Need to implement fonts */
 
 /* positions the whole capsule */
 .nav-shell {
@@ -32,6 +32,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* hover effect on links */
+/* Keep this code before the "links" section */
+.nav-inner nav a:hover {
+  text-decoration: underline;
+  text-decoration-color: #CC12CC;
 }
 
 /* links */

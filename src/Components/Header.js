@@ -3,7 +3,7 @@ import './Header.css';
 
 export default function Header() {
   return (
-    <div className="nav-shell">           {/* gradient border */}
+    <div className="nav-shell">    
       <header className="nav-inner">  
         <nav>
           <a href="/">Home</a>
