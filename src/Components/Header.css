@@ -26,7 +26,7 @@
   background: transparent;
   backdrop-filter: blur(6px);
   box-shadow: 0 2px 8px #CC12CC;
-
+  font-size: 20px;
   padding: 14px 24px;
 
   display: flex;
@@ -49,3 +49,71 @@
   font-weight: 500;
 }
 .nav-inner nav a:last-child { margin-right: 0; }
+
+/* search button container */
+.search-button {
+  background: transparent;
+  border: none; 
+  cursor: pointer; 
+  padding: 0; 
+}
+
+/* search button icon */
+.search-button i.fas.fa-search,
+.search-button .material-symbols-outlined {
+  position: relative;
+  top: 5px;
+  left: 540px;
+  color: #fff;
+}
+
+/* notifications button container */
+.notifications-button {
+  background: transparent;
+  border: none; 
+  cursor: pointer; 
+  padding: 0;
+}
+
+/* notifications button icon */
+.notifications-button i.fas.fa-bell,
+.notifications-button .material-symbols-outlined {
+  position: relative;
+  top: 5px;
+  left: 570px;
+  color: #fff;
+}
+
+/* profile button container */
+.profile-button {
+  background: transparent;
+  border: none; 
+  cursor: pointer; 
+  padding: 0;
+}
+
+/* profile button icon */
+.profile-button i.fas.fa-user-circle,
+.profile-button .material-symbols-outlined {
+  position: relative;
+  top: 5px;
+  left: 600px;
+  color: #fff;
+}
+
+/* light/dark mode toggle button container */
+.light-mode-button {
+  background: transparent;
+  border: none; 
+  cursor: pointer; 
+  padding: 0;
+}
+
+/* light/dark mode toggle button icon */
+.light-mode-button i.fas.fa-lightbulb,
+.light-mode-button .material-symbols-outlined {
+  position: relative;
+  top: 5px;
+  left: 630px;
+  color: #fff;
+}
