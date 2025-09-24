@@ -1,0 +1,51 @@
+/* Need to implement fonts */
+
+/* positions the whole capsule */
+.nav-shell {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* sizing */
+  width: clamp(320px, 95vw, 1100px);
+  box-sizing: border-box;
+
+  /* gradient border */
+  padding: 1px;
+  border-width: 3px;
+  border-radius: 18px;
+  border-color: #CC12CC;
+  background: transparent;
+  z-index: 1000;
+}
+
+/* the actual header bar */
+.nav-inner {
+  border-radius: 17px;      
+  background: transparent;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px #CC12CC;
+
+  padding: 14px 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* hover effect on links */
+/* Keep this code before the "links" section */
+.nav-inner nav a:hover {
+  text-decoration: underline;
+  text-decoration-color: #CC12CC;
+}
+
+/* links */
+.nav-inner nav a {
+  color: #fff;
+  text-decoration: none;
+  margin-right: 1.2rem;
+  font-weight: 500;
+}
+.nav-inner nav a:last-child { margin-right: 0; }
