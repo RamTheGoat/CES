@@ -1,0 +1,173 @@
+/* color pallete - trying to keep it cute and purpley, purply? */
+:root{
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+/* Details page */
+.details{
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Movie banner section */
+.details__banner{
+  height: 400px;
+  background-position: center;
+  background-size: cover;
+  position: relative;
+}
+
+/* Image gallery section */
+.details__gallery{
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  padding: 40px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.details__gallery-img{
+  height: 150px;
+  border-radius: 12px;
+  background: var(--card);
+  background-position: center;
+  background-size: cover;
+}
+
+/* Content sections */
+.details__content{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+/* Section headers */
+.details__section{
+  margin-bottom: 40px;
+}
+
+.details__section-title{
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+/* About section */
+.details__description{
+  line-height: 1.6;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* Genre tags */
+.details__genres{
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.details__genre-tag{
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(204,18,204,.12);
+  border: 1px solid rgba(204,18,204,.35);
+  color: #e9c6f0;
+  font-size: 14px;
+}
+
+/* Trailer section */
+.details__trailer-container{
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* kinda depends on aspect ratio im ngl im not sure */
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card);
+}
+
+.details__trailer-iframe{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Showtimes section */
+.details__days{
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.details__day-btn{
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.2);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.details__day-btn--active{
+  background: rgba(204,18,204,.18);
+  border-color: #cc12cc;
+}
+
+.details__day-btn:hover{
+  transform: translateY(-1px);
+}
+
+.details__times{
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.details__time-btn{
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: var(--chip);
+  border: 1px solid rgba(255,255,255,.1);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.details__time-btn:hover{
+  background: rgba(204,18,204,.25);
+  transform: translateY(-1px);
+}
+
+/* Book tickets button */
+.details__book-section{
+  text-align: center;
+  margin-top: 60px;
+}
+
+.details__book-btn{
+  padding: 16px 32px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #8b14d1, #cc12cc);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.details__book-btn:hover{
+  transform: translateY(-2px);
+}
