@@ -59,7 +59,7 @@ export default function Browse() {
   };
 
   // Clear all selections
-  const clear = () => setSelected(new Set());
+  // const clear = () => setSelected(new Set());
 
   return (
     <main className="browse">
