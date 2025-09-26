@@ -2,6 +2,7 @@ import Header from "../Components/Header";
 import './App.css';
 import '../Components/Header.css';
 import Home from '../Pages/Home';
+import Search from "../Components/Search";
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       <header className="App-header">
           <Header></Header>
           <Home></Home>
+          <Search></Search>
         <p>
         </p>
       </header>
