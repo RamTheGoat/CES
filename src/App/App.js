@@ -4,6 +4,7 @@ import "./App.css";
 import "../Components/Header.css";
 import Home from "../Pages/Home";
 import Browse from "../Pages/Browse";
+import Details from '../Pages/Details';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
+          <Route path="/details" element={<Details />} />
         </Routes>
       </main>
     </div>
