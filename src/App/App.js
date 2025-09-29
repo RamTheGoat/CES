@@ -1,21 +1,24 @@
+import { Routes, Route } from "react-router-dom";
 import Header from "../Components/Header";
-import './App.css';
-import '../Components/Header.css';
-import Home from '../Pages/Home';
+import "./App.css";
+import "../Components/Header.css";
+import Home from "../Pages/Home";
+import Browse from "../Pages/Browse";
+import Details from '../Pages/Details';
 import Search from "../Components/Search";
 
-function App() {
+export default function App() {
   return (
     <div className="App">
-      <header className="App-header">
-          <Header></Header>
-          <Home></Home>
-          <Search></Search>
-        <p>
-        </p>
-      </header>
+      <Header />
+      <main className="App-main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/browse" element={<Browse />} />
+            <Search></Search>
+        <Route path="/details" element={<Details />} />
+        </Routes>
+      </main>
     </div>
   );
 }
-
-export default App;
