@@ -5,7 +5,7 @@ import "../Components/Header.css";
 import Home from "../Pages/Home";
 import Browse from "../Pages/Browse";
 import Details from '../Pages/Details';
-import Search from "../Components/Search";
+import Booking from '../Pages/Booking';
 
 export default function App() {
   return (
@@ -15,7 +15,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
-        <Route path="/details" element={<Details />} />
+          <Route path="/details" element={<Details />} />
+          <Route path="/booking" element={<Booking />} />
+
         </Routes>
       </main>
     </div>

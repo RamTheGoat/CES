@@ -17,7 +17,7 @@
 }
 
 /* Movie banner section */
-.details__banner{
+.details_banner{
   height: 400px;
   background-position: center;
   background-size: cover;
@@ -25,7 +25,7 @@
 }
 
 /* Image gallery section */
-.details__gallery{
+.details_gallery{
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 16px;
@@ -34,7 +34,7 @@
   margin: 0 auto;
 }
 
-.details__gallery-img{
+.details_gallery-img{
   height: 150px;
   border-radius: 12px;
   background: var(--card);
@@ -43,38 +43,38 @@
 }
 
 /* Content sections */
-.details__content{
+.details_content{
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px 60px;
 }
 
 /* Section headers */
-.details__section{
+.details_section{
   margin-bottom: 40px;
 }
 
-.details__section-title{
+.details_section-title{
   font-size: 28px;
   margin-bottom: 20px;
   color: var(--text);
 }
 
 /* About section */
-.details__description{
+.details_description{
   line-height: 1.6;
   color: var(--muted);
   font-size: 16px;
 }
 
 /* Genre tags */
-.details__genres{
+.details_genres{
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.details__genre-tag{
+.details_genre-tag{
   padding: 8px 16px;
   border-radius: 999px;
   background: rgba(204,18,204,.12);
@@ -84,7 +84,7 @@
 }
 
 /* Trailer section */
-.details__trailer-container{
+.details_trailer-container{
   position: relative;
   width: 100%;
   height: 0;
@@ -94,7 +94,7 @@
   background: var(--card);
 }
 
-.details__trailer-iframe{
+.details_trailer-iframe{
   position: absolute;
   top: 0;
   left: 0;
@@ -104,14 +104,14 @@
 }
 
 /* Showtimes section */
-.details__days{
+.details_days{
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
-.details__day-btn{
+.details_day-btn{
   padding: 10px 20px;
   border-radius: 8px;
   background: transparent;
@@ -121,22 +121,22 @@
   transition: all 0.2s ease;
 }
 
-.details__day-btn--active{
+.details_day-btn--active{
   background: rgba(204,18,204,.18);
   border-color: #cc12cc;
 }
 
-.details__day-btn:hover{
+.details_day-btn:hover{
   transform: translateY(-1px);
 }
 
-.details__times{
+.details_times{
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.details__time-btn{
+.details_time-btn{
   padding: 12px 24px;
   border-radius: 8px;
   background: var(--chip);
@@ -146,18 +146,18 @@
   transition: all 0.2s ease;
 }
 
-.details__time-btn:hover{
+.details_time-btn:hover{
   background: rgba(204,18,204,.25);
   transform: translateY(-1px);
 }
 
 /* Book tickets button */
-.details__book-section{
+.details_book-section{
   text-align: center;
   margin-top: 60px;
 }
 
-.details__book-btn{
+.details_book-btn{
   padding: 16px 32px;
   font-size: 18px;
   border-radius: 12px;
@@ -168,6 +168,6 @@
   transition: transform 0.2s ease;
 }
 
-.details__book-btn:hover{
+.details_book-btn:hover{
   transform: translateY(-2px);
 }
