@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Details.css";
+import { useNavigate } from "react-router-dom";
 
 // Data for Barbie movie - replace images in a bit
 const movie = {
@@ -36,6 +37,7 @@ const showtimes = {
 export default function Details() {
   const [selectedDay, setSelectedDay] = useState(0);
   const days = getNextSevenDays();
+  const navigate = useNavigate();
 
   return (
     <main className="details">
@@ -43,46 +45,46 @@ export default function Details() {
       
       {/* Movie banner */}
       <section 
-        className="details__banner"
+        className="details_banner"
         style={{ backgroundImage: `url(${movie.bannerImage})` }} // will add in image in a bit
       />
       
       {/* Image gallery */}
-      <section className="details__gallery">
+      <section className="details_gallery">
         {movie.galleryImages.map((img, index) => (
           <div
             key={index}
-            className="details__gallery-img" // im adding in the images in a bit
+            className="details_gallery-img" // im adding in the images in a bit
             style={{ backgroundImage: `url(${img})` }}
           />
         ))}
       </section>
       
       {/* Content sections */}
-      <div className="details__content">
+      <div className="details_content">
         {/* About section */}
-        <section className="details__section">
-          <h2 className="details__section-title">About {movie.title}</h2>
-          <p className="details__description">{movie.description}</p>
+        <section className="details_section">
+          <h2 className="details_section-title">About {movie.title}</h2>
+          <p className="details_description">{movie.description}</p>
         </section>
         
         {/* Genre section */}
-        <section className="details__section">
-          <h2 className="details__section-title">Genres</h2>
-          <div className="details__genres">
+        <section className="details_section">
+          <h2 className="details_section-title">Genres</h2>
+          <div className="details_genres">
             {movie.genres.map((genre) => (
-              <span key={genre} className="details__genre-tag">{genre}</span>
+              <span key={genre} className="details_genre-tag">{genre}</span>
             ))}
           </div>
         </section>
         
         {/* Trailer section */}
-        <section className="details__section">
-          <h2 className="details__section-title">Trailer</h2>
-          <div className="details__trailer-container">
+        <section className="details_section">
+          <h2 className="details_section-title">Trailer</h2>
+          <div className="details_trailer-container">
             {movie.trailerUrl ? (
               <iframe
-                className="details__trailer-iframe"
+                className="details_trailer-iframe"
                 src={movie.trailerUrl}
                 title={`${movie.title} Trailer`}
                 allowFullScreen
@@ -106,15 +108,15 @@ export default function Details() {
         </section>
         
         {/* Showtimes section */}
-        <section className="details__section">
-          <h2 className="details__section-title">Showtimes</h2>
+        <section className="details_section">
+          <h2 className="details_section-title">Showtimes</h2>
           
           {/* Day selection */}
-          <div className="details__days">
+          <div className="details_days">
             {days.map((day, index) => (
               <button
                 key={index}
-                className={`details__day-btn ${selectedDay === index ? 'details__day-btn--active' : ''}`}
+                className={`details_day-btn ${selectedDay === index ? 'details_day-btn--active' : ''}`}
                 onClick={() => setSelectedDay(index)}
               >
                 {day}
@@ -123,9 +125,19 @@ export default function Details() {
           </div>
           
           {/* Time selection */}
-          <div className="details__times">
+          <div className="details_times">
             {showtimes[selectedDay].map((time, index) => (
-              <button key={index} className="details__time-btn">
+              <button 
+                key={index} 
+                className="details_time-btn"
+                onClick={() => navigate('/booking', { 
+                  state: { 
+                    movieTitle: movie.title,
+                    showtime: time,
+                    date: days[selectedDay]
+                  }
+                })}
+              >
                 {time}
               </button>
             ))}
@@ -133,8 +145,8 @@ export default function Details() {
         </section>
         
         {/* Book tickets button */}
-        <section className="details__book-section">
-          <button className="details__book-btn">
+        <section className="details_book-section">
+          <button className="details_book-btn">
             Book Your Tickets Today!
           </button>
         </section>
