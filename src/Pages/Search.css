@@ -1,0 +1,85 @@
+/* color pallete */
+:root{
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+/* The page */
+.search-bar{
+  min-height: 100svh;
+  padding: 24px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Searchbar */
+.search{
+  display: block;
+  width: min(720px, 100%);
+  margin: 85px auto 18px;     /* push down from header like Browse */
+  padding: 12px 14px;
+  font-size: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  background: var(--bg-2);
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.search::placeholder{ color: var(--muted); }
+.search:focus{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(204,18,204,.25);
+}
+
+/* Result card grid */
+.cards-container{
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+/* Movie Card */
+.movie-card{
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.movie-card:hover{
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,.14);
+  box-shadow: 0 12px 28px rgba(0,0,0,.35);
+}
+
+/* Poster */
+.movie-image{
+  width: 100%;
+  aspect-ratio: 2/3;     /* consistent poster shape */
+  object-fit: cover;
+  display: block;
+  background: #000;      
+}
+
+/* Body */
+.movie-title{
+  font-size: 16px;
+  line-height: 1.25;
+  margin: 10px 12px 4px;
+  color: var(--text);
+}
+.movie-year{
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 12px 12px;
+}
+
