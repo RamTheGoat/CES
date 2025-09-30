@@ -16,6 +16,17 @@
   color: var(--text);
 }
 
+/* Details Info like cast... */
+.details_info p {
+  margin: 0.5rem 0; /* space between each line */
+  line-height: 1.5; /* make it a bit taller */
+}
+
+.details_section {
+  margin-bottom: 2rem; /* space between sections */
+}
+
+
 /* Movie banner section */
 .details_banner{
   height: 400px;

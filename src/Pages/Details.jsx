@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Details.css";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
+
+/*
 // Data for Barbie movie - replace images in a bit
 const movie = {
   title: "Barbie",
@@ -11,6 +14,7 @@ const movie = {
   bannerImage: "", // Will be added later
   galleryImages: ["", "", "", "", ""] // Will be added later
 };
+*/
 
 // Generate about a week of days to choose from
 const getNextSevenDays = () => {
@@ -35,9 +39,28 @@ const showtimes = {
 };
 
 export default function Details() {
+  const { id } = useParams()
+  const [movie, setMovie] = useState(null);
+
   const [selectedDay, setSelectedDay] = useState(0);
   const days = getNextSevenDays();
   const navigate = useNavigate();
+
+  useEffect(() =>  {
+    const fetchMovie = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/api/movies/${id}`);
+        const data = await response.json();
+        console.log("Fetched movie:", data);
+        setMovie(data);
+      } catch (error) {
+        console.error("Failed to fetch movie data.", error);
+      }
+    };
+    fetchMovie();
+  }, [id]);
+
+  if (!movie) return <p>Loading...</p>; // Wait until data is fetched
 
   return (
     <main className="details">
@@ -46,15 +69,15 @@ export default function Details() {
       {/* Movie banner */}
       <section 
         className="details_banner"
-        style={{ backgroundImage: `url(${movie.bannerImage})` }} // will add in image in a bit
+        style={{ backgroundImage: `url(${movie.bannerimage || "placeholder-url-here"})` }}
       />
       
       {/* Image gallery */}
       <section className="details_gallery">
-        {movie.galleryImages.map((img, index) => (
+        {(movie.galleryImages || []).map((img, index) => (
           <div
             key={index}
-            className="details_gallery-img" // im adding in the images in a bit
+            className="details_gallery-img"
             style={{ backgroundImage: `url(${img})` }}
           />
         ))}
@@ -65,16 +88,25 @@ export default function Details() {
         {/* About section */}
         <section className="details_section">
           <h2 className="details_section-title">About {movie.title}</h2>
-          <p className="details_description">{movie.description}</p>
+          <p className="details_description">{movie.synopsis}</p>
+
+          <div className="details_info">
+            <p><strong>Cast:</strong> {movie.cast}</p>
+            <p><strong>Producers:</strong> {movie.producers}</p>
+            <p><strong>Director:</strong> {movie.director}</p>
+            <p><strong>Film Rating:</strong> {movie['film rating']}</p>
+            <p><strong>Reviews:</strong> {movie.reviews}</p>
+          </div>
         </section>
         
         {/* Genre section */}
         <section className="details_section">
           <h2 className="details_section-title">Genres</h2>
           <div className="details_genres">
-            {movie.genres.map((genre) => (
-              <span key={genre} className="details_genre-tag">{genre}</span>
-            ))}
+            {Array.isArray(movie.genre) 
+              ? movie.genre.map((g) => <span key={g} className="details_genre-tag">{g}</span>)
+              : <span className="details_genre-tag">{movie.genre}</span>
+            }
           </div>
         </section>
         
@@ -82,10 +114,10 @@ export default function Details() {
         <section className="details_section">
           <h2 className="details_section-title">Trailer</h2>
           <div className="details_trailer-container">
-            {movie.trailerUrl ? (
+            {movie.trailerurl ? (
               <iframe
                 className="details_trailer-iframe"
-                src={movie.trailerUrl}
+                src={movie.trailerurl}
                 title={`${movie.title} Trailer`}
                 allowFullScreen
               />

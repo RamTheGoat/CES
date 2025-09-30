@@ -21,20 +21,20 @@ export default function Header() {
           <NavLink to="/pricing">Pricing</NavLink>
           <NavLink to="/faq">FAQ</NavLink>
           {/* Search button */}
-          <button type="submit" class="search-button">
-            <span class="material-symbols-outlined">search</span>
+          <button type="submit" className="search-button">
+            <span className="material-symbols-outlined">search</span>
           </button>
           {/* Notification button */}
-          <button type="button" class="notifications-button">
-            <span class="material-symbols-outlined">notifications</span>
+          <button type="button" className="notifications-button">
+            <span className="material-symbols-outlined">notifications</span>
           </button>
           {/* User profile button */
-          <button type="button" class="profile-button">
-            <span class="material-symbols-outlined">account_circle</span>
+          <button type="button" className="profile-button">
+            <span className="material-symbols-outlined">account_circle</span>
           </button>}
           {/* light mode toggle button */
-          <button type="button" class="light-mode-button">
-            <span class="material-symbols-outlined">light_mode</span>
+          <button type="button" className="light-mode-button">
+            <span className="material-symbols-outlined">light_mode</span>
           </button>}
         </nav>
       </header>

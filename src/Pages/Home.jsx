@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./Home.css";
+import { Link } from "react-router-dom";
 
+/*
 // Replace all sample data with MongoDB data in the future
 // Sample data
 const movie = {
@@ -38,6 +40,7 @@ const comingSoon = [
   { id: 17, title: "Arcane",     img: "https://images.unsplash.com/photo-1535223289827-42f1e9919769?q=80&w=800&auto=format&fit=crop" },
   { id: 18, title: "Marvels",    img: "https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=800&auto=format&fit=crop" }
 ];
+*/
 
 // Function for movie cards
 function Rail({ title, items }) {
@@ -46,15 +49,16 @@ function Rail({ title, items }) {
       <h2 className="rail__title">{title}</h2>
       <div className="rail__track">
         {items.map((m) => (
-          <article
-            key={m.id}
-            className="card"
-            style={{ backgroundImage: `url(${m.img})` }}
-            aria-label={m.title}
-            title={m.title}
-          >
-            <div className="card__fade" />
-          </article>
+          <Link ey={m.id} to={`/details/${m._id}`} className="card-link">
+            <article
+              className="card"
+              style={{ backgroundImage: `url(${m.posterurl})` }}
+              aria-label={m.title}
+              title={m.title}
+            >
+              <div className="card__fade" />
+            </article>
+          </Link>
         ))}
       </div>
 
@@ -67,34 +71,63 @@ function Rail({ title, items }) {
 }
 
 export default function Home() {
+  // New Code
+  const [movie, setMovie] = useState(null);
+  const [nowPlaying, setNowPlaying] = useState([]);
+  const [comingSoon, setComingSoon] = useState([]);
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/movies");
+        const moviesData = await res.json();
+
+        setMovie(moviesData[0]);
+
+        setNowPlaying(moviesData.slice(0, 6));
+        setComingSoon(moviesData.slice(6));
+      } catch (err) {
+        console.error("Failed to fetch movies:", err);
+      }
+    };
+
+    fetchMovies();
+  }, []);
+
+  // Render a loading state while data is being fetched
+  if (!movie) return <p>Loading...</p>;
+
   return (
     <main className="home">
       {/* MOVIE */}
       <section
         className="movie"
-        style={{ backgroundImage: `url(${movie.image})` }}
+        style={{ backgroundImage: `url(${movie.posterurl})` }}
       >
         <div className="movie__scrim" />
         <div className="movie__content">
           <h1 className="movie__title">{movie.title}</h1>
 
-          <p className="movie__summary">{movie.summary}</p>
+          <p className="movie__summary">{movie.synopsis}</p>
 
           <div className="movie__meta">
             <div className="tags">
-              {movie.tags.map((t) => (
+              {movie.tags?.map((t) => (
                 <span key={t} className="tag">{t}</span>
               ))}
-            </div>
+
+              {/* Or, since your DB has "genre", just show that */}
+              {!movie.tags && <span className="tag">{movie.genre}</span>}
+          </div>
             <div className="rating">
               <span className="stars">★★★★★</span>
-              <span className="rating__num">{movie.rating}</span>
+              <span className="rating__num">{movie.reviews}</span>
             </div>
           </div>
 
           <div className="movie__actions">
             <button className="btn btn--primary">Watch Movie</button>
-            <button className="btn btn--ghost">More Info</button>
+              <button className="btn btn--ghost">More Info</button>
           </div>
         </div>
       </section>
