@@ -1,14 +1,6 @@
 import { NavLink } from "react-router-dom";
 import "./Header.css";
 
-/* Search button functionality - to be implemented later */
-//const searchButton = document.querySelector('.search-button');
-
-//searchButton.addEventListener('click', function() {
-  // Add your JavaScript logic here, e.g.,
-  // openSearchOverlay();
-  // submitSearchForm();
-//}); 
 
 export default function Header() {
   return (
@@ -21,9 +13,9 @@ export default function Header() {
           <NavLink to="/pricing">Pricing</NavLink>
           <NavLink to="/faq">FAQ</NavLink>
           {/* Search button */}
-          <button type="submit" className="search-button">
+          <NavLink to="/search" className="search-button" aria-label="Search" title="Search">
             <span className="material-symbols-outlined">search</span>
-          </button>
+          </NavLink>
           {/* Notification button */}
           <button type="button" className="notifications-button">
             <span className="material-symbols-outlined">notifications</span>
