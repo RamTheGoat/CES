@@ -1,0 +1,79 @@
+/* color pallete */
+:root{
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+/* The page */
+.login-page{
+  min-height: 100svh;
+  padding: 24px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Login Container */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    background: var(--bg);
+}
+
+/* Login Header */
+.login-container h2 {
+    margin-bottom: 20px;
+    color: var(--text);
+}
+
+/* Input Boxes */
+.emailBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--card);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    width: 300px;
+    margin-bottom: 20px;
+}
+
+.passwordBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--card);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    width: 300px;
+}
+.sButton {
+    background: var(--accent);
+    color: var(--text);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.sButton:hover {
+    background: #e020e0;
+}
+
+.fPassword {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer;
+}
