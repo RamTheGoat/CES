@@ -7,6 +7,7 @@ import Browse from "../Pages/Browse";
 import Details from '../Pages/Details';
 import Booking from '../Pages/Booking';
 import Search from "../Pages/Search";
+import AdminHome from "../Pages/AdminHome";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <main className="App-main">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/adminHome" element={<AdminHome />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/details/:id" element={<Details />} />
           <Route path="/search" element={<Search />} />

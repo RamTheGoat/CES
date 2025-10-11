@@ -1,0 +1,193 @@
+/* color pallete */
+:root{
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+/* Homepage Basics */
+.home{
+  min-height: 100svh;
+  width: 100vw;  
+  background: var(--bg); /*might want to change to black or gradient later*/
+  /*background: radial-gradient(1200px 600px at 20% 0%, #11183a 0%, var(--bg) 40%, var(--bg-2) 100%);*/
+  color: var(--text);
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+*{ box-sizing: border-box; }
+h1,h2,p{ margin: 0; }
+
+/* Movie */
+.movie{
+  position: relative;
+  min-height: 100svh; /* Full viewport height */
+  height: 100vh; /* Keep it full height instead of auto so the movie_content is positioned correctly */
+  border-radius: 24px;
+  overflow: hidden;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 24px 60px rgba(0,0,0,.45);
+  margin-bottom: 40px;
+}
+
+/* Featured Movie Box */
+.movie__scrim{
+  position: absolute;
+  inset: 0; /* Border of the box */
+  /* Darkening effect over the movie poster image*/
+  background: linear-gradient(90deg, rgba(9,11,22,.85) 0%, rgba(9,11,22,.55) 45%, rgba(9,11,22,.2) 65%, rgba(9,11,22,.85) 100%);
+}
+
+/* Content box of the featured movie */
+.movie__content{
+  position: relative;
+  top: 37%;
+  padding: 50px;
+  max-width: 720px;
+}
+
+/* Movie Title of the featured movie */
+.movie__title{
+  font-size: clamp(28px, 4.5vw, 44px);
+  font-weight: 700;
+  letter-spacing: .2px;
+  text-align: left;
+}
+
+/* Movie Summary of the featured movie */
+.movie__summary{
+  margin-top: 10px;
+  line-height: 1.5;
+  text-align: left;
+  color: var(--muted);
+  max-width: 60ch;
+  font-size: medium;
+}
+
+/* Movie Meta of the featured movie (tags, rating, etc) */
+.movie__meta{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+/* Movie Genre Tags */
+.tags{ display:flex; gap:8px; }
+.tag{
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(204,18,204,.12);
+  border: 1px solid rgba(204,18,204,.35);
+  color: #e9c6f0;
+  font-size: 12px;
+}
+
+/* Movie Rating */
+.rating{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#ffd966;
+}
+
+/* Star rating*/
+.stars{
+  font-size: 20px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #ffd966 80%, #333 0%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; /* faux fill */
+}
+/* Rating number - Might not want it later */
+.rating__num{ font-weight: 600; color:#ffdf80; }
+
+/* Movie Buttons Content Box */
+.movie__actions{
+  margin-top: 18px;
+  display:flex;
+  gap:12px;
+}
+.btn{
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.btn:hover{ transform: translateY(-1px); }
+/* Watch Movie button */
+.btn--primary{ /* Gradient button - Do we want to keep it solid? */
+  background:
+    radial-gradient(60% 120% at 30% 0%, rgba(255,255,255,.15), transparent 60%),
+    linear-gradient(90deg, #8b14d1, #cc12cc 60%, #ff5bd3);
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: 0 8px 20px rgba(204,18,204,.35);
+}
+/* More Info button */
+.btn--ghost{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.2);
+}
+
+/* RAILS */
+.rail{ margin-top: 32px; }
+
+/* Now playing and Coming Soon Title */
+.rail__title{
+  font-size: 35px;
+  margin-bottom: 2%;
+  margin-left: 5%;
+  text-align: left;
+}
+
+/* Track container for horizontal scrolling of movies */
+.rail__track{
+  margin-left: 2.5%;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 275px;
+  gap: 75px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scroll-snap-type: x mandatory;
+}
+.rail__track::-webkit-scrollbar{ height: 10px; }
+.rail__track::-webkit-scrollbar-thumb{
+  background: transparent;
+  border-radius: 999px;
+}
+
+/* Movie Cards inside the rails */
+.card{
+  position: relative;
+  height: 407px; /* Aspect ratio 275:407 */ /* Movie Posters are usually 27:40 ratio */
+  border-radius: 16px;
+  background: var(--card);
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  scroll-snap-align: start;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.card:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 18px 42px rgba(204,18,204,.25);
+}
+.card__fade{
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
