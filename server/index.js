@@ -16,16 +16,8 @@ mongoose.connect("mongodb+srv://rampatel4204:Patel4204@ces.yybxumv.mongodb.net/M
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(async () => {
-    console.log("MongoDB connected");
-
-    // Fetch all movies and print to console
-    try {
-        const movies = await Movie.find();
-        console.log("Movies in DB:", movies);
-    } catch (err) {
-        console.error("Error fetching movies:", err);
-    }
+.then(() => {
+    console.log("✅ MongoDB connected");
 })
 .catch(err => console.error("MongoDB connection error:", err));
 
@@ -51,4 +43,4 @@ app.get("/api/movies", async (req, res) => {
   });
   
   const PORT = 4000;
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
