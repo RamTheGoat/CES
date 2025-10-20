@@ -1,6 +1,7 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "./Browse.css";
-import { movies } from "../Components/movies.js";
+// import { movies } from "../Components/movies.js";
 
 /* Sample genres - replace with MongoDB data in the future? */
 const GENRES = [
@@ -53,16 +54,12 @@ function GenreRail({ items, selectedSet, onToggle }) {
 function MovieCard({ movie }) {
   return (
     <article className="movie-card">
-      {movie.image && <img src={movie.image} alt={movie.title} className="movie-card__img" />}
+      {movie.posterUrl && (<img src={movie.posterUrl} alt={movie.title} className="movie-card__img" />)}
       <div className="movie-card__body">
         <h4 className="movie-card__title">{movie.title}</h4>
         {movie.year && <p className="movie-card__meta">{movie.year}</p>}
-        {Array.isArray(movie.genres) && (
-          <div className="movie-card__tags">
-            {movie.genres.slice(0, 3).map((g) => (
-              <span key={g} className="tag">{g}</span>
-            ))}
-          </div>
+        {Array.isArray(movie.genre) && (
+          <p className="movie-card__tags">{movie.genre.join(" / ")}</p>
         )}
       </div>
     </article>
@@ -72,6 +69,14 @@ function MovieCard({ movie }) {
 export default function Browse() {
   // allow multiple selections
   const [selected, setSelected] = useState(new Set());
+  const [movies, setMovies] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:4000/api/movies")
+      .then((res) => res.json())
+      .then((data) => setMovies(data))
+      .catch((err) => console.error("Error fetching movies:", err));
+  }, []);
 
   const toggle = (tag) => {
     setSelected((prev) => {
@@ -88,7 +93,7 @@ export default function Browse() {
   if (selectedArr.length === 0) return movies;
 
   return movies.filter((m) => {
-    const mg = Array.isArray(m.genres) ? m.genres.map(norm) : [];
+    const mg = Array.isArray(m.genre) ? m.genre.map(norm) : [];
     return MATCH_MODE === "ALL"
       ? selectedArr.every((g) => mg.includes(g))   // must contain ALL selected
       : selectedArr.some((g) => mg.includes(g));   // contains ANY selected
@@ -119,7 +124,9 @@ export default function Browse() {
       ) : (
         <section className="grid">
           {filtered.map((m) => (
-            <MovieCard key={m.id} movie={m} />
+            <Link key={m._id} to={`/details/${m._id}`} className="movie-link">
+              <MovieCard movie={m} />
+            </Link>
           ))}
         </section>
       )}
