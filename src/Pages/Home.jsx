@@ -52,7 +52,7 @@ function Rail({ title, items }) {
           <Link ey={m.id} to={`/details/${m._id}`} className="card-link">
             <article
               className="card"
-              style={{ backgroundImage: `url(${m.posterurl})` }}
+              style={{ backgroundImage: `url(${m.posterUrl})` }}
               aria-label={m.title}
               title={m.title}
             >
@@ -84,8 +84,12 @@ export default function Home() {
 
         setMovie(moviesData[0]);
 
-        setNowPlaying(moviesData.slice(0, 6));
+        setNowPlaying(moviesData.filter((m) => m.status === "Now Playing"));
+        setComingSoon(moviesData.filter((m) => m.status === "Coming Soon"));
+        /*
+        setNowPlaying(moviesData.(0, 6));
         setComingSoon(moviesData.slice(6));
+        */
       } catch (err) {
         console.error("Failed to fetch movies:", err);
       }
@@ -102,7 +106,7 @@ export default function Home() {
       {/* MOVIE */}
       <section
         className="movie"
-        style={{ backgroundImage: `url(${movie.posterurl})` }}
+        style={{ backgroundImage: `url(${movie.posterUrl})` }}
       >
         <div className="movie__scrim" />
         <div className="movie__content">
@@ -117,11 +121,15 @@ export default function Home() {
               ))}
 
               {/* Or, since your DB has "genre", just show that */}
-              {!movie.tags && <span className="tag">{movie.genre}</span>}
+              {!movie.tags && <span className="tag">{movie.genre.join("/")}</span>}
           </div>
             <div className="rating">
               <span className="stars">★★★★★</span>
-              <span className="rating__num">{movie.reviews}</span>
+              <div className="rating__num">
+                <p>IMDb: {movie.review?.IMDb}</p>
+                <p>Rotten Tomatoes: {movie.review?.RottenTomatoes}</p>
+                <p>Letterboxd: {movie.review?.Letterboxd}</p>
+              </div>
             </div>
           </div>
 

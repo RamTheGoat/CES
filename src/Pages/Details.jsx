@@ -3,7 +3,6 @@ import "./Details.css";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
-
 /*
 // Data for Barbie movie - replace images in a bit
 const movie = {
@@ -27,6 +26,7 @@ const getNextSevenDays = () => {
   return days;
 };
 
+
 // Sample showtimes for each day
 const showtimes = {
   0: ["1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"],
@@ -38,6 +38,7 @@ const showtimes = {
   6: ["11:00 AM", "2:00 PM", "5:00 PM", "8:00 PM"]
 };
 
+
 export default function Details() {
   const { id } = useParams()
   const [movie, setMovie] = useState(null);
@@ -46,6 +47,7 @@ export default function Details() {
   const days = getNextSevenDays();
   const navigate = useNavigate();
 
+  // Fetch movie
   useEffect(() =>  {
     const fetchMovie = async () => {
       try {
@@ -69,7 +71,7 @@ export default function Details() {
       {/* Movie banner */}
       <section 
         className="details_banner"
-        style={{ backgroundImage: `url(${movie.bannerimage || "placeholder-url-here"})` }}
+        style={{ backgroundImage: `url(${movie.bannerImage || "placeholder-url-here"})` }}
       />
       
       {/* Image gallery */}
@@ -91,11 +93,17 @@ export default function Details() {
           <p className="details_description">{movie.synopsis}</p>
 
           <div className="details_info">
-            <p><strong>Cast:</strong> {movie.cast}</p>
-            <p><strong>Producers:</strong> {movie.producers}</p>
-            <p><strong>Director:</strong> {movie.director}</p>
-            <p><strong>Film Rating:</strong> {movie['film rating']}</p>
-            <p><strong>Reviews:</strong> {movie.reviews}</p>
+            <p><strong>Cast:</strong> {movie.cast.join(", ") || "N/A"}</p>
+            <p><strong>Producers:</strong> {movie.producer.join(", ") || "N/A"}</p>
+            <p><strong>Director:</strong> {movie.director.join(", ") || "N/A"}</p>
+            <p><strong>Film Rating:</strong> {movie['filmRating'] || "N/A"}</p>
+
+            <div>
+              <strong>Reviews:</strong>
+              <p>IMDb: {movie.review?.IMDb || "N/A"}</p>
+              <p>Rotten Tomatoes: {movie.review?.RottenTomatoes || "N/A"}</p>
+              <p>Letterboxd: {movie.review?.Letterboxd || "N/A"}</p>
+            </div>
           </div>
         </section>
         
@@ -114,10 +122,10 @@ export default function Details() {
         <section className="details_section">
           <h2 className="details_section-title">Trailer</h2>
           <div className="details_trailer-container">
-            {movie.trailerurl ? (
+            {movie.trailerUrl ? (
               <iframe
                 className="details_trailer-iframe"
-                src={movie.trailerurl}
+                src={movie.trailerUrl}
                 title={`${movie.title} Trailer`}
                 allowFullScreen
               />
