@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
+import UserProfile from "./models/UserProfile.js";
 
 const app = express();
 app.use(cors({
@@ -46,41 +47,57 @@ mongoose.connection.on("disconnected", () => {
 
 // Get Movies
 app.get("/api/movies", async (req, res) => {
-    try {
-      const movies = await Movie.find();
-      res.json(movies);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-  
-  // GET single movie by ID
-  app.get("/api/movies/:id", async (req, res) => {
-    try {
-      const movie = await Movie.findById(req.params.id);
-      if (!movie) return res.status(404).json({ message: "Movie not found" });
-      res.json(movie);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+  try {
+    const movies = await Movie.find();
+    res.json(movies);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-  app.get("/api/bookings", async (req, res) => {
-    try {
-      const bookings = await Booking.find()
-        .populate("user_id", "name email")
-        .populate({
-          path: "showtime_id",
-          populate: [
-            { path: "movie_id", select: "title genre duration" },
-            { path: "theater_id", select: "name location" },
-          ],
-        });
-      res.json(bookings);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-  
-  const PORT = 4000;
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// GET single movie by ID
+app.get("/api/movies/:id", async (req, res) => {
+  try {
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).json({ message: "Movie not found" });
+    res.json(movie);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/bookings", async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("user_id", "name email")
+      .populate({
+        path: "showtime_id",
+        populate: [
+          { path: "movie_id", select: "title genre duration" },
+          { path: "theater_id", select: "name location" },
+        ],
+      });
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST edit user profile
+app.post("/api/users/edit/:id", async (req, res) => {
+  try {
+    const profile = await UserProfile.findById(req.params.id);
+    if (!profile) return res.status(404).json({ error: "User profile not found" });
+
+    let filter = { _id: req.params.id };
+    const result = await UserProfile.updateOne(filter, req.body);
+
+    if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user profile was successful" });
+    else return res.status(200).json({ message: "No changes were made to the user profile" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const PORT = 4000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
