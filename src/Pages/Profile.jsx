@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./Profile.css";
 
 // Edit user data item
-const EditItem = ({ userData, title, profile, setProfile, edit }) => {
-  const updateValue = e => setProfile(prev => ({ ...prev, [userData]: e.target.value }));
-  const value = profile?.[userData] ?? "";
+const EditItem = ({ userData, title, profileStates }) => {
+  const {userProfile, setUserProfile, canEdit} = profileStates;
+  const updateValue = e => setUserProfile(prev => ({ ...prev, [userData]: e.target.value }));
+  const value = userProfile?.[userData] ?? "";
 
   return (
     <div className="edit-item">
       <h2 className="edit-item-title">{title}</h2>
-      {edit ? (
+      {canEdit ? (
         <input
           className="edit-item-input"
           type="text"
@@ -28,14 +29,18 @@ const EditItem = ({ userData, title, profile, setProfile, edit }) => {
 
 export default function Profile() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [userProfile, setUserProfile] = useState(null);
   const [canEdit, setCanEdit] = useState(false);
+  const states = {userProfile, setUserProfile, canEdit, setCanEdit};
 
   // Fetch user profile
   useEffect(() =>  {
     const fetchProfile = async () => {
+      if (canEdit) return;
       try {
+        setUserProfile(null);
         const response = await fetch(`http://localhost:4000/api/users/${id}`);
         const profile = await response.json();
         setUserProfile(profile);
@@ -44,10 +49,10 @@ export default function Profile() {
       }
     };
     fetchProfile();
-  }, [id]);
+  }, [id, canEdit]);
 
   // Handle button press
-  async function handleButton() {
+  async function handleEditButton() {
     if (canEdit) try {
 
       // Try update user profile
@@ -67,11 +72,16 @@ export default function Profile() {
     setCanEdit(!canEdit);
   }
 
+  function handleCloseButton() {
+    if (canEdit) setCanEdit(false);
+    else navigate("/");
+  }
+
   return (
     <div className="profile-page">
       <h1>User Profile ig</h1>
-      <EditItem userData="firstName" title="First Name" profile={userProfile} setProfile={setUserProfile} edit={canEdit}/>
-      <EditItem userData="lastName" title="Last Name" profile={userProfile} setProfile={setUserProfile} edit={canEdit}/>
+      <EditItem userData="firstName" title="First Name" profileStates={states}/>
+      <EditItem userData="lastName" title="Last Name" profileStates={states}/>
 
       {/* The user isnt allowed to change their email */}
       <div className="edit-item">
@@ -79,9 +89,10 @@ export default function Profile() {
         <h3 className="edit-item-value">{userProfile?.email ?? ""}</h3>
       </div>
 
-      <EditItem userData="passwordHash" title="Password" profile={userProfile} setProfile={setUserProfile} edit={canEdit}/>
-      <EditItem userData="address" title="Billing Address" profile={userProfile} setProfile={setUserProfile} edit={canEdit}/>
-      <button className="edit-button" onClick={handleButton}>{canEdit ? "Save Profile" : "Edit Profile"}</button>
+      <EditItem userData="passwordHash" title="Password" profileStates={states}/>
+      <EditItem userData="address" title="Billing Address" profileStates={states}/>
+      <button className="edit-button" onClick={handleEditButton}>{canEdit ? "Save Profile" : "Edit Profile"}</button>
+      <button className="edit-button" onClick={handleCloseButton}>{canEdit ? "Cancel" : "Close"}</button>
     </div>
   )
 }
