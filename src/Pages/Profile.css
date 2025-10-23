@@ -1,0 +1,59 @@
+/* color pallete :)) */
+:root{
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+.profile-page{
+  min-height: 100svh;
+  padding: 24px;
+  padding-top: 100px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.edit-item{
+  background: var(--bg-2);
+  margin: 10px;
+  padding: 15px;
+  border-radius: 15px;
+  min-width: 15%;
+  min-height: 120px;
+  justify-self: center;
+}
+
+.edit-item-title{
+  margin-bottom: 15px;
+  color: var(--text);
+}
+
+.edit-item-input{
+  margin: 0;
+  padding: 5px;
+  text-align: center;
+}
+
+.edit-item-value{
+  margin: 0;
+  padding: 5px;
+  color: var(--text);
+}
+
+.edit-button{
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.edit-button:hover{
+  transform: translateY(-1px);
+}
