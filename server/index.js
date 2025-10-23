@@ -83,6 +83,16 @@ app.get("/api/bookings", async (req, res) => {
   }
 });
 
+app.get("/api/users/:id", async (req, res) => {
+  try {
+    const profile = await UserProfile.findById(req.params.id);
+    if (!profile) return res.status(404).json({ error: "User profile not found" });
+    else return res.status(200).json(profile);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST edit user profile
 app.post("/api/users/edit/:id", async (req, res) => {
   try {
