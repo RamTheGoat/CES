@@ -15,9 +15,10 @@ const Login = () => {
         <div className="login-container">
             <h2>Login</h2>
             <form onSubmit={handleSubmit}>
-                <div className='emailBox'>
-                    <label>
-                        <input
+                <div className='inputbox'>
+                    <label className='emailBox'>
+                        <input style={{padding: '7px', borderRadius: '8px'}}
+                            className='emailInput'
                             type="email"
                             placeholder='Email'
                             value={email}
@@ -25,10 +26,8 @@ const Login = () => {
                             required                        
                         />
                     </label>
-                </div>
-                <div className='passwordBox'>
-                    <label>
-                        <input
+                    <label className='passwordBox'>
+                        <input style={{padding: '7px', borderRadius: '8px'}}
                             type="password"
                             placeholder='Password'
                             value={password}
@@ -36,10 +35,10 @@ const Login = () => {
                             required
                         />
                     </label>
-                </div>
-                <div className='forgotPassword'>
+                    <div className='forgotPassword'>
                     {/* Have to implement a forgot password page */}
                     <a href='/forgot-password' className='fPassword'>Forgot Password?</a> 
+                </div>
                 </div>
                 <button type="submit" className='sButton'>Login</button>
             </form>
