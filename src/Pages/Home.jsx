@@ -94,30 +94,7 @@ export default function Home() {
         console.error("Failed to fetch movies:", err);
       }
     };
-
-    const testEditProfile = async () => {
-      try {
-        const userID = "68f58a24c79cf4363b952d4e";
-        const res = await fetch(`http://localhost:4000/api/users/edit/${userID}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            firstName: "John",
-            lastName: "Smith",
-            address: "1234 Uga Drive",
-          })
-        });
-
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        else console.log(data.message);
-      } catch (err) {
-        console.log("Failed to edit profile:", err);
-      }
-    }
-
     fetchMovies();
-    testEditProfile();
   }, []);
 
   // Render a loading state while data is being fetched
