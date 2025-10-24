@@ -9,6 +9,7 @@ import Booking from '../Pages/Booking';
 import Search from "../Pages/Search";
 import AdminHome from "../Pages/AdminHome";
 import Login from "../Pages/Login";
+import Register from "../Pages/Register";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/login" element={<Login/>} />
+          <Route path="/register" element={<Register/>} />
         </Routes>
       </main>
     </div>
