@@ -100,17 +100,25 @@ app.post("/api/users/edit/:id", async (req, res) => {
     if (!profile) return res.status(404).json({ error: "User profile not found" });
     const data = req.body;
 
+    let changes = {};
+    for (let prop in profile.toObject()) {
+      if (data[prop]) changes[prop] = data[prop];
+    }
+
     // Ensure the payment card data is complete to avoid deleting any card data
     if (data.paymentCard) {
-      let editCard = profile.paymentCard;
-      for (let prop in profile.toObject().paymentCard)
-        if (data.paymentCard[prop]) editCard[prop] = data.paymentCard[prop];
-      data.paymentCard = editCard;
+      let index = profile.paymentCards.findIndex(card => card._id.equals(data.paymentCard._id));
+      if (index > -1) {
+        changes.paymentCards = profile.paymentCards.toObject();
+        for (let prop in changes.paymentCards[index]) {
+          if (data.paymentCard[prop]) changes.paymentCards[index][prop] = data.paymentCard[prop];
+        }
+      }
     }
 
     // Update the user with the profile id
     let filter = { _id: profile.id };
-    const result = await UserProfile.updateOne(filter, data);
+    const result = await UserProfile.updateOne(filter, changes);
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user profile was successful" });
     else return res.status(200).json({ message: "No changes were made to the user profile" });

@@ -12,12 +12,12 @@ const userProfileSchema = new mongoose.Schema({
     status: String,
     createdAt: Date,
     role: String,
-    paymentCard: {
+    paymentCards: [{
         cardNumber: Number,
         expirationMonth: Number,
         expirationYear: Number,
         securityCode: Number
-    }
+    }]
 });
 
 export default mongoose.model("UserProfile", userProfileSchema, "users");
