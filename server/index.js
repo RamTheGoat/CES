@@ -83,9 +83,9 @@ app.get("/api/bookings", async (req, res) => {
   }
 });
 
-app.get("/api/users/:id", async (req, res) => {
+app.get("/api/users/:userId", async (req, res) => {
   try {
-    const profile = await UserProfile.findById(req.params.id);
+    const profile = await UserProfile.findById(req.params.userId);
     if (!profile) return res.status(404).json({ error: "User profile not found" });
     else return res.status(200).json(profile);
   } catch (err) {
@@ -94,34 +94,46 @@ app.get("/api/users/:id", async (req, res) => {
 });
 
 // POST edit user profile
-app.post("/api/users/edit/:id", async (req, res) => {
+app.post("/api/users/edit/:userId", async (req, res) => {
   try {
-    const profile = await UserProfile.findById(req.params.id);
+    const profile = await UserProfile.findById(req.params.userId);
     if (!profile) return res.status(404).json({ error: "User profile not found" });
-    const data = req.body;
 
     let changes = {};
     for (let prop in profile.toObject()) {
-      if (data[prop]) changes[prop] = data[prop];
-    }
-
-    // Ensure the payment card data is complete to avoid deleting any card data
-    if (data.paymentCard) {
-      let index = profile.paymentCards.findIndex(card => card._id.equals(data.paymentCard._id));
-      if (index > -1) {
-        changes.paymentCards = profile.paymentCards.toObject();
-        for (let prop in changes.paymentCards[index]) {
-          if (data.paymentCard[prop]) changes.paymentCards[index][prop] = data.paymentCard[prop];
-        }
-      }
+      if (req.body[prop]) changes[prop] = req.body[prop];
     }
 
     // Update the user with the profile id
-    let filter = { _id: profile.id };
-    const result = await UserProfile.updateOne(filter, changes);
+    let filter = { _id: profile._id };
+    const result = await UserProfile.updateOne(filter, { '$set': changes });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user profile was successful" });
     else return res.status(200).json({ message: "No changes were made to the user profile" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST edit user payment card
+app.post("/api/users/card/edit/:cardId", async (req, res) => {
+  try {
+    const profile = await UserProfile.findOne({ "paymentCards._id": req.params.cardId });
+    if (!profile) return res.status(404).json({ error: "Payment card not found" });
+    const card = await profile.paymentCards.find(c => c._id.equals(req.params.id));
+    if (!card) return res.status(404).json({ error: "Payment card not found" });
+
+    let changes = {};
+    for (let prop in card.toObject()) {
+      if (req.body[prop]) changes[`paymentCards.$.${prop}`] = req.body[prop];
+    }
+
+    // Update the payment card with the card id
+    let filter = { 'paymentCards._id': card._id };
+    const result = await UserProfile.updateOne(filter, { '$set': changes });
+
+    if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit payment card was successful" });
+    else return res.status(200).json({ message: "No changes were made to the payment card" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
