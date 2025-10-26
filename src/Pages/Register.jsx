@@ -21,6 +21,27 @@ const Register = () => {
         }));
     };
 
+    const sendData = async() => {
+        try {
+            const response = await fetch("http://localhost:4000/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+            const data = await response.json(); 
+
+            if (response.ok) {
+                alert("Registration successful!");
+                console.log("Server response:", data)
+            } else {
+                alert(data.message || "Registration failed");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Something went wrong. Please try again.");
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         
@@ -36,9 +57,11 @@ const Register = () => {
         }
         
         // registration logic
-        alert(`Registration submitted!\nName: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\nPhone: ${formData.phone}`);
+        //alert(`Registration submitted!\nName: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\nPhone: ${formData.phone}`);
+        sendData(); 
     };
 
+    
     return (
         <div className="register-page">
             <div className="register_container">

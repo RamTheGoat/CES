@@ -1,8 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 import cors from "cors";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
+import User from "./models/User.js";
 
 const app = express();
 app.use(cors({
@@ -23,7 +25,7 @@ mongoose.connect("mongodb+srv://rampatel4204:Patel4204@ces.yybxumv.mongodb.net/M
     // Fetch all movies and print to console
     try {
         const movies = await Movie.find();
-        console.log("Movies in DB:", movies);
+        //console.log("Movies in DB:", movies);
     } catch (err) {
         console.error("Error fetching movies:", err);
     }
@@ -65,6 +67,32 @@ app.get("/api/movies", async (req, res) => {
       res.json(bookings);
     } catch (err) {
       res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/register", async (req, res) => {
+    try {
+      const { firstName, lastName, email, phone, password } = req.body;
+
+      const existingUser = await User.findOne({ email });
+      if (existingUser)
+        return res.status(400).json({ message: "Email already registered" });
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const newUser = new User({
+        firstName,
+        lastName,
+        email,
+        phone,
+        password: hashedPassword,
+      });
+
+      await newUser.save();
+      res.status(201).json({ message: "User registered successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server error" });
     }
   });
   
