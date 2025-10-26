@@ -120,7 +120,7 @@ app.post("/api/users/card/edit/:cardId", async (req, res) => {
   try {
     const profile = await UserProfile.findOne({ "paymentCards._id": req.params.cardId });
     if (!profile) return res.status(404).json({ error: "Payment card not found" });
-    const card = await profile.paymentCards.find(c => c._id.equals(req.params.id));
+    const card = await profile.paymentCards.find(c => c._id.equals(req.params.cardId));
     if (!card) return res.status(404).json({ error: "Payment card not found" });
 
     let changes = {};
@@ -133,6 +133,57 @@ app.post("/api/users/card/edit/:cardId", async (req, res) => {
     const result = await UserProfile.updateOne(filter, { '$set': changes });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit payment card was successful" });
+    else return res.status(200).json({ message: "No changes were made to the payment card" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST remove user payment card
+app.post("/api/users/card/remove/:cardId", async (req, res) => {
+  try {
+    const profile = await UserProfile.findOne({ "paymentCards._id": req.params.cardId });
+    if (!profile) return res.status(404).json({ error: "Payment card not found" });
+    const card = await profile.paymentCards.find(c => c._id.equals(req.params.cardId));
+    if (!card) return res.status(404).json({ error: "Payment card not found" });
+
+    // Remove the payment card with the card id
+    let filter = { 'paymentCards._id': card._id };
+    const result = await UserProfile.updateOne(filter, { '$pull': { paymentCards: { _id: card._id } } });
+
+    if (result.modifiedCount > 0) return res.status(200).json({ message: "Remove payment card was successful" });
+    else return res.status(200).json({ message: "No changes were made to the payment card" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST add user payment card
+app.post("/api/users/card/add/:userId", async (req, res) => {
+  try {
+    const profile = await UserProfile.findById(req.params.userId);
+    if (!profile) return res.status(404).json({ error: "User profile not found" });
+
+    if (profile.paymentCards.length >= 4) {
+      return res.status(409).json({ error: "Cannot add more than 4 payment cards" });
+    }
+
+    // Create a new payment card
+    let newCard = {};
+    if (req.body.cardNumber && req.body.expirationMonth && req.body.expirationYear && req.body.securityCode) {
+      newCard.cardNumber = req.body.cardNumber;
+      newCard.expirationMonth = req.body.expirationMonth;
+      newCard.expirationYear = req.body.expirationYear;
+      newCard.securityCode = req.body.securityCode;
+    } else {
+      return res.status(422).json({ error: "Add payment card information is incomplete" });
+    }
+
+    // Add the payment card to the user with the user id
+    let filter = { '_id': profile._id };
+    const result = await UserProfile.updateOne(filter, { '$push': { paymentCards: newCard }});
+
+    if (result.modifiedCount > 0) return res.status(200).json({ message: "Add payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });
   } catch (err) {
     res.status(500).json({ error: err.message });
