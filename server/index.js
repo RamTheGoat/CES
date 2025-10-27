@@ -5,7 +5,6 @@ import cors from "cors";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
 import User from "./models/User.js";
-import UserProfile from "./models/UserProfile.js";
 
 const app = express();
 app.use(cors({
@@ -71,35 +70,37 @@ app.get("/api/bookings", async (req, res) => {
   }
 });
 
-  app.post("/register", async (req, res) => {
-    try {
-      const { firstName, lastName, email, phone, password } = req.body;
+// POST register new user
+app.post("/register", async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, password } = req.body;
 
-      const existingUser = await User.findOne({ email });
-      if (existingUser)
-        return res.status(400).json({ message: "Email already registered" });
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(400).json({ message: "Email already registered" });
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      const newUser = new User({
-        firstName,
-        lastName,
-        email,
-        phone,
-        password: hashedPassword,
-      });
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      phone,
+      password: hashedPassword,
+    });
 
-      await newUser.save();
-      res.status(201).json({ message: "User registered successfully" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+    await newUser.save();
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
+// GET user profile
 app.get("/api/users/:userId", async (req, res) => {
   try {
-    const profile = await UserProfile.findById(req.params.userId);
+    const profile = await User.findById(req.params.userId);
     if (!profile) return res.status(404).json({ error: "User profile not found" });
     else return res.status(200).json(profile);
   } catch (err) {
@@ -107,10 +108,10 @@ app.get("/api/users/:userId", async (req, res) => {
   }
 });
 
-// POST edit user profile
-app.post("/api/users/edit/:userId", async (req, res) => {
+// PUT edit user profile
+app.put("/api/users/edit/:userId", async (req, res) => {
   try {
-    const profile = await UserProfile.findById(req.params.userId);
+    const profile = await User.findById(req.params.userId);
     if (!profile) return res.status(404).json({ error: "User profile not found" });
 
     let changes = {};
@@ -120,7 +121,7 @@ app.post("/api/users/edit/:userId", async (req, res) => {
 
     // Update the user with the profile id
     let filter = { _id: profile._id };
-    const result = await UserProfile.updateOne(filter, { '$set': changes });
+    const result = await User.updateOne(filter, { '$set': changes });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user profile was successful" });
     else return res.status(200).json({ message: "No changes were made to the user profile" });
@@ -129,10 +130,10 @@ app.post("/api/users/edit/:userId", async (req, res) => {
   }
 });
 
-// POST edit user payment card
-app.post("/api/users/card/edit/:cardId", async (req, res) => {
+// PUT edit user payment card
+app.put("/api/users/card/edit/:cardId", async (req, res) => {
   try {
-    const profile = await UserProfile.findOne({ "paymentCards._id": req.params.cardId });
+    const profile = await User.findOne({ "paymentCards._id": req.params.cardId });
     if (!profile) return res.status(404).json({ error: "Payment card not found" });
     const card = await profile.paymentCards.find(c => c._id.equals(req.params.cardId));
     if (!card) return res.status(404).json({ error: "Payment card not found" });
@@ -144,7 +145,7 @@ app.post("/api/users/card/edit/:cardId", async (req, res) => {
 
     // Update the payment card with the card id
     let filter = { 'paymentCards._id': card._id };
-    const result = await UserProfile.updateOne(filter, { '$set': changes });
+    const result = await User.updateOne(filter, { '$set': changes });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });
@@ -153,17 +154,17 @@ app.post("/api/users/card/edit/:cardId", async (req, res) => {
   }
 });
 
-// POST remove user payment card
-app.post("/api/users/card/remove/:cardId", async (req, res) => {
+// PUT remove user payment card
+app.put("/api/users/card/remove/:cardId", async (req, res) => {
   try {
-    const profile = await UserProfile.findOne({ "paymentCards._id": req.params.cardId });
+    const profile = await User.findOne({ "paymentCards._id": req.params.cardId });
     if (!profile) return res.status(404).json({ error: "Payment card not found" });
     const card = await profile.paymentCards.find(c => c._id.equals(req.params.cardId));
     if (!card) return res.status(404).json({ error: "Payment card not found" });
 
     // Remove the payment card with the card id
     let filter = { 'paymentCards._id': card._id };
-    const result = await UserProfile.updateOne(filter, { '$pull': { paymentCards: { _id: card._id } } });
+    const result = await User.updateOne(filter, { '$pull': { paymentCards: { _id: card._id } } });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Remove payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });
@@ -175,7 +176,7 @@ app.post("/api/users/card/remove/:cardId", async (req, res) => {
 // POST add user payment card
 app.post("/api/users/card/add/:userId", async (req, res) => {
   try {
-    const profile = await UserProfile.findById(req.params.userId);
+    const profile = await User.findById(req.params.userId);
     if (!profile) return res.status(404).json({ error: "User profile not found" });
 
     if (profile.paymentCards.length >= 4) {
@@ -195,7 +196,7 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
 
     // Add the payment card to the user with the user id
     let filter = { '_id': profile._id };
-    const result = await UserProfile.updateOne(filter, { '$push': { paymentCards: newCard }});
+    const result = await User.updateOne(filter, { '$push': { paymentCards: newCard }});
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Add payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });

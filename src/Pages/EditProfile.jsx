@@ -57,7 +57,7 @@ export default function EditProfile() {
 
       // Try update user profile
       const res = await fetch(`http://localhost:4000/api/users/edit/${id}`, {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userProfile)
       });
