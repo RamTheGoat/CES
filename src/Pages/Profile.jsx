@@ -1,6 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import "./Profile.css";
 
+const PaymentCard = ({ card, onEdit }) => {
+    const [cardData, setCardData] = useState(card);
+    const [isEditing, setIsEditing] = useState(false);
+
+    const getDateAsString = () => {
+        if (cardData.expirationMonth == null || cardData.expirationYear == null) return `2025-01-01`;
+        else if (cardData.expirationMonth > 9) return `${cardData.expirationYear}-${cardData.expirationMonth}-01`;
+        else return `${cardData.expirationYear}-0${cardData.expirationMonth}-01`;
+    }
+
+    const handleEditButton = () => {
+        setIsEditing(!isEditing);
+    }
+
+    const handleDeleteButton = () => {
+        alert('Delete payment method');
+    }
+
+    const handleInputChange = (field, value) => {
+        if (field == 'expirationDate') {
+            let date = new Date(value + 14400000);
+            setCardData(prev => ({
+                ...prev,
+                expirationMonth: date.getMonth() + 1,
+                expirationYear: date.getFullYear()
+            }));
+        } else {
+            setCardData(prev => ({
+                ...prev,
+                [field]: value
+            }));
+        }
+    }
+
+    return isEditing ? (
+        <div className="payment_item" id="edit">
+            <input
+                className="input_field"
+                type="number"
+                value={cardData.lastFour ?? ""}
+                onChange={e => handleInputChange('lastFour', e.target.value)}
+                placeholder="Card Number"
+            />
+            <div className="payment_row">
+                <select
+                    className="select_field"
+                    value={cardData.cardType}
+                    onChange={e => handleInputChange('cardType', e.target.value)}
+                >
+                    <option value="Visa">Visa</option>
+                    <option value="Mastercard">Mastercard</option>
+                    <option value="American Express">American Express</option>
+                    <option value="Discover">Discover</option>
+                </select>
+                <input
+                    className="input_field"
+                    type="date"
+                    value={getDateAsString()}
+                    onChange={e => handleInputChange('expirationDate', e.target.valueAsNumber)}
+                    placeholder="Expiration Date"
+                    onKeyDown={e => e.preventDefault()}
+                    min="2001-01-01"
+                />
+            </div>
+            <div className="payment_row">
+                <button className="secondary_button" onClick={handleEditButton}>Save</button>
+                <button className="delete_button" onClick={handleDeleteButton}>Delete</button>
+            </div>
+        </div>
+    ) : (
+        <div className="payment_item">
+            <div>
+                <span className="info_value">{cardData.cardType} •••• {cardData.lastFour % 10000}</span>
+                <span className="info_label"> Expires {cardData.expirationMonth}/{cardData.expirationYear % 100}</span>
+            </div>
+            <button className="secondary_button" onClick={handleEditButton}>Edit</button>
+        </div>
+    );
+};
+
 const Profile = () => {
     // This will eventually use data from the login, for now use test user id
     const userId = "68fd5bd183469bb90d227ac0";
@@ -248,17 +328,8 @@ const Profile = () => {
                         </div>
                         <div className="payment_methods">
                             {userData.paymentCards ? userData.paymentCards.map(card => (
-                                <div key={card._id} className="payment_item">
-                                    <div>
-                                        <span className="info_value">{card.cardType} •••• {card.lastFour}</span>
-                                        <span className="info_label"> Expires {card.expirationMonth}/{card.expirationYear}</span>
-                                    </div>
-                                    <button 
-                                        className="secondary_button"
-                                        onClick={() => handleEditPayment(card.id)}
-                                    >
-                                        Edit
-                                    </button>
+                                <div key={card._id}>
+                                    <PaymentCard card={card} onEdit={handleEditPayment}/>
                                 </div>
                             )) : (
                                 <p>No payment methods added</p>
