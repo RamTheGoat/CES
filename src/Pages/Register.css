@@ -24,14 +24,24 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 80vh;
+    min-height: 100vh;
     background: var(--bg);
 }
 
 /* register Header */
 .register_container h2 {
+    font-size: 35px;
     margin-bottom: 20px;
     color: var(--text);
+}
+
+/* container for all boxes */
+.form_container {
+    background: var(--card);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    margin-bottom: 20px;
 }
 
 /* input area */
@@ -39,12 +49,25 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: var(--card);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    background: transparent;
     width: 300px;
     margin-bottom: 15px;
+}
+
+.input_label {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 14px;
+    color: var(--muted);
+    padding: 5px;
+}
+
+.label_text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .input_box input {
@@ -67,7 +90,7 @@
     background: var(--accent);
     color: var(--text);
     border: none;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
@@ -78,7 +101,6 @@
 
 .s_button:hover {
     background: #e020e0;
-    transform: translateY(-1px);
 }
 
 /* linkning to login */
@@ -86,6 +108,7 @@
     margin-top: 20px;
     color: var(--muted);
     font-size: 14px;
+    cursor: pointer;
 }
 
 .login_link a {
@@ -101,12 +124,15 @@
 .form_row {
     display: flex;
     gap: 15px;
-    width: 300px;
+    width: 615px;
+    justify-content: center;
 }
 
 .form_row .input_box {
     flex: 1;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    width: auto;
+    min-width: 0;
 }
 
 /* tos box */
@@ -117,6 +143,10 @@
     margin-top: 15px;
     color: var(--muted);
     font-size: 14px;
+    max-width: 615px;
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
 }
 
 .terms_check input {
@@ -130,4 +160,44 @@
 
 .terms_check a:hover {
     text-decoration: underline;
+}
+
+
+/* promo box */
+.promo_check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 615px;
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+}
+
+.promo_check input {
+    width: auto;
+}
+
+/* stars */
+.required_star {
+    color: #ff4757;
+    margin-left: 4px;
+}
+
+.required_note {
+    margin-top: 15px;
+    color: var(--muted);
+    font-size: 14px; 
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.register_container form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
