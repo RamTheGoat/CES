@@ -57,7 +57,7 @@ const Login = () => {
             />
           </label>
           <div className='forgotPassword'>
-            <a href='/forgot-password' className='fPassword'>Forgot Password?</a>
+            <a href='/forgotpassword' className='fPassword'>Forgot Password?</a>
           </div>
         </div>
         <button type="submit" className='sButton'>Login</button>
