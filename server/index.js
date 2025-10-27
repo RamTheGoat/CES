@@ -1,8 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 import cors from "cors";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
+import User from "./models/User.js";
 import UserProfile from "./models/UserProfile.js";
 
 const app = express();
@@ -18,27 +20,13 @@ mongoose.connect("mongodb+srv://rampatel4204:Patel4204@ces.yybxumv.mongodb.net/M
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-/*
-mongoose.connection.on("connected", () => {
-  console.log("✅ MongoDB connected successfully");
-});
-
-mongoose.connection.on("error", (err) => {
-  console.error("❌ MongoDB connection error:", err);
-});
-
-mongoose.connection.on("disconnected", () => {
-  console.warn("⚠️ MongoDB disconnected");
-});
-*/
-
 .then(async () => {
     console.log("MongoDB connected");
 
     // Fetch all movies and print to console
     try {
         const movies = await Movie.find();
-        console.log("Movies in DB:", movies);
+        //console.log("Movies in DB:", movies);
     } catch (err) {
         console.error("Error fetching movies:", err);
     }
@@ -82,6 +70,32 @@ app.get("/api/bookings", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+  app.post("/register", async (req, res) => {
+    try {
+      const { firstName, lastName, email, phone, password } = req.body;
+
+      const existingUser = await User.findOne({ email });
+      if (existingUser)
+        return res.status(400).json({ message: "Email already registered" });
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const newUser = new User({
+        firstName,
+        lastName,
+        email,
+        phone,
+        password: hashedPassword,
+      });
+
+      await newUser.save();
+      res.status(201).json({ message: "User registered successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
 
 app.get("/api/users/:userId", async (req, res) => {
   try {
@@ -191,4 +205,4 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
 });
 
 const PORT = 4000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
