@@ -70,68 +70,56 @@ const Register = () => {
                 <form onSubmit={handleSubmit}>
                     {/* name row */}
                     <div className='form_container'>
-                        <div className='input_box'>
                             <label className='input_label'>
-                                First Name<span className='required_star'>*</span>
-                                    <input
+                                <span className='title_join'><span className='required_star'>*</span>First Name:</span>
+                                    <input style={{padding: '7px', borderRadius: '8px', alignSelf: 'right'}}               
                                         type="text"
                                         name="firstName"
-                                        placeholder='First Name'
+                                        placeholder='John'
                                         value={formData.firstName}
                                         onChange={handleChange}
                                         required                        
                                     />
                                 </label>
-                        </div>
-                        <div className='input_box'>
-                            <label className='input_label'>
-                                Last Name<span className='required_star'>*</span>
-                                <input
+                                <label className='input_label'>
+                                    <span className='title_join'><span className='required_star'>*</span>Last Name:</span>
+                                <input style={{padding: '7px', borderRadius: '8px'}}
                                     type="text"
                                     name="lastName"
-                                    placeholder='Last Name'
+                                    placeholder='Doe'
                                     value={formData.lastName}
                                     onChange={handleChange}
                                     required                        
                                 />
                             </label>
-                        </div>
-                    </div>
-
-                    {/* contact info */}
-                    <div className='input_box'>
-                        <label className='input_label'>
-                            Email Address<span className='required_star'>*</span>
-                                <input
+                            {/* contact info */}
+                            <label className='input_label'>
+                                 <span className='title_join'><span className='required_star'>*</span>Email Address:</span>
+                            
+                                <input style={{padding: '7px', borderRadius: '8px', alignSelf: 'right'}}
                                     type="email"
                                     name="email"
-                                    placeholder='Email Address'
+                                    placeholder='JohnDoe@example.com'
                                     value={formData.email}
                                     onChange={handleChange}
                                     required                        
                                 />
                             </label>
-                    </div>
-                    
-                    <div className='input_box'>
-                        <label className='input_label'>
-                            Phone Number<span className='required_star'>*</span>
-                                <input
+                            <label className='input_label' style={{alignSelf: 'left'}}>
+                                <span className='title_join'><span className='required_star'>*</span>Phone Number:</span>
+                                <input style={{padding: '7px', borderRadius: '8px', alignSelf: 'right'}}
                                     type="tel"
                                     name="phone"
-                                    placeholder='Phone Number'
+                                    placeholder='1111111111'
                                     value={formData.phone}
                                     onChange={handleChange}
                                     required                        
                                 />
-                        </label>
-                    </div>
-
-                    {/* password check */}
-                    <div className='input_box'>
+                        </label> 
+                        {/* password check */}
                         <label className='input_label'>
-                            Password<span className='required_star'>*</span>
-                                <input
+                             <span className='title_join'><span className='required_star'>*</span>Password:</span>
+                                <input style={{padding: '7px', borderRadius: '8px', alignSelf: 'right'}}
                                     type="password"
                                     name="password"
                                     placeholder='Password'
@@ -140,15 +128,12 @@ const Register = () => {
                                     required
                                 />
                         </label>
-                    </div>
-                    
-                    <div className='input_box'>
                         <label className='input_label'>
-                            Confirm Password<span className='required_star'>*</span>
-                                <input
+                            <span className='title_join'><span className='required_star'>*</span>Confirm Password:</span>
+                                <input style={{padding: '7px', borderRadius: '8px', alignSelf: 'right'}}
                                     type="password"
                                     name="confirmPassword"
-                                    placeholder='Confirm Password'
+                                    placeholder='Retype Password'
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     required
