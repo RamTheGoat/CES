@@ -50,18 +50,22 @@
     flex-direction: column;
     align-items: center;
     background: transparent;
-    width: 300px;
     margin-bottom: 15px;
 }
 
 .input_label {
     width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 5px;
     font-size: 14px;
     color: var(--muted);
     padding: 5px;
+    justify-content: space-between;
+}
+
+.input_label title {
+    font-weight: bold;
 }
 
 .label_text {
@@ -181,10 +185,13 @@
     width: auto;
 }
 
+.title_join {
+    padding: 6px;
+}
 /* stars */
 .required_star {
     color: #ff4757;
-    margin-left: 4px;
+    padding: 5px;
 }
 
 .required_note {
