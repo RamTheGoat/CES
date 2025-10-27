@@ -1,28 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "./Profile.css";
 
 const Profile = () => {
-    // not linked to the DB yet so using sample data
-    const [userData, setUserData] = useState({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        phone: '(555) 123-4567',
-        acceptPromos: true,
-        paymentMethods: [
-            { id: 1, type: 'Visa', lastFour: '4242', expiry: '12/25' },
-            { id: 2, type: 'Mastercard', lastFour: '8888', expiry: '06/24' }
-        ]
-    });
+    // This will eventually use data from the login, for now use test user id
+    const userId = "68fd5bd183469bb90d227ac0";
+
+    const [userData, setUserData] = useState({});
 
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({ ...userData });
+
+    const testCard = { _id: 2, cardType: 'Mastercard', cardNumber: '8888', expirationMonth: 6, expirationYear: 24 };
+
+    // Fetch user profile
+    useEffect(() =>  {
+        const fetchProfile = async () => {
+            if (isEditing) return;
+            try {
+                setUserData({});
+                const response = await fetch(`http://localhost:4000/api/users/${userId}`);
+                const profile = await response.json();
+                setUserData({ ...profile, paymentCards: [ ...profile.paymentCards, testCard ]});
+            } catch (err) {
+                console.error("User profile not found:", err);
+            }
+        };
+        fetchProfile();
+    }, [userId, isEditing]);
 
     // toggle for edit mode
     const handleEditToggle = () => {
         if (isEditing) {
             // save changes
             setUserData(editData);
+        } else {
+            setEditData(userData);
         }
         setIsEditing(!isEditing);
     };
@@ -100,28 +112,28 @@ const Profile = () => {
                                 <input
                                     className="input_field"
                                     type="text"
-                                    value={editData.firstName}
+                                    value={editData.firstName ?? ""}
                                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                                     placeholder="First Name"
                                 />
                                 <input
                                     className="input_field"
                                     type="text"
-                                    value={editData.lastName}
+                                    value={editData.lastName ?? ""}
                                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                                     placeholder="Last Name"
                                 />
                                 <input
                                     className="input_field"
                                     type="email"
-                                    value={editData.email}
+                                    value={editData.email ?? ""}
                                     onChange={(e) => handleInputChange('email', e.target.value)}
                                     placeholder="Email Address"
                                 />
                                 <input
                                     className="input_field"
                                     type="tel"
-                                    value={editData.phone}
+                                    value={editData.phone ?? ""}
                                     onChange={(e) => handleInputChange('phone', e.target.value)}
                                     placeholder="Phone Number"
                                 />
@@ -131,15 +143,15 @@ const Profile = () => {
                             <div>
                                 <div className="info_row">
                                     <span className="info_label">Name</span>
-                                    <span className="info_value">{userData.firstName} {userData.lastName}</span>
+                                    <span className="info_value">{userData.firstName ?? ""} {userData.lastName ?? ""}</span>
                                 </div>
                                 <div className="info_row">
                                     <span className="info_label">Email</span>
-                                    <span className="info_value">{userData.email}</span>
+                                    <span className="info_value">{userData.email ?? ""}</span>
                                 </div>
                                 <div className="info_row">
                                     <span className="info_label">Phone</span>
-                                    <span className="info_value">{userData.phone}</span>
+                                    <span className="info_value">{userData.phone ?? ""}</span>
                                 </div>
                             </div>
                         )}
@@ -200,20 +212,22 @@ const Profile = () => {
                             </button>
                         </div>
                         <div className="payment_methods">
-                            {userData.paymentMethods.map(payment => (
-                                <div key={payment.id} className="payment_item">
+                            {userData.paymentCards ? userData.paymentCards.map(card => (
+                                <div key={card._id} className="payment_item">
                                     <div>
-                                        <span className="info_value">{payment.type} •••• {payment.lastFour}</span>
-                                        <span className="info_label"> Expires {payment.expiry}</span>
+                                        <span className="info_value">{card.cardType} •••• {card.cardNumber % 10000}</span>
+                                        <span className="info_label"> Expires {card.expirationMonth}/{card.expirationYear}</span>
                                     </div>
                                     <button 
                                         className="secondary_button"
-                                        onClick={() => handleEditPayment(payment.id)}
+                                        onClick={() => handleEditPayment(card.id)}
                                     >
                                         Edit
                                     </button>
                                 </div>
-                            ))}
+                            )) : (
+                                <p>No payment methods added</p>
+                            )}
                         </div>
                     </div>
 
