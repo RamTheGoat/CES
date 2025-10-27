@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import "./Profile.css";
 
-const PaymentCard = ({ card, onEdit }) => {
+const PaymentCard = ({ card, onEdit, onDelete }) => {
     const [cardData, setCardData] = useState(card);
     const [isEditing, setIsEditing] = useState(false);
 
@@ -12,15 +12,17 @@ const PaymentCard = ({ card, onEdit }) => {
     }
 
     const handleEditButton = () => {
+        if (isEditing) onEdit(cardData._id, {
+            cardType: cardData.cardType,
+            lastFour: cardData.lastFour,
+            expirationMonth: cardData.expirationMonth,
+            expirationYear: cardData.expirationYear
+        });
         setIsEditing(!isEditing);
     }
 
-    const handleDeleteButton = () => {
-        alert('Delete payment method');
-    }
-
     const handleInputChange = (field, value) => {
-        if (field == 'expirationDate') {
+        if (field === 'expirationDate') {
             let date = new Date(value + 14400000);
             setCardData(prev => ({
                 ...prev,
@@ -67,7 +69,7 @@ const PaymentCard = ({ card, onEdit }) => {
             </div>
             <div className="payment_row">
                 <button className="secondary_button" onClick={handleEditButton}>Save</button>
-                <button className="delete_button" onClick={handleDeleteButton}>Delete</button>
+                <button className="delete_button" onClick={() => { onDelete(cardData._id) }}>Delete</button>
             </div>
         </div>
     ) : (
@@ -171,14 +173,20 @@ const Profile = () => {
     };
 
     // payment info edit
-    const handleEditPayment = (paymentId) => {
-        alert(`Edit payment method ${paymentId}`);
+    const handleEditPayment = (cardId, cardData) => {
+        alert(`Edit payment method ${cardId}`);
         // more db stuff
     };
 
     // add payment method
     const handleAddPayment = () => {
         alert('Add new payment method');
+        // more db stuff
+    };
+
+    // delete payment method
+    const handleDeletePayment = (cardId) => {
+        alert(`Delete payment method ${cardId}`);
         // more db stuff
     };
 
@@ -329,7 +337,7 @@ const Profile = () => {
                         <div className="payment_methods">
                             {userData.paymentCards ? userData.paymentCards.map(card => (
                                 <div key={card._id}>
-                                    <PaymentCard card={card} onEdit={handleEditPayment}/>
+                                    <PaymentCard card={card} onEdit={handleEditPayment} onDelete={handleDeletePayment}/>
                                 </div>
                             )) : (
                                 <p>No payment methods added</p>
