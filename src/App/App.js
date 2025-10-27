@@ -11,6 +11,7 @@ import AdminHome from "../Pages/AdminHome";
 import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import Profile from "../Pages/Profile";
+import ForgotPassword from "../Pages/ForgotPassword";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register/>} />
           <Route path="/profile" element={<Profile/>} />
+          <Route path="/forgotpassword" element={<ForgotPassword/>} />
         </Routes>
       </main>
     </div>
