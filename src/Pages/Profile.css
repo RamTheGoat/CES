@@ -282,10 +282,28 @@ input:checked + .toggle_slider:before {
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
-    margin-left: 10px;
     transition: background 0.3s ease;
 }
 
 .delete_button:hover {
     background: rgba(255, 75, 75, 0.2);
+}
+
+#delete_payment {
+    margin-left: 10px;
+}
+
+.confirm_button {
+    border: 1px solid rgba(75, 255, 75, 0.3);
+    background: rgba(75, 255, 75, 0.1);
+    color: rgb(75, 255, 75);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.confirm_button:hover {
+    background: rgba(75, 255, 75, 0.2);
 }

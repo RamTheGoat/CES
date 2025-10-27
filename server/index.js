@@ -121,7 +121,7 @@ app.put("/api/users/edit/:userId", async (req, res) => {
 
     // Update the user with the profile id
     let filter = { _id: profile._id };
-    const result = await User.updateOne(filter, { '$set': changes });
+    const result = await User.updateOne(filter, { $set: changes });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user profile was successful" });
     else return res.status(200).json({ message: "No changes were made to the user profile" });
@@ -145,7 +145,7 @@ app.put("/api/users/card/edit/:cardId", async (req, res) => {
 
     // Update the payment card with the card id
     let filter = { 'paymentCards._id': card._id };
-    const result = await User.updateOne(filter, { '$set': changes });
+    const result = await User.updateOne(filter, { $set: changes });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });
@@ -164,7 +164,7 @@ app.put("/api/users/card/remove/:cardId", async (req, res) => {
 
     // Remove the payment card with the card id
     let filter = { 'paymentCards._id': card._id };
-    const result = await User.updateOne(filter, { '$pull': { paymentCards: { _id: card._id } } });
+    const result = await User.updateOne(filter, { $pull: { paymentCards: { _id: card._id } } });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Remove payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });
@@ -185,7 +185,7 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
 
     // Create a new payment card
     let newCard = {};
-    if (req.body.cardType && req.body.cardNumber && req.body.expirationMonth && req.body.expirationYear && req.body.securityCode) {
+    if (req.body.cardType && req.body.lastFour && req.body.expirationMonth && req.body.expirationYear) {
       newCard.cardType = req.body.cardType;
       newCard.lastFour = req.body.lastFour;
       newCard.expirationMonth = req.body.expirationMonth;
@@ -196,7 +196,7 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
 
     // Add the payment card to the user with the user id
     let filter = { '_id': profile._id };
-    const result = await User.updateOne(filter, { '$push': { paymentCards: newCard }});
+    const result = await User.updateOne(filter, { $push: { paymentCards: { $each: [newCard], $position: 0 }}});
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Add payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });

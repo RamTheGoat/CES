@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import "./Profile.css";
 
-const PaymentCard = ({ card, onEdit, onDelete }) => {
-    const [cardData, setCardData] = useState(card);
-    const [isEditing, setIsEditing] = useState(false);
+const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
+    const [cardData, setCardData] = useState(card ?? {
+        cardType: "Visa",
+        expirationMonth: 1,
+        expirationYear: 2025
+    });
+    const [isEditing, setIsEditing] = useState(newCard);
 
     const getDateAsString = () => {
         if (cardData.expirationMonth == null || cardData.expirationYear == null) return `2025-01-01`;
@@ -18,12 +22,12 @@ const PaymentCard = ({ card, onEdit, onDelete }) => {
             expirationMonth: cardData.expirationMonth,
             expirationYear: cardData.expirationYear
         });
-        setIsEditing(!isEditing);
+        setIsEditing(!isEditing || newCard);
     }
 
     const handleInputChange = (field, value) => {
         if (field === 'expirationDate') {
-            let date = new Date(value + 14400000);
+            let date = new Date(value + 1000000000);
             setCardData(prev => ({
                 ...prev,
                 expirationMonth: date.getMonth() + 1,
@@ -37,7 +41,7 @@ const PaymentCard = ({ card, onEdit, onDelete }) => {
         }
     }
 
-    return isEditing ? (
+    return isEditing || newCard ? (
         <div className="payment_item" id="edit">
             <input
                 className="input_field"
@@ -68,8 +72,15 @@ const PaymentCard = ({ card, onEdit, onDelete }) => {
                 />
             </div>
             <div className="payment_row">
-                <button className="secondary_button" onClick={handleEditButton}>Save</button>
-                <button className="delete_button" onClick={() => { onDelete(cardData._id) }}>Delete</button>
+                <button
+                    className={newCard ? "confirm_button" : "secondary_button"}
+                    onClick={handleEditButton}
+                >{newCard ? "Confirm" : "Save"}</button>
+                <button
+                    className={newCard ? "secondary_button" : "delete_button"}
+                    onClick={() => { onDelete(cardData._id) }}
+                    id="delete_payment"
+                >{newCard ? "Cancel" : "Delete"}</button>
             </div>
         </div>
     ) : (
@@ -89,12 +100,11 @@ const Profile = () => {
 
     const [userData, setUserData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
+    const [addPaymentCard, setAddPaymentCard] = useState(false);
 
     // Fetch user profile
     const fetchProfile = async () => {
-        console.log("fetch");
         try {
-            setUserData({});
             const response = await fetch(`http://localhost:4000/api/users/${userId}`);
             const profile = await response.json();
             setUserData(profile);
@@ -127,7 +137,7 @@ const Profile = () => {
             else console.log(data.message);
         } catch (err) {
             console.log('Failed to edit profile:', err);
-            fetchProfile();
+            await fetchProfile();
         }
         setIsEditing(!isEditing);
     };
@@ -186,20 +196,34 @@ const Profile = () => {
             });
         } catch (err) {
             console.log('Failed to edit payment card:', err);
-            fetchProfile();
+            await fetchProfile();
         }
     };
 
     // add payment method
-    const handleAddPayment = () => {
-        alert('Add new payment method');
-        // more db stuff
+    const handleAddPayment = async (cardId, cardData) => {
+        if (!cardData.lastFour || !cardData.cardType || !cardData.expirationMonth || !cardData.expirationYear) return;
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/card/add/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cardData)
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+            await fetchProfile();
+        } catch (err) {
+            console.log('Failed to add payment card:', err);
+        }
+        setAddPaymentCard(false);
     };
 
     // delete payment method
     const handleDeletePayment = async cardId => {
-        let confirmDelete = window.confirm("Are you sure you want to delete this payment card?");
-        if (!confirmDelete) return;
+        if (!window.confirm("Are you sure you want to delete this payment card?")) return;
 
         try {
             const res = await fetch(`http://localhost:4000/api/users/card/remove/${cardId}`, {
@@ -213,10 +237,11 @@ const Profile = () => {
 
             setUserData(prev => ({
                 ...prev,
-                paymentCards: prev.paymentCards.filter(card => card._id != cardId)
+                paymentCards: prev.paymentCards.filter(card => card._id !== cardId)
             }));
         } catch (err) {
-            console.log('Failed to edit payment card:', err);
+            console.log('Failed to delete payment card:', err);
+            await fetchProfile();
         }
     };
 
@@ -359,12 +384,17 @@ const Profile = () => {
                             <h3>Payment Methods</h3>
                             <button 
                                 className="action_button"
-                                onClick={handleAddPayment}
+                                onClick={() => { setAddPaymentCard(userData.paymentCards && userData.paymentCards.length < 4) }}
                             >
                                 Add New
                             </button>
                         </div>
                         <div className="payment_methods">
+                            {addPaymentCard ? (
+                                <div key="new">
+                                    <PaymentCard newCard onEdit={handleAddPayment} onDelete={() => { setAddPaymentCard(false) }}/>
+                                </div>
+                            ) : <></> }
                             {userData.paymentCards ? userData.paymentCards.map(card => (
                                 <div key={card._id}>
                                     <PaymentCard card={card} onEdit={handleEditPayment} onDelete={handleDeletePayment}/>
