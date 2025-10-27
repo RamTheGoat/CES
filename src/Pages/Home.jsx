@@ -55,7 +55,6 @@ export default function Home() {
         console.error("Failed to fetch movies:", err);
       }
     };
-
     fetchMovies();
   }, []);
 
@@ -67,7 +66,7 @@ export default function Home() {
       {/* MOVIE */}
       <section
         className="movie"
-        style={{ backgroundImage: `url(${movie.posterUrl})` }}
+        style={{ backgroundImage: `url(${movie.bannerImage})` }}
       >
         <div className="movie__scrim" />
         <div className="movie__content">
