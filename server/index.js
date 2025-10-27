@@ -185,7 +185,8 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
 
     // Create a new payment card
     let newCard = {};
-    if (req.body.cardNumber && req.body.expirationMonth && req.body.expirationYear && req.body.securityCode) {
+    if (req.body.cardType && req.body.cardNumber && req.body.expirationMonth && req.body.expirationYear && req.body.securityCode) {
+      newCard.cardType = req.body.cardType;
       newCard.cardNumber = req.body.cardNumber;
       newCard.expirationMonth = req.body.expirationMonth;
       newCard.expirationYear = req.body.expirationYear;

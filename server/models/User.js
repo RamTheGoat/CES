@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     status: { type: String, required: true },
     role: { type: String, required: true },
     paymentCards: { type: [{
+        cardType: { type: String, required: true },
         cardNumber: { type: Number, required: true },
         expirationMonth: { type: Number, required: true },
         expirationYear: { type: Number, required: true },
