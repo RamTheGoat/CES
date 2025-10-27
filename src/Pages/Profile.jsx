@@ -106,14 +106,20 @@ const Profile = () => {
         fetchProfile();
     }, []);
 
-    // Update user profile
-    const updateUserProfile = async (userData, error) => {
-        console.log("update");
-        try {
+    // toggle for edit mode
+    const handleEditToggle = async () => {
+        if (isEditing) try {
             const res = await fetch(`http://localhost:4000/api/users/edit/${userId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData)
+                body: JSON.stringify({
+                    firstName: userData.firstName,
+                    lastName: userData.lastName,
+                    email: userData.email,
+                    phone: userData.phone,
+                    address: userData.address,
+                    promotion: userData.promotion
+                })
             });
 
             const data = await res.json();
@@ -121,22 +127,7 @@ const Profile = () => {
             else console.log(data.message);
         } catch (err) {
             console.log('Failed to edit profile:', err);
-            error(err);
-        }
-    }
-
-    // toggle for edit mode
-    const handleEditToggle = () => {
-        if (isEditing) {
-            setUserData(userData);
-            updateUserProfile({
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                email: userData.email,
-                phone: userData.phone,
-                address: userData.address,
-                promotion: userData.promotion
-            }, fetchProfile);
+            fetchProfile();
         }
         setIsEditing(!isEditing);
     };
@@ -173,9 +164,30 @@ const Profile = () => {
     };
 
     // payment info edit
-    const handleEditPayment = (cardId, cardData) => {
-        alert(`Edit payment method ${cardId}`);
-        // more db stuff
+    const handleEditPayment = async (cardId, cardData) => {
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/card/edit/${cardId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cardData)
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+
+            setUserData(prev => {
+                let index = prev.paymentCards.findIndex(card => card._id === cardId);
+                prev.paymentCards[index] = {
+                    ...prev.paymentCards[index],
+                    ...cardData
+                }
+                return prev;
+            });
+        } catch (err) {
+            console.log('Failed to edit payment card:', err);
+            fetchProfile();
+        }
     };
 
     // add payment method
