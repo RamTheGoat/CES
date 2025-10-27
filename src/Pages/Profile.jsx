@@ -197,9 +197,27 @@ const Profile = () => {
     };
 
     // delete payment method
-    const handleDeletePayment = (cardId) => {
-        alert(`Delete payment method ${cardId}`);
-        // more db stuff
+    const handleDeletePayment = async cardId => {
+        let confirmDelete = window.confirm("Are you sure you want to delete this payment card?");
+        if (!confirmDelete) return;
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/card/remove/${cardId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+
+            setUserData(prev => ({
+                ...prev,
+                paymentCards: prev.paymentCards.filter(card => card._id != cardId)
+            }));
+        } catch (err) {
+            console.log('Failed to edit payment card:', err);
+        }
     };
 
     // delete account
