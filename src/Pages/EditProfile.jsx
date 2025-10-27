@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
-import "./Profile.css";
+import "./EditProfile.css";
 
 // Edit user data item
 const EditItem = ({ userData, title, profileStates }) => {
@@ -27,7 +27,7 @@ const EditItem = ({ userData, title, profileStates }) => {
   )
 }
 
-export default function Profile() {
+export default function EditProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
 
