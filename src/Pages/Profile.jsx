@@ -51,7 +51,7 @@ const Profile = () => {
     const handlePromoToggle = () => {
         setEditData(prev => ({
             ...prev,
-            acceptPromos: !prev.acceptPromos
+            promotion: !prev.promotion
         }));
     };
 
@@ -191,7 +191,7 @@ const Profile = () => {
                             <label className="toggle_switch">
                                 <input 
                                     type="checkbox" 
-                                    checked={isEditing ? editData.acceptPromos : userData.acceptPromos}
+                                    checked={isEditing ? editData.promotion ?? false : userData.promotion ?? false}
                                     onChange={handlePromoToggle}
                                     disabled={!isEditing}
                                 />

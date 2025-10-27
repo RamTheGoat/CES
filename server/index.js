@@ -116,7 +116,7 @@ app.put("/api/users/edit/:userId", async (req, res) => {
 
     let changes = {};
     for (let prop in profile.toObject()) {
-      if (req.body[prop]) changes[prop] = req.body[prop];
+      if (req.body[prop] != null) changes[prop] = req.body[prop];
     }
 
     // Update the user with the profile id
@@ -140,7 +140,7 @@ app.put("/api/users/card/edit/:cardId", async (req, res) => {
 
     let changes = {};
     for (let prop in card.toObject()) {
-      if (req.body[prop]) changes[`paymentCards.$.${prop}`] = req.body[prop];
+      if (req.body[prop] != null) changes[`paymentCards.$.${prop}`] = req.body[prop];
     }
 
     // Update the payment card with the card id
