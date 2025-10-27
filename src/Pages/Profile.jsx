@@ -250,7 +250,7 @@ const Profile = () => {
                             {userData.paymentCards ? userData.paymentCards.map(card => (
                                 <div key={card._id} className="payment_item">
                                     <div>
-                                        <span className="info_value">{card.cardType} •••• {card.cardNumber % 10000}</span>
+                                        <span className="info_value">{card.cardType} •••• {card.lastFour}</span>
                                         <span className="info_label"> Expires {card.expirationMonth}/{card.expirationYear}</span>
                                     </div>
                                     <button 

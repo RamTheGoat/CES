@@ -187,10 +187,9 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
     let newCard = {};
     if (req.body.cardType && req.body.cardNumber && req.body.expirationMonth && req.body.expirationYear && req.body.securityCode) {
       newCard.cardType = req.body.cardType;
-      newCard.cardNumber = req.body.cardNumber;
+      newCard.lastFour = req.body.lastFour;
       newCard.expirationMonth = req.body.expirationMonth;
       newCard.expirationYear = req.body.expirationYear;
-      newCard.securityCode = req.body.securityCode;
     } else {
       return res.status(422).json({ error: "Add payment card information is incomplete" });
     }

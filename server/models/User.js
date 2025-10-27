@@ -12,10 +12,9 @@ const userSchema = new mongoose.Schema({
     promotion: { type: Boolean, required: true },
     paymentCards: { type: [{
         cardType: { type: String, required: true },
-        cardNumber: { type: Number, required: true },
+        lastFour: { type: Number, required: true },
         expirationMonth: { type: Number, required: true },
-        expirationYear: { type: Number, required: true },
-        securityCode: { type: Number, required: true }
+        expirationYear: { type: Number, required: true }
     }], required: false }
 });
 
