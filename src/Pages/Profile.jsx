@@ -10,29 +10,49 @@ const Profile = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({ ...userData });
 
-    const testCard = { _id: 2, cardType: 'Mastercard', cardNumber: '8888', expirationMonth: 6, expirationYear: 24 };
-
     // Fetch user profile
     useEffect(() =>  {
         const fetchProfile = async () => {
-            if (isEditing) return;
             try {
                 setUserData({});
                 const response = await fetch(`http://localhost:4000/api/users/${userId}`);
                 const profile = await response.json();
-                setUserData({ ...profile, paymentCards: [ ...profile.paymentCards, testCard ]});
+                setUserData(profile);
             } catch (err) {
                 console.error("User profile not found:", err);
             }
         };
         fetchProfile();
-    }, [userId, isEditing]);
+    }, [userId]);
+
+    // Update user profile
+    const updateUserProfile = async userData => {
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/edit/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+        } catch (err) {
+            console.log('Failed to edit profile:', err);
+        }
+    }
 
     // toggle for edit mode
     const handleEditToggle = () => {
         if (isEditing) {
-            // save changes
             setUserData(editData);
+            updateUserProfile({
+                firstName: editData.firstName,
+                lastName: editData.lastName,
+                email: editData.email,
+                phone: editData.phone,
+                promotion: editData.promotion
+            });
         } else {
             setEditData(userData);
         }
@@ -41,6 +61,10 @@ const Profile = () => {
 
     // handling changes in edit mode
     const handleInputChange = (field, value) => {
+        if (field === 'phone') {
+            value = value.replace(/^(\d{3})(\d{3})(\d{4})$/, "($1)-$2-$3");
+            value = value.slice(0, 14);
+        }
         setEditData(prev => ({
             ...prev,
             [field]: value
