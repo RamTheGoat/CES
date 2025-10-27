@@ -6,27 +6,27 @@ const Profile = () => {
     const userId = "68fd5bd183469bb90d227ac0";
 
     const [userData, setUserData] = useState({});
-
     const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState({ ...userData });
 
     // Fetch user profile
-    useEffect(() =>  {
-        const fetchProfile = async () => {
-            try {
-                setUserData({});
-                const response = await fetch(`http://localhost:4000/api/users/${userId}`);
-                const profile = await response.json();
-                setUserData(profile);
-            } catch (err) {
-                console.error("User profile not found:", err);
-            }
-        };
+    const fetchProfile = async () => {
+        console.log("fetch");
+        try {
+            setUserData({});
+            const response = await fetch(`http://localhost:4000/api/users/${userId}`);
+            const profile = await response.json();
+            setUserData(profile);
+        } catch (err) {
+            console.error("User profile not found:", err);
+        }
+    };
+    useEffect(() => {
         fetchProfile();
-    }, [userId]);
+    }, []);
 
     // Update user profile
-    const updateUserProfile = async userData => {
+    const updateUserProfile = async (userData, error) => {
+        console.log("update");
         try {
             const res = await fetch(`http://localhost:4000/api/users/edit/${userId}`, {
                 method: 'PUT',
@@ -39,22 +39,22 @@ const Profile = () => {
             else console.log(data.message);
         } catch (err) {
             console.log('Failed to edit profile:', err);
+            error(err);
         }
     }
 
     // toggle for edit mode
     const handleEditToggle = () => {
         if (isEditing) {
-            setUserData(editData);
+            setUserData(userData);
             updateUserProfile({
-                firstName: editData.firstName,
-                lastName: editData.lastName,
-                email: editData.email,
-                phone: editData.phone,
-                promotion: editData.promotion
-            });
-        } else {
-            setEditData(userData);
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                email: userData.email,
+                phone: userData.phone,
+                address: userData.address,
+                promotion: userData.promotion
+            }, fetchProfile);
         }
         setIsEditing(!isEditing);
     };
@@ -65,7 +65,7 @@ const Profile = () => {
             value = value.replace(/^(\d{3})(\d{3})(\d{4})$/, "($1)-$2-$3");
             value = value.slice(0, 14);
         }
-        setEditData(prev => ({
+        setUserData(prev => ({
             ...prev,
             [field]: value
         }));
@@ -73,7 +73,7 @@ const Profile = () => {
 
     // promo toggle
     const handlePromoToggle = () => {
-        setEditData(prev => ({
+        setUserData(prev => ({
             ...prev,
             promotion: !prev.promotion
         }));
@@ -136,30 +136,37 @@ const Profile = () => {
                                 <input
                                     className="input_field"
                                     type="text"
-                                    value={editData.firstName ?? ""}
+                                    value={userData.firstName ?? ""}
                                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                                     placeholder="First Name"
                                 />
                                 <input
                                     className="input_field"
                                     type="text"
-                                    value={editData.lastName ?? ""}
+                                    value={userData.lastName ?? ""}
                                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                                     placeholder="Last Name"
                                 />
                                 <input
                                     className="input_field"
                                     type="email"
-                                    value={editData.email ?? ""}
+                                    value={userData.email ?? ""}
                                     onChange={(e) => handleInputChange('email', e.target.value)}
                                     placeholder="Email Address"
                                 />
                                 <input
                                     className="input_field"
                                     type="tel"
-                                    value={editData.phone ?? ""}
+                                    value={userData.phone ?? ""}
                                     onChange={(e) => handleInputChange('phone', e.target.value)}
                                     placeholder="Phone Number"
+                                />
+                                <input
+                                    className="input_field"
+                                    type="text"
+                                    value={userData.address ?? ""}
+                                    onChange={(e) => handleInputChange('address', e.target.value)}
+                                    placeholder="Billing Address"
                                 />
                             </div>
                         ) : (
@@ -176,6 +183,10 @@ const Profile = () => {
                                 <div className="info_row">
                                     <span className="info_label">Phone</span>
                                     <span className="info_value">{userData.phone ?? ""}</span>
+                                </div>
+                                <div className="info_row">
+                                    <span className="info_label">Billing Address</span>
+                                    <span className="info_value">{userData.address ?? ""}</span>
                                 </div>
                             </div>
                         )}
@@ -215,7 +226,7 @@ const Profile = () => {
                             <label className="toggle_switch">
                                 <input 
                                     type="checkbox" 
-                                    checked={isEditing ? editData.promotion ?? false : userData.promotion ?? false}
+                                    checked={isEditing ? userData.promotion ?? false : userData.promotion ?? false}
                                     onChange={handlePromoToggle}
                                     disabled={!isEditing}
                                 />
