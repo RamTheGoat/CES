@@ -1,4 +1,3 @@
-
 /* Need to implement fonts */
 
 /* positions the whole capsule */
@@ -51,29 +50,13 @@
 }
 .nav-inner nav a:last-child { margin-right: 0; }
 
-/* search button container */
-.search-button {
-  background: transparent;
-  border: none; 
-  cursor: pointer; 
-  padding: 0; 
-}
-
 /* search button icon */
 .search-button i.fas.fa-search,
 .search-button .material-symbols-outlined {
   position: relative;
   top: 5px;
-  left: 540px;
+  left: 550px;
   color: #fff;
-}
-
-/* notifications button container */
-.notifications-button {
-  background: transparent;
-  border: none; 
-  cursor: pointer; 
-  padding: 0;
 }
 
 /* notifications button icon */
@@ -81,16 +64,9 @@
 .notifications-button .material-symbols-outlined {
   position: relative;
   top: 5px;
-  left: 570px;
+  left: 560px;
   color: #fff;
-}
-
-/* profile button container */
-.profile-button {
-  background: transparent;
-  border: none; 
   cursor: pointer; 
-  padding: 0;
 }
 
 /* profile button icon */
@@ -98,24 +74,27 @@
 .profile-button .material-symbols-outlined {
   position: relative;
   top: 5px;
-  left: 600px;
+  left: 590px;
   color: #fff;
-}
-
-/* light/dark mode toggle button container */
-.light-mode-button {
-  background: transparent;
-  border: none; 
   cursor: pointer; 
-  padding: 0;
 }
 
-/* light/dark mode toggle button icon */
-.light-mode-button i.fas.fa-lightbulb,
-.light-mode-button .material-symbols-outlined {
+/* logout button icon */
+.logout-button i.fas.fa-logout,
+.logout-button .material-symbols-outlined {
   position: relative;
   top: 5px;
-  left: 630px;
+  left: 600px;
   color: #fff;
+  cursor: pointer; 
 }
 
+.logout-button {
+  background: none;
+  border: none;
+}
+
+.notifications-button {
+  background: none;
+  border: none;
+}
