@@ -35,6 +35,35 @@ function generateTempPassword(length = 12) {
   return pw;
 }
 
+async function sendProfileUpdateEmail(email, name, updatedField) {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "Jiexian0902@gmail.com", 
+        pass: "wpyhctrfiwlroqea",   
+      },
+    });
+
+    const mailOptions = {
+      from: '"E-Cinema Support" <yourgmail@gmail.com>',
+      to: email,
+      subject: "Your account was updated",
+      html: `
+        <h2>Hello ${name},</h2>
+        <p>Your ${updatedField} was successfully updated on your E-Cinema account.</p>
+        <p>If you didn’t make this change, please reset your password immediately.</p>
+        <br>
+        <p>Thank you,<br>The E-Cinema Team</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent to ${email} about ${updatedField} update`);
+  } catch (error) {
+    console.error("❌ Error sending email:", error);
+  }
+}
 // ------------------------- MOVIES & BOOKINGS -------------------------
 app.get("/api/movies", async (req, res) => {
   try {
@@ -256,16 +285,26 @@ app.put("/api/users/edit/:userId", async (req, res) => {
 
     let changes = {};
     for (let prop in profile.toObject()) {
-      if (req.body[prop] != null) changes[prop] = req.body[prop];
+      if (req.body[prop] != null && req.body[prop] !== profile[prop]) {
+        changes[prop] = req.body[prop];
+      }
     }
 
-    const result = await User.updateOne({ _id: profile._id }, { $set: changes });
-    if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user profile was successful" });
-    return res.status(200).json({ message: "No changes were made to the user profile" });
+    if (Object.keys(changes).length === 0) {
+      return res.status(200).json({ message: "No changes were made to the user profile" });
+    }
+
+    await User.updateOne({ _id: profile._id }, { $set: changes });
+
+    await sendProfileUpdateEmail(profile.email, profile.firstName, "profile information");
+
+    return res.status(200).json({ message: "Edit user profile was successful" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // PUT edit user password
 app.put("/api/users/password/edit/:userId", async (req, res) => {
@@ -280,10 +319,15 @@ app.put("/api/users/password/edit/:userId", async (req, res) => {
     let changes = { password: await bcrypt.hash(req.body.new, 10) };
     const result = await User.updateOne(filter, { $set: changes });
 
-    if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user password was successful" });
-    else return res.status(200).json({ message: "No changes were made to the user password" });
+    if (result.modifiedCount > 0) {
+      // ✅ Send password change email
+      await sendProfileUpdateEmail(profile.email, profile.firstName, "password");
+      return res.status(200).json({ message: "Edit user password was successful" });
+    }
+
+    return res.status(200).json({ message: "No changes were made to the user password" });
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("Password update error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });

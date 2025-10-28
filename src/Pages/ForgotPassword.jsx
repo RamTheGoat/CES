@@ -50,7 +50,7 @@ const ForgotPassword = () => {
                                 />
                             </label>
                         </div>
-                        <button type="submit" className='s_button'>Send Reset Link</button>
+                        <button type="submit" className='s_button'>Send Temporary Password </button>
                     </form>
                 ) : (
                     <div className='success_message'>

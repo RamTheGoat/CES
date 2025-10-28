@@ -191,3 +191,32 @@ h1,h2,p{ margin: 0; }
   inset: 0;
   z-index: 1;
 }
+
+.edit-showtimes-container {
+  position: relative;
+  z-index: 10; 
+  margin-top: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 20px;
+  background: transparent;
+}
+
+.edit-showtimes-btn {
+  background: linear-gradient(90deg, #8b14d1, #cc12cc 60%, #ff5bd3);
+  color: var(--text);
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(204, 18, 204, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.edit-showtimes-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(204, 18, 204, 0.55);
+}

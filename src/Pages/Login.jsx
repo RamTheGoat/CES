@@ -7,61 +7,59 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:4000/login", {
+        const res = await fetch("http://localhost:4000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      });
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!res.ok) {
+        if (!res.ok) {
         alert(data.message || "Login failed");
         return;
-      } else {
-        alert("Login successful!");
-        console.log(data.user);
-
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        if (data.user.role === "admin") {
-          navigate("/adminHome");
-        } else if (data.user.role === "user") {
-          navigate("/");
-        } else {
-          alert("Unknown role.");
         }
-      }
 
-      /*
-      const user = data.user;
-
-      // Save token + user info for later use 
-      if (data.token) {
+        // Save token + user info
+        if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-      }
+        }
 
-      // Redirect to Change Password page if user must change password
-      if (data.mustChangePassword) {
-        navigate(`/changepassword?userId=${user._id}`);
+        alert(data.message || "Login successful!");
+        console.log("User data:", data.user);
+
+        // ✅ If using a temporary password, redirect straight to profile
+        if (data.mustChangePassword === true || data.mustChangePassword === "true") {
+        console.log("Redirecting to profile due to temp password");
+        navigate(`/profile?userId=${data.user._id}`);
         return;
-      }
+        }
 
-      // Normal login: redirect to home/dashboard
-      navigate("/"); // replace with your home/dashboard route
-      */
 
+        // ✅ Normal role-based navigation
+        if (data.user.role === "admin") {
+        navigate("/adminHome");
+        return;
+        }
+
+        if (data.user.role === "user") {
+        navigate("/");
+        return;
+        }
+
+        alert("Unknown role.");
     } catch (err) {
-      console.error("Login error:", err);
-      alert("Something went wrong!");
+        console.error("Login error:", err);
+        alert("Something went wrong!");
     }
-  };
+    };
+
+
 
   return (
     <div className="login-container">
