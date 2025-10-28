@@ -4,6 +4,7 @@ import "./Profile.css";
 const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
     const [cardData, setCardData] = useState(card ?? {
         cardType: "Visa",
+        cardNumber: "",
         expirationMonth: 1,
         expirationYear: 2025
     });
@@ -16,12 +17,16 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
     }
 
     const handleEditButton = () => {
-        if (isEditing) onEdit(cardData._id, {
-            cardType: cardData.cardType,
-            lastFour: cardData.lastFour,
-            expirationMonth: cardData.expirationMonth,
-            expirationYear: cardData.expirationYear
-        });
+        if (isEditing) {
+            if (newCard && cardData.cardNumber.length < 16) return alert("Invalid payment card number!");
+            const data = {
+                cardType: cardData.cardType,
+                expirationMonth: cardData.expirationMonth,
+                expirationYear: cardData.expirationYear
+            };
+            if (newCard) data.cardNumber = cardData.cardNumber;
+            onEdit(cardData._id, data);
+        }
         setIsEditing(!isEditing || newCard);
     }
 
@@ -45,10 +50,11 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
         <div className="payment_item" id="edit">
             <input
                 className="input_field"
-                type="number"
-                value={cardData.lastFour ?? ""}
-                onChange={e => handleInputChange('lastFour', e.target.value)}
+                type={newCard ? "number" : "text"}
+                value={newCard ? cardData.cardNumber : `XXXX-XXXX-XXXX-${cardData.lastFour}`}
+                onChange={e => handleInputChange('cardNumber', e.target.value)}
                 placeholder="Card Number"
+                readOnly={!newCard}
             />
             <div className="payment_row">
                 <select
@@ -86,7 +92,7 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
     ) : (
         <div className="payment_item">
             <div>
-                <span className="info_value">{cardData.cardType} •••• {cardData.lastFour % 10000}</span>
+                <span className="info_value">{cardData.cardType} •••• {cardData.lastFour}</span>
                 <span className="info_label"> Expires {cardData.expirationMonth}/{cardData.expirationYear % 100}</span>
             </div>
             <button className="secondary_button" onClick={handleEditButton}>Edit</button>
@@ -101,6 +107,9 @@ const Profile = () => {
     const [userData, setUserData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
     const [addPaymentCard, setAddPaymentCard] = useState(false);
+    const [changePassword, setChangePassword] = useState(false);
+    const [passwordInput, setPasswordInput] = useState({});
+
     const isLoggedIn = true;
     const handleLogout = () => {
         window.location.href = "/login";
@@ -148,15 +157,18 @@ const Profile = () => {
 
     // handling changes in edit mode
     const handleInputChange = (field, value) => {
-        if (field === 'phone') {
-            value = value.replace(/^(\d{3})(\d{3})(\d{4})$/, "($1)-$2-$3");
-            value = value.slice(0, 14);
-        }
         setUserData(prev => ({
             ...prev,
             [field]: value
         }));
     };
+
+    const handlePasswordInputChange = (field, value) => {
+        setPasswordInput(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    }
 
     // promo toggle
     const handlePromoToggle = () => {
@@ -167,8 +179,27 @@ const Profile = () => {
     };
 
     // password changing
-    const handleChangePassword = () => {
-        alert('dont have actual password change in yet cause gotta link it to DB for that'); // sorry, this isnt implemented yet cause its db stuff
+    const handleChangePassword = async () => {
+        if (!passwordInput.current || passwordInput.current.length === 0) return alert("Password cannot be empty!");
+        if (!passwordInput.new || passwordInput.new.length === 0) return alert("Password cannot be empty!");
+        if (passwordInput.current === passwordInput.new) return alert("Passwords must be different, please choose a different new password!");
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/password/edit/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(passwordInput)
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+            alert("Password successfully changed!");
+            setChangePassword(false);
+        } catch (err) {
+            console.log('Failed to edit password:', err);
+            alert("Current password is incorrect!");
+        }
     };
 
     // reset password
@@ -206,7 +237,7 @@ const Profile = () => {
 
     // add payment method
     const handleAddPayment = async (cardId, cardData) => {
-        if (!cardData.lastFour || !cardData.cardType || !cardData.expirationMonth || !cardData.expirationYear) return;
+        if (!cardData.cardType || !cardData.cardNumber || !cardData.expirationMonth || !cardData.expirationYear) return;
 
         try {
             const res = await fetch(`http://localhost:4000/api/users/card/add/${userId}`, {
@@ -356,19 +387,32 @@ const Profile = () => {
                             <span className="info_label">Password</span>
                             <div>
                                 <button 
-                                    className="secondary_button"
-                                    onClick={handleChangePassword}
-                                >
-                                    Change Password
-                                </button>
+                                    className={changePassword ? "confirm_button" : "secondary_button"}
+                                    onClick={changePassword ? handleChangePassword : () => { setChangePassword(true); setPasswordInput({}) }}
+                                >{changePassword ? "Save Password" : "Change Password"}</button>
                                 <button 
-                                    className="secondary_button"
-                                    onClick={handleResetPassword}
-                                >
-                                    Reset Password
-                                </button>
+                                    id="delete_payment"
+                                    className={changePassword ? "delete_button" : "secondary_button"}
+                                    onClick={changePassword ? () => { setChangePassword(false) } : handleResetPassword}
+                                >{changePassword ? "Cancel" : "Reset Password"}</button>
                             </div>
                         </div>
+                        {changePassword ? <div>
+                            <input
+                                className="input_field"
+                                type="text"
+                                value={passwordInput.current ?? ""}
+                                onChange={(e) => handlePasswordInputChange('current', e.target.value)}
+                                placeholder="Current Password"
+                            />
+                            <input
+                                className="input_field"
+                                type="text"
+                                value={passwordInput.new ?? ""}
+                                onChange={(e) => handlePasswordInputChange('new', e.target.value)}
+                                placeholder="New Password"
+                            />
+                        </div> : <></>}
                     </div>
 
                     {/* promo section */}
@@ -407,13 +451,13 @@ const Profile = () => {
                                     <PaymentCard newCard onEdit={handleAddPayment} onDelete={() => { setAddPaymentCard(false) }}/>
                                 </div>
                             ) : <></> }
-                            {userData.paymentCards ? userData.paymentCards.map(card => (
+                            {userData.paymentCards && userData.paymentCards.length > 0 ? userData.paymentCards.map(card => (
                                 <div key={card._id}>
                                     <PaymentCard card={card} onEdit={handleEditPayment} onDelete={handleDeletePayment}/>
                                 </div>
-                            )) : (
+                            )) : !addPaymentCard ? (
                                 <p>No payment methods added</p>
-                            )}
+                            ) : <></>}
                         </div>
                     </div>
 
