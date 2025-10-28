@@ -45,7 +45,8 @@ export default function Header() {
           </NavLink>
 
           {/* logout button, only show when logged in} */}
-          {isLoggedIn && (
+          {//isLoggedIn && 
+          (
             <button
               type = "button"
               className = "logout-button"
@@ -54,15 +55,9 @@ export default function Header() {
             aria-label="Logout"
             title="Logout"
           >
-            <span
-            className="material-symbols-outlined">logout</span>
+            <span className="material-symbols-outlined">logout</span>
           </button>
         )}
-
-          {/* light mode toggle button */
-          <button type="button" className="light-mode-button">
-            <span className="material-symbols-outlined">light_mode</span>
-          </button>}
         </nav>
       </header>
     </div>
