@@ -45,7 +45,7 @@ export default function Header() {
           </NavLink>
 
           {/* logout button, only show when logged in} */}
-          {//isLoggedIn && 
+          {isLoggedIn && 
           (
             <button
               type = "button"
