@@ -307,3 +307,18 @@ input:checked + .toggle_slider:before {
 .confirm_button:hover {
     background: rgba(75, 255, 75, 0.2);
 }
+
+/* section for logout button */
+.logout_button {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,.2);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.logout_button:hover {
+    background: rgba(255,255,255,.05);
+}
