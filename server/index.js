@@ -6,7 +6,9 @@ import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
 import User from "./models/User.js";
 import nodemailer from "nodemailer";
+import jwt from "jsonwebtoken";
 import crypto from "crypto";
+const JWT_SECRET = "secret"; 
 
 const app = express();
 app.use(cors({
@@ -186,17 +188,46 @@ app.post("/login", async (req, res) => {
       if (user.tempPasswordExpires && user.tempPasswordExpires < Date.now()) {
         return res.status(401).json({ message: "Temporary password expired. Request a new one." });
       }
+      // Generate token for temporary login
+      const token = jwt.sign(
+        { id: user._id, email: user.email, mustChangePassword: true, role: user.role },
+          JWT_SECRET, 
+        { expiresIn: "1h" }
+      );
+
       return res.status(200).json({
         message: "Login successful — temporary password in use. Change required.",
-        user: { _id: user._id, email: user.email, firstName: user.firstName },
+        token,
+        user: { 
+          _id: user._id, 
+          email: user.email, 
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isActive: user.isActive,
+          role: user.role
+        },
         mustChangePassword: true
       });
     }
 
     // Normal login
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
     res.status(200).json({
       message: "Login successful",
-      user: { _id: user._id, email: user.email, firstName: user.firstName, isActive: user.isActive },
+      token,
+      user: { 
+        _id: user._id, 
+        email: user.email, 
+        firstName: user.firstName, 
+        lastName: user.lastName,
+        isActive: user.isActive,
+        role: user.role
+      },
       mustChangePassword: false
     });
 

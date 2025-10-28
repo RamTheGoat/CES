@@ -103,7 +103,8 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
 
 const Profile = () => {
     // This will eventually use data from the login, for now use test user id
-    const userId = "68fd5bd183469bb90d227ac0";
+    //const userId = "68fd5bd183469bb90d227ac0";
+    const navigate = useNavigate();
 
     const [userData, setUserData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
@@ -111,21 +112,37 @@ const Profile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [passwordInput, setPasswordInput] = useState({});
 
-    const navigate = useNavigate();
-    const isLoggedIn = true;
+    //const isLoggedIn = true;
+
+    // Get token + user from localStorage
+    const token = localStorage.getItem("token");
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    
+    const isLoggedIn = !!token && !! storedUser;
+    const userID = storedUser?._id;
+
+    // If not logged in, redirect
+    useEffect(() => {
+        if (!token || !storedUser) {
+            navigate("/login");
+        }
+    }, [navigate]);
+    
     const handleLogout = () => {
         // Clear user session
         localStorage.removeItem("user"); 
         localStorage.removeItem("token"); 
-
-        
         navigate("/login");
     };
     
     // Fetch user profile
     const fetchProfile = async () => {
         try {
-            const response = await fetch(`http://localhost:4000/api/users/${userId}`);
+            const response = await fetch(`http://localhost:4000/api/users/${userID}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             const profile = await response.json();
             setUserData(profile);
         } catch (err) {
@@ -139,9 +156,12 @@ const Profile = () => {
     // toggle for edit mode
     const handleEditToggle = async () => {
         if (isEditing) try {
-            const res = await fetch(`http://localhost:4000/api/users/edit/${userId}`, {
+            const res = await fetch(`http://localhost:4000/api/users/edit/${userID}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json' 
+                },
                 body: JSON.stringify({
                     firstName: userData.firstName,
                     lastName: userData.lastName,
@@ -191,9 +211,12 @@ const Profile = () => {
         if (passwordInput.current === passwordInput.new) return alert("Passwords must be different, please choose a different new password!");
 
         try {
-            const res = await fetch(`http://localhost:4000/api/users/password/edit/${userId}`, {
+            const res = await fetch(`http://localhost:4000/api/users/password/edit/${userID}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json' 
+                },
                 body: JSON.stringify(passwordInput)
             });
 
@@ -246,9 +269,12 @@ const Profile = () => {
         if (!cardData.cardType || !cardData.cardNumber || !cardData.expirationMonth || !cardData.expirationYear) return;
 
         try {
-            const res = await fetch(`http://localhost:4000/api/users/card/add/${userId}`, {
+            const res = await fetch(`http://localhost:4000/api/users/card/add/${userID}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json' 
+                },
                 body: JSON.stringify(cardData)
             });
 

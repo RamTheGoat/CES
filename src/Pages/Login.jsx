@@ -22,9 +22,30 @@ const Login = () => {
       if (!res.ok) {
         alert(data.message || "Login failed");
         return;
+      } else {
+        alert("Login successful!");
+        console.log(data.user);
+
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        if (data.user.role === "admin") {
+          navigate("/adminHome");
+        } else if (data.user.role === "user") {
+          navigate("/");
+        } else {
+          alert("Unknown role.");
+        }
       }
 
+      /*
       const user = data.user;
+
+      // Save token + user info for later use 
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
 
       // Redirect to Change Password page if user must change password
       if (data.mustChangePassword) {
@@ -34,6 +55,7 @@ const Login = () => {
 
       // Normal login: redirect to home/dashboard
       navigate("/"); // replace with your home/dashboard route
+      */
 
     } catch (err) {
       console.error("Login error:", err);

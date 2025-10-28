@@ -159,14 +159,23 @@ h1,h2,p{ margin: 0; }
   grid-auto-columns: 275px;
   gap: 75px;
   overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 12px;
   scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.rail__track::-webkit-scrollbar {
+  display: none;
+}
+
+/*
 .rail__track::-webkit-scrollbar{ height: 10px; }
 .rail__track::-webkit-scrollbar-thumb{
   background: transparent;
   border-radius: 999px;
 }
+*/
 
 /* Movie Cards inside the rails */
 .card{
