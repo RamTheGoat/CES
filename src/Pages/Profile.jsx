@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
 import "./Profile.css";
 
@@ -112,8 +112,6 @@ const Profile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [passwordInput, setPasswordInput] = useState({});
 
-    //const isLoggedIn = true;
-
     // Get token + user from localStorage
     const token = localStorage.getItem("token");
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -125,7 +123,7 @@ const Profile = () => {
         if (!token || !storedUser) {
             navigate("/login");
         }
-    }, [navigate]);
+    }, [navigate, token, storedUser]);
     
     const handleLogout = () => {
         // Clear user session
@@ -135,7 +133,7 @@ const Profile = () => {
     };
     
     // Fetch user profile
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
         try {
             const response = await fetch(`http://localhost:4000/api/users/${userID}`, {
                 headers: {
@@ -147,10 +145,8 @@ const Profile = () => {
         } catch (err) {
             console.error("User profile not found:", err);
         }
-    };
-    useEffect(() => {
-        fetchProfile();
-    }, []);
+    }, [userID, token]);
+    useEffect(() => { fetchProfile() }, [fetchProfile]);
 
     // toggle for edit mode
     const handleEditToggle = async () => {
@@ -208,6 +204,7 @@ const Profile = () => {
         if (!passwordInput.current || passwordInput.current.length === 0) return alert("Password cannot be empty!");
         if (!passwordInput.new || passwordInput.new.length === 0) return alert("Password cannot be empty!");
         if (passwordInput.current === passwordInput.new) return alert("Passwords must be different, please choose a different new password!");
+        if (passwordInput.new !== passwordInput.confirm) return alert("Passwords do not match!");
 
         try {
             const res = await fetch(`http://localhost:4000/api/users/password/edit/${userID}`, {
@@ -431,17 +428,24 @@ const Profile = () => {
                         {changePassword ? <div>
                             <input
                                 className="input_field"
-                                type="text"
+                                type="password"
                                 value={passwordInput.current ?? ""}
                                 onChange={(e) => handlePasswordInputChange('current', e.target.value)}
                                 placeholder="Current Password"
                             />
                             <input
                                 className="input_field"
-                                type="text"
+                                type="password"
                                 value={passwordInput.new ?? ""}
                                 onChange={(e) => handlePasswordInputChange('new', e.target.value)}
                                 placeholder="New Password"
+                            />
+                            <input
+                                className="input_field"
+                                type="password"
+                                value={passwordInput.confirm ?? ""}
+                                onChange={(e) => handlePasswordInputChange('confirm', e.target.value)}
+                                placeholder="Confirm Password"
                             />
                         </div> : <></>}
                     </div>
