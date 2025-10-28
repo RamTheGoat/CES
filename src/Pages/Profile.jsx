@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import "./Profile.css";
 
 const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
@@ -110,11 +111,17 @@ const Profile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [passwordInput, setPasswordInput] = useState({});
 
+    const navigate = useNavigate();
     const isLoggedIn = true;
     const handleLogout = () => {
-        window.location.href = "/login";
-    };
+        // Clear user session
+        localStorage.removeItem("user"); 
+        localStorage.removeItem("token"); 
 
+        
+        navigate("/login");
+    };
+    
     // Fetch user profile
     const fetchProfile = async () => {
         try {
