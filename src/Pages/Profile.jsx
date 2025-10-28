@@ -227,12 +227,6 @@ const Profile = () => {
         }
     };
 
-    // reset password
-    const handleResetPassword = () => {
-        alert('password reset email/whatnot goes here');
-        // sorry again, needs db work to actually change it
-    };
-
     // payment info edit
     const handleEditPayment = async (cardId, cardData) => {
         try {
@@ -417,11 +411,11 @@ const Profile = () => {
                                 <button 
                                     className={changePassword ? "confirm_button" : "secondary_button"}
                                     onClick={changePassword ? handleChangePassword : () => { setChangePassword(true); setPasswordInput({}) }}
-                                >{changePassword ? "Save Password" : "Change Password"}</button>
+                                >{changePassword ? "Save" : "Change Password"}</button>
                                 <button 
                                     id="delete_payment"
                                     className={changePassword ? "delete_button" : "secondary_button"}
-                                    onClick={changePassword ? () => { setChangePassword(false) } : handleResetPassword}
+                                    onClick={changePassword ? () => { setChangePassword(false) } : () => { navigate("/forgotpassword") }}
                                 >{changePassword ? "Cancel" : "Reset Password"}</button>
                             </div>
                         </div>
