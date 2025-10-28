@@ -202,9 +202,10 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
 
     // Create a new payment card
     let newCard = {};
-    if (req.body.cardType && req.body.lastFour && req.body.expirationMonth && req.body.expirationYear) {
+    if (req.body.cardType && req.body.cardNumber && req.body.expirationMonth && req.body.expirationYear) {
       newCard.cardType = req.body.cardType;
-      newCard.lastFour = req.body.lastFour;
+      newCard.cardNumber = await bcrypt.hash(req.body.cardNumber, 10);
+      newCard.lastFour = req.body.cardNumber.slice(-4);
       newCard.expirationMonth = req.body.expirationMonth;
       newCard.expirationYear = req.body.expirationYear;
     } else {

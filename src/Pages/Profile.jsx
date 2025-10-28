@@ -4,6 +4,7 @@ import "./Profile.css";
 const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
     const [cardData, setCardData] = useState(card ?? {
         cardType: "Visa",
+        cardNumber: "",
         expirationMonth: 1,
         expirationYear: 2025
     });
@@ -16,12 +17,16 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
     }
 
     const handleEditButton = () => {
-        if (isEditing) onEdit(cardData._id, {
-            cardType: cardData.cardType,
-            lastFour: cardData.lastFour,
-            expirationMonth: cardData.expirationMonth,
-            expirationYear: cardData.expirationYear
-        });
+        if (isEditing) {
+            if (newCard && cardData.cardNumber.length < 16) return;
+            const data = {
+                cardType: cardData.cardType,
+                expirationMonth: cardData.expirationMonth,
+                expirationYear: cardData.expirationYear
+            };
+            if (newCard) data.cardNumber = cardData.cardNumber;
+            onEdit(cardData._id, data);
+        }
         setIsEditing(!isEditing || newCard);
     }
 
@@ -45,10 +50,11 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
         <div className="payment_item" id="edit">
             <input
                 className="input_field"
-                type="number"
-                value={cardData.lastFour ?? ""}
-                onChange={e => handleInputChange('lastFour', e.target.value)}
+                type={newCard ? "number" : "text"}
+                value={newCard ? cardData.cardNumber : `XXXX-XXXX-XXXX-${cardData.lastFour}`}
+                onChange={e => handleInputChange('cardNumber', e.target.value)}
                 placeholder="Card Number"
+                readOnly={!newCard}
             />
             <div className="payment_row">
                 <select
@@ -86,7 +92,7 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
     ) : (
         <div className="payment_item">
             <div>
-                <span className="info_value">{cardData.cardType} •••• {cardData.lastFour % 10000}</span>
+                <span className="info_value">{cardData.cardType} •••• {cardData.lastFour}</span>
                 <span className="info_label"> Expires {cardData.expirationMonth}/{cardData.expirationYear % 100}</span>
             </div>
             <button className="secondary_button" onClick={handleEditButton}>Edit</button>
@@ -144,10 +150,6 @@ const Profile = () => {
 
     // handling changes in edit mode
     const handleInputChange = (field, value) => {
-        if (field === 'phone') {
-            value = value.replace(/^(\d{3})(\d{3})(\d{4})$/, "($1)-$2-$3");
-            value = value.slice(0, 14);
-        }
         setUserData(prev => ({
             ...prev,
             [field]: value
@@ -202,7 +204,7 @@ const Profile = () => {
 
     // add payment method
     const handleAddPayment = async (cardId, cardData) => {
-        if (!cardData.lastFour || !cardData.cardType || !cardData.expirationMonth || !cardData.expirationYear) return;
+        if (!cardData.cardType || !cardData.cardNumber || !cardData.expirationMonth || !cardData.expirationYear) return;
 
         try {
             const res = await fetch(`http://localhost:4000/api/users/card/add/${userId}`, {
@@ -395,13 +397,13 @@ const Profile = () => {
                                     <PaymentCard newCard onEdit={handleAddPayment} onDelete={() => { setAddPaymentCard(false) }}/>
                                 </div>
                             ) : <></> }
-                            {userData.paymentCards ? userData.paymentCards.map(card => (
+                            {userData.paymentCards && userData.paymentCards.length > 0 ? userData.paymentCards.map(card => (
                                 <div key={card._id}>
                                     <PaymentCard card={card} onEdit={handleEditPayment} onDelete={handleDeletePayment}/>
                                 </div>
-                            )) : (
+                            )) : !addPaymentCard ? (
                                 <p>No payment methods added</p>
-                            )}
+                            ) : <></>}
                         </div>
                     </div>
 
