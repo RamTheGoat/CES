@@ -73,6 +73,13 @@
     background: #e020e0;
 }
 
+/* remember me line */
+.rememberMe {
+    margin: 10px;
+    color: var(--muted);
+    font-size: 16px;
+}
+
 /* forgot password line */
 .fPassword {
     margin-top: 10px;
