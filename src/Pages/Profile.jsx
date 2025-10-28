@@ -18,7 +18,7 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
 
     const handleEditButton = () => {
         if (isEditing) {
-            if (newCard && cardData.cardNumber.length < 16) return;
+            if (newCard && cardData.cardNumber.length < 16) return alert("Invalid payment card number!");
             const data = {
                 cardType: cardData.cardType,
                 expirationMonth: cardData.expirationMonth,
@@ -107,6 +107,9 @@ const Profile = () => {
     const [userData, setUserData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
     const [addPaymentCard, setAddPaymentCard] = useState(false);
+    const [changePassword, setChangePassword] = useState(false);
+    const [passwordInput, setPasswordInput] = useState({});
+
     const isLoggedIn = true;
     const handleLogout = () => {
         window.location.href = "/login";
@@ -159,6 +162,13 @@ const Profile = () => {
             [field]: value
         }));
     };
+
+    const handlePasswordInputChange = (field, value) => {
+        setPasswordInput(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    }
 
     // promo toggle
     const handlePromoToggle = () => {
@@ -358,19 +368,32 @@ const Profile = () => {
                             <span className="info_label">Password</span>
                             <div>
                                 <button 
-                                    className="secondary_button"
-                                    onClick={handleChangePassword}
-                                >
-                                    Change Password
-                                </button>
+                                    className={changePassword ? "confirm_button" : "secondary_button"}
+                                    onClick={changePassword ? handleChangePassword : () => { setChangePassword(true) }}
+                                >{changePassword ? "Save Password" : "Change Password"}</button>
                                 <button 
-                                    className="secondary_button"
-                                    onClick={handleResetPassword}
-                                >
-                                    Reset Password
-                                </button>
+                                    id="delete_payment"
+                                    className={changePassword ? "delete_button" : "secondary_button"}
+                                    onClick={changePassword ? () => { setChangePassword(false); setPasswordInput({}) } : handleResetPassword}
+                                >{changePassword ? "Cancel" : "Reset Password"}</button>
                             </div>
                         </div>
+                        {changePassword ? <div>
+                            <input
+                                className="input_field"
+                                type="text"
+                                value={passwordInput.current ?? ""}
+                                onChange={(e) => handlePasswordInputChange('current', e.target.value)}
+                                placeholder="Current Password"
+                            />
+                            <input
+                                className="input_field"
+                                type="text"
+                                value={passwordInput.new ?? ""}
+                                onChange={(e) => handlePasswordInputChange('new', e.target.value)}
+                                placeholder="New Password"
+                            />
+                        </div> : <></>}
                     </div>
 
                     {/* promo section */}
