@@ -59,6 +59,9 @@ const Login = () => {
           <div className='forgotPassword'>
             <a href='/forgotpassword' className='fPassword'>Forgot Password?</a>
           </div>
+          <div className='createAccount'>
+            <a href='/register' className='cAccount'>Create an account</a>
+          </div>
         </div>
         <button type="submit" className='sButton'>Login</button>
       </form>

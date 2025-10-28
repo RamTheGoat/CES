@@ -80,3 +80,11 @@
     font-size: 14px;
     cursor: pointer;
 }
+
+/* create account line */
+.cAccount {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer;
+}

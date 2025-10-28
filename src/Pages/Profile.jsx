@@ -107,6 +107,10 @@ const Profile = () => {
     const [userData, setUserData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
     const [addPaymentCard, setAddPaymentCard] = useState(false);
+    const isLoggedIn = true;
+    const handleLogout = () => {
+        window.location.href = "/login";
+    };
 
     // Fetch user profile
     const fetchProfile = async () => {
@@ -259,8 +263,16 @@ const Profile = () => {
         <div className="profile_page">
             <div className="profile_container">
                 <h2>My Profile</h2>
+
+                {/* logout button show */}
+                {isLoggedIn && (
+                    <button className="logout_button"
+                    onClick={handleLogout}>
+                        Log Out
+                    </button>
+                )}
                 
-                {/* edit/save buttom */}
+                {/* edit/save button */}
                 <button 
                     className="edit_button"
                     onClick={handleEditToggle}
