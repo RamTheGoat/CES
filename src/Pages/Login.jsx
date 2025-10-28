@@ -1,34 +1,45 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "./Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-        try {
-            const res = await fetch("http://localhost:4000/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ email, password })
-            });
 
-            const data = await res.json();
-            if (!res.ok) {
-            alert(data.message || "Login failed");
-            } else {
-            alert("Login successful!");
-            console.log(data.user);
-            }
-        } catch (err) {
-            console.error("Error:", err);
-            alert("Something went wrong!");
-        }
-    };
+    try {
+      const res = await fetch("http://localhost:4000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Login failed");
+        return;
+      }
+
+      const user = data.user;
+
+      // Redirect to Change Password page if user must change password
+      if (data.mustChangePassword) {
+        navigate(`/changepassword?userId=${user._id}`);
+        return;
+      }
+
+      // Normal login: redirect to home/dashboard
+      navigate("/"); // replace with your home/dashboard route
+
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Something went wrong!");
+    }
+  };
 
   return (
     <div className="login-container">
@@ -38,7 +49,6 @@ const Login = () => {
           <label className='emailBox'>
             <input
               style={{ padding: '7px', borderRadius: '8px' }}
-              className='emailInput'
               type="email"
               placeholder='Email'
               value={email}

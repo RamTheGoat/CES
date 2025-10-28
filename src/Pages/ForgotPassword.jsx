@@ -37,7 +37,7 @@ const ForgotPassword = () => {
                     <form onSubmit={handleSubmit}>
                         <div className='inputbox'>
                             <p className='instruction_text'>
-                                Enter your email address and we'll send you a link to reset your password. c:
+                                Enter your email address and we'll send you a temporary password. You can use it to log in and must change it immediately.
                             </p>
                             <label className='email_box'>
                                 <input
@@ -54,7 +54,7 @@ const ForgotPassword = () => {
                     </form>
                 ) : (
                     <div className='success_message'>
-                        <p>✓ Check your email for a password reset link.</p>
+                        <p>✓ Check your email for a temporary password. Log in and change it immediately.</p>
                     </div>
                 )}
                 <div className='back_to_login'>

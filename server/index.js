@@ -5,34 +5,35 @@ import cors from "cors";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
 import User from "./models/User.js";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:3000",  // React app URL
+  origin: "http://localhost:3000",
   methods: ["GET", "POST", "PUT", "DELETE"]
 }));
-
 app.use(express.json());
 
-// Connect to MongoDB Atlus
+// Connect to MongoDB
 mongoose.connect("mongodb+srv://rampatel4204:Patel4204@ces.yybxumv.mongodb.net/Movies", {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(async () => {
-    console.log("MongoDB connected");
-
-    // Fetch all movies and print to console
-    try {
-        const movies = await Movie.find();
-        //console.log("Movies in DB:", movies);
-    } catch (err) {
-        console.error("Error fetching movies:", err);
-    }
-})
+.then(() => console.log("MongoDB connected"))
 .catch(err => console.error("MongoDB connection error:", err));
 
-// Get Movies
+// Helper to generate random temporary password
+function generateTempPassword(length = 12) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]";
+  let pw = "";
+  for (let i = 0; i < length; i++) {
+    pw += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pw;
+}
+
+// ------------------------- MOVIES & BOOKINGS -------------------------
 app.get("/api/movies", async (req, res) => {
   try {
     const movies = await Movie.find();
@@ -42,7 +43,6 @@ app.get("/api/movies", async (req, res) => {
   }
 });
 
-// GET single movie by ID
 app.get("/api/movies/:id", async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
@@ -56,7 +56,7 @@ app.get("/api/movies/:id", async (req, res) => {
 app.get("/api/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find()
-      .populate("user_id", "name email")
+      .populate("user_id", "firstName lastName email")
       .populate({
         path: "showtime_id",
         populate: [
@@ -70,7 +70,7 @@ app.get("/api/bookings", async (req, res) => {
   }
 });
 
-// POST register new user
+// ------------------------- REGISTER -------------------------
 app.post("/register", async (req, res) => {
   try {
     const { firstName, lastName, email, phone, password } = req.body;
@@ -87,27 +87,119 @@ app.post("/register", async (req, res) => {
       email,
       phone,
       password: hashedPassword,
+      isActive: false, // initially inactive
     });
 
     await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
+
+    // Send confirmation email (inform user account created)
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "Jiexian0902@gmail.com",
+        pass: "wpyhctrfiwlroqea",
+      },
+    });
+
+    await transporter.sendMail({
+      from: '"E-Cinema" <Jiexian0902@gmail.com>',
+      to: email,
+      subject: "Registration Confirmation",
+      html: `<h2>Hello, ${firstName}</h2><p>Your account has been created. You will be active after your first login.</p>`,
+    });
+
+    res.status(201).json({ message: "User registered successfully. Confirmation email sent." });
+
   } catch (err) {
-    console.error(err);
+    console.error("Register error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+// ------------------------- FORGOT PASSWORD -------------------------
+app.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Generate temporary password
+    const tempPassword = generateTempPassword(12);
+    const hashedTemp = await bcrypt.hash(tempPassword, 10);
+
+    // Save temporary password and flags
+    user.password = hashedTemp;
+    user.mustChangePassword = true;
+    user.tempPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+    await user.save();
+
+    // Send email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "Jiexian0902@gmail.com",
+        pass: "wpyhctrfiwlroqea",
+      },
+    });
+
+    const emailHtml = `
+      <h2>Hello ${user.firstName || ""}</h2>
+      <p>You requested a password reset. A temporary password has been generated:</p>
+      <p style="font-weight:bold; font-size:16px; padding:8px; border:1px solid #ddd; display:inline-block;">${tempPassword}</p>
+      <p>This temporary password expires in 1 hour. Please log in and change your password immediately.</p>
+    `;
+
+    await transporter.sendMail({
+      from: '"E-Cinema" <Jiexian0902@gmail.com>',
+      to: email,
+      subject: "E-Cinema — Temporary Password",
+      html: emailHtml,
+    });
+
+    res.status(200).json({ message: "Temporary password emailed. Check your inbox." });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ------------------------- LOGIN -------------------------
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) return res.status(401).json({ message: "Invalid password" });
 
-    res.status(200).json({ message: "Login successful", user });
+    // Activate user on first login
+    if (!user.isActive) {
+      user.isActive = true;
+      await user.save();
+    }
+
+    // Check temporary password
+    if (user.mustChangePassword) {
+      if (user.tempPasswordExpires && user.tempPasswordExpires < Date.now()) {
+        return res.status(401).json({ message: "Temporary password expired. Request a new one." });
+      }
+      return res.status(200).json({
+        message: "Login successful — temporary password in use. Change required.",
+        user: { _id: user._id, email: user.email, firstName: user.firstName },
+        mustChangePassword: true
+      });
+    }
+
+    // Normal login
+    res.status(200).json({
+      message: "Login successful",
+      user: { _id: user._id, email: user.email, firstName: user.firstName, isActive: user.isActive },
+      mustChangePassword: false
+    });
+
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
@@ -119,7 +211,7 @@ app.get("/api/users/:userId", async (req, res) => {
   try {
     const profile = await User.findById(req.params.userId);
     if (!profile) return res.status(404).json({ error: "User profile not found" });
-    else return res.status(200).json(profile);
+    return res.status(200).json(profile);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -136,12 +228,9 @@ app.put("/api/users/edit/:userId", async (req, res) => {
       if (req.body[prop] != null) changes[prop] = req.body[prop];
     }
 
-    // Update the user with the profile id
-    let filter = { _id: profile._id };
-    const result = await User.updateOne(filter, { $set: changes });
-
+    const result = await User.updateOne({ _id: profile._id }, { $set: changes });
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user profile was successful" });
-    else return res.status(200).json({ message: "No changes were made to the user profile" });
+    return res.status(200).json({ message: "No changes were made to the user profile" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
