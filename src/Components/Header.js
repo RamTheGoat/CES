@@ -1,12 +1,24 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./Header.css";
 
 
 export default function Header() {
-  const isLoggedIn = false; // Replace with actual authentication logic
+  //const isLoggedIn = false; // Replace with actual authentication logic
+  const navigate = useNavigate();
 
+  // Check login state
+  const token = localStorage.getItem("token");
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const isLoggedIn = !!token && !!storedUser;
+  const role = storedUser?.role;
+
+  // Handle logout and clear session
   const handleLogout = () => {
-    window.location.href = "/login";
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login"); // Redirect to login after logout
+    
+    //window.location.href = "/login";
   }
 
   return (
@@ -14,7 +26,7 @@ export default function Header() {
       <header className="nav-inner">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />        
         <nav>
-          <NavLink to="/" end>Home</NavLink>
+          <NavLink to={!isLoggedIn ? "/" : role === "admin" ? "/adminHome" : "/"} end>Home</NavLink>
           <NavLink to="/browse">Browse</NavLink>
           <NavLink to="/pricing">Pricing</NavLink>
           <NavLink to="/faq">FAQ</NavLink>

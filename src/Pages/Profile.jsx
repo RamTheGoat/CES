@@ -117,7 +117,6 @@ const Profile = () => {
     // Get token + user from localStorage
     const token = localStorage.getItem("token");
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    
     const isLoggedIn = !!token && !! storedUser;
     const userID = storedUser?._id;
 
