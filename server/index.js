@@ -236,6 +236,27 @@ app.put("/api/users/edit/:userId", async (req, res) => {
   }
 });
 
+// PUT edit user password
+app.put("/api/users/password/edit/:userId", async (req, res) => {
+  try {
+    const profile = await User.findById(req.params.userId);
+    if (!profile) return res.status(404).json({ error: "User profile not found" });
+
+    const isPasswordValid = await bcrypt.compare(req.body.current, profile.password);
+    if (!isPasswordValid) return res.status(401).json({ message: "Current password is invalid" });
+
+    let filter = { _id: profile._id };
+    let changes = { password: await bcrypt.hash(req.body.new, 10) };
+    const result = await User.updateOne(filter, { $set: changes });
+
+    if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user password was successful" });
+    else return res.status(200).json({ message: "No changes were made to the user password" });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // PUT edit user payment card
 app.put("/api/users/card/edit/:cardId", async (req, res) => {
   try {
@@ -291,9 +312,10 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
 
     // Create a new payment card
     let newCard = {};
-    if (req.body.cardType && req.body.lastFour && req.body.expirationMonth && req.body.expirationYear) {
+    if (req.body.cardType && req.body.cardNumber && req.body.expirationMonth && req.body.expirationYear) {
       newCard.cardType = req.body.cardType;
-      newCard.lastFour = req.body.lastFour;
+      newCard.cardNumber = await bcrypt.hash(req.body.cardNumber, 10);
+      newCard.lastFour = req.body.cardNumber.slice(-4);
       newCard.expirationMonth = req.body.expirationMonth;
       newCard.expirationYear = req.body.expirationYear;
     } else {
