@@ -179,8 +179,27 @@ const Profile = () => {
     };
 
     // password changing
-    const handleChangePassword = () => {
-        alert('dont have actual password change in yet cause gotta link it to DB for that'); // sorry, this isnt implemented yet cause its db stuff
+    const handleChangePassword = async () => {
+        if (!passwordInput.current || passwordInput.current.length === 0) return alert("Password cannot be empty!");
+        if (!passwordInput.new || passwordInput.new.length === 0) return alert("Password cannot be empty!");
+        if (passwordInput.current === passwordInput.new) return alert("Passwords must be different, please choose a different new password!");
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/password/edit/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(passwordInput)
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+            alert("Password successfully changed!");
+            setChangePassword(false);
+        } catch (err) {
+            console.log('Failed to edit password:', err);
+            alert("Current password is incorrect!");
+        }
     };
 
     // reset password
@@ -369,12 +388,12 @@ const Profile = () => {
                             <div>
                                 <button 
                                     className={changePassword ? "confirm_button" : "secondary_button"}
-                                    onClick={changePassword ? handleChangePassword : () => { setChangePassword(true) }}
+                                    onClick={changePassword ? handleChangePassword : () => { setChangePassword(true); setPasswordInput({}) }}
                                 >{changePassword ? "Save Password" : "Change Password"}</button>
                                 <button 
                                     id="delete_payment"
                                     className={changePassword ? "delete_button" : "secondary_button"}
-                                    onClick={changePassword ? () => { setChangePassword(false); setPasswordInput({}) } : handleResetPassword}
+                                    onClick={changePassword ? () => { setChangePassword(false) } : handleResetPassword}
                                 >{changePassword ? "Cancel" : "Reset Password"}</button>
                             </div>
                         </div>
