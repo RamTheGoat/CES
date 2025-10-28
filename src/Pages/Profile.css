@@ -104,6 +104,29 @@
     border-color: var(--accent);
 }
 
+.input_field::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+/* edit card select field */
+.select_field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+}
+
+.select_field:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
 /* action buttons */
 .action_button {
     background: var(--accent);
@@ -167,6 +190,18 @@
     padding: 10px;
     background: rgba(255,255,255,.05);
     border-radius: 8px;
+}
+
+.payment_item#edit {
+    flex-direction: column;
+}
+
+.payment_row {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    min-width: 100%;
+    margin: 0;
 }
 
 /* toggle switch for promotions */
@@ -237,4 +272,38 @@ input:checked + .toggle_slider:before {
 
 .danger_button:hover {
     background: #ff3742;
+}
+
+.delete_button {
+    border: 1px solid rgba(255, 75, 75, 0.3);
+    background: rgba(255, 75, 75, 0.1);
+    color: #ff4757;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.delete_button:hover {
+    background: rgba(255, 75, 75, 0.2);
+}
+
+#delete_payment {
+    margin-left: 10px;
+}
+
+.confirm_button {
+    border: 1px solid rgba(75, 255, 75, 0.3);
+    background: rgba(75, 255, 75, 0.1);
+    color: rgb(75, 255, 75);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.confirm_button:hover {
+    background: rgba(75, 255, 75, 0.2);
 }

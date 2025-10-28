@@ -89,32 +89,30 @@ app.post("/register", async (req, res) => {
       password: hashedPassword,
     });
 
-      await newUser.save();
-      res.status(201).json({ message: "User registered successfully" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
+    await newUser.save();
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
-  app.post("/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await User.findOne({ email });
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
-      if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) return res.status(401).json({ message: "Invalid password" });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) return res.status(401).json({ message: "Invalid password" });
 
-      res.status(200).json({ message: "Login successful", user });
-    } catch (err) {
-      console.error("Login error:", err);
-      res.status(500).json({ message: "Server error" });
-    }
-  });
-
-  
+    res.status(200).json({ message: "Login successful", user });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // GET user profile
 app.get("/api/users/:userId", async (req, res) => {
@@ -135,12 +133,12 @@ app.put("/api/users/edit/:userId", async (req, res) => {
 
     let changes = {};
     for (let prop in profile.toObject()) {
-      if (req.body[prop]) changes[prop] = req.body[prop];
+      if (req.body[prop] != null) changes[prop] = req.body[prop];
     }
 
     // Update the user with the profile id
     let filter = { _id: profile._id };
-    const result = await User.updateOne(filter, { '$set': changes });
+    const result = await User.updateOne(filter, { $set: changes });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit user profile was successful" });
     else return res.status(200).json({ message: "No changes were made to the user profile" });
@@ -159,12 +157,12 @@ app.put("/api/users/card/edit/:cardId", async (req, res) => {
 
     let changes = {};
     for (let prop in card.toObject()) {
-      if (req.body[prop]) changes[`paymentCards.$.${prop}`] = req.body[prop];
+      if (req.body[prop] != null) changes[`paymentCards.$.${prop}`] = req.body[prop];
     }
 
     // Update the payment card with the card id
     let filter = { 'paymentCards._id': card._id };
-    const result = await User.updateOne(filter, { '$set': changes });
+    const result = await User.updateOne(filter, { $set: changes });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Edit payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });
@@ -183,7 +181,7 @@ app.put("/api/users/card/remove/:cardId", async (req, res) => {
 
     // Remove the payment card with the card id
     let filter = { 'paymentCards._id': card._id };
-    const result = await User.updateOne(filter, { '$pull': { paymentCards: { _id: card._id } } });
+    const result = await User.updateOne(filter, { $pull: { paymentCards: { _id: card._id } } });
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Remove payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });
@@ -204,18 +202,18 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
 
     // Create a new payment card
     let newCard = {};
-    if (req.body.cardNumber && req.body.expirationMonth && req.body.expirationYear && req.body.securityCode) {
-      newCard.cardNumber = req.body.cardNumber;
+    if (req.body.cardType && req.body.lastFour && req.body.expirationMonth && req.body.expirationYear) {
+      newCard.cardType = req.body.cardType;
+      newCard.lastFour = req.body.lastFour;
       newCard.expirationMonth = req.body.expirationMonth;
       newCard.expirationYear = req.body.expirationYear;
-      newCard.securityCode = req.body.securityCode;
     } else {
       return res.status(422).json({ error: "Add payment card information is incomplete" });
     }
 
     // Add the payment card to the user with the user id
     let filter = { '_id': profile._id };
-    const result = await User.updateOne(filter, { '$push': { paymentCards: newCard }});
+    const result = await User.updateOne(filter, { $push: { paymentCards: { $each: [newCard], $position: 0 }}});
 
     if (result.modifiedCount > 0) return res.status(200).json({ message: "Add payment card was successful" });
     else return res.status(200).json({ message: "No changes were made to the payment card" });

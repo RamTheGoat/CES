@@ -9,11 +9,12 @@ const userSchema = new mongoose.Schema({
     address: { type: String, required: true },
     status: { type: String, required: true },
     role: { type: String, required: true },
+    promotion: { type: Boolean, required: true },
     paymentCards: { type: [{
-        cardNumber: { type: Number, required: true },
+        cardType: { type: String, required: true },
+        lastFour: { type: Number, required: true },
         expirationMonth: { type: Number, required: true },
-        expirationYear: { type: Number, required: true },
-        securityCode: { type: Number, required: true }
+        expirationYear: { type: Number, required: true }
     }], required: false }
 });
 

@@ -1,35 +1,154 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "./Profile.css";
 
-const Profile = () => {
-    // not linked to the DB yet so using sample data
-    const [userData, setUserData] = useState({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        phone: '(555) 123-4567',
-        acceptPromos: true,
-        paymentMethods: [
-            { id: 1, type: 'Visa', lastFour: '4242', expiry: '12/25' },
-            { id: 2, type: 'Mastercard', lastFour: '8888', expiry: '06/24' }
-        ]
+const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
+    const [cardData, setCardData] = useState(card ?? {
+        cardType: "Visa",
+        expirationMonth: 1,
+        expirationYear: 2025
     });
+    const [isEditing, setIsEditing] = useState(newCard);
 
+    const getDateAsString = () => {
+        if (cardData.expirationMonth == null || cardData.expirationYear == null) return `2025-01-01`;
+        else if (cardData.expirationMonth > 9) return `${cardData.expirationYear}-${cardData.expirationMonth}-01`;
+        else return `${cardData.expirationYear}-0${cardData.expirationMonth}-01`;
+    }
+
+    const handleEditButton = () => {
+        if (isEditing) onEdit(cardData._id, {
+            cardType: cardData.cardType,
+            lastFour: cardData.lastFour,
+            expirationMonth: cardData.expirationMonth,
+            expirationYear: cardData.expirationYear
+        });
+        setIsEditing(!isEditing || newCard);
+    }
+
+    const handleInputChange = (field, value) => {
+        if (field === 'expirationDate') {
+            let date = new Date(value + 1000000000);
+            setCardData(prev => ({
+                ...prev,
+                expirationMonth: date.getMonth() + 1,
+                expirationYear: date.getFullYear()
+            }));
+        } else {
+            setCardData(prev => ({
+                ...prev,
+                [field]: value
+            }));
+        }
+    }
+
+    return isEditing || newCard ? (
+        <div className="payment_item" id="edit">
+            <input
+                className="input_field"
+                type="number"
+                value={cardData.lastFour ?? ""}
+                onChange={e => handleInputChange('lastFour', e.target.value)}
+                placeholder="Card Number"
+            />
+            <div className="payment_row">
+                <select
+                    className="select_field"
+                    value={cardData.cardType}
+                    onChange={e => handleInputChange('cardType', e.target.value)}
+                >
+                    <option value="Visa">Visa</option>
+                    <option value="Mastercard">Mastercard</option>
+                    <option value="American Express">American Express</option>
+                    <option value="Discover">Discover</option>
+                </select>
+                <input
+                    className="input_field"
+                    type="date"
+                    value={getDateAsString()}
+                    onChange={e => handleInputChange('expirationDate', e.target.valueAsNumber)}
+                    placeholder="Expiration Date"
+                    onKeyDown={e => e.preventDefault()}
+                    min="2001-01-01"
+                />
+            </div>
+            <div className="payment_row">
+                <button
+                    className={newCard ? "confirm_button" : "secondary_button"}
+                    onClick={handleEditButton}
+                >{newCard ? "Confirm" : "Save"}</button>
+                <button
+                    className={newCard ? "secondary_button" : "delete_button"}
+                    onClick={() => { onDelete(cardData._id) }}
+                    id="delete_payment"
+                >{newCard ? "Cancel" : "Delete"}</button>
+            </div>
+        </div>
+    ) : (
+        <div className="payment_item">
+            <div>
+                <span className="info_value">{cardData.cardType} •••• {cardData.lastFour % 10000}</span>
+                <span className="info_label"> Expires {cardData.expirationMonth}/{cardData.expirationYear % 100}</span>
+            </div>
+            <button className="secondary_button" onClick={handleEditButton}>Edit</button>
+        </div>
+    );
+};
+
+const Profile = () => {
+    // This will eventually use data from the login, for now use test user id
+    const userId = "68fd5bd183469bb90d227ac0";
+
+    const [userData, setUserData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState({ ...userData });
+    const [addPaymentCard, setAddPaymentCard] = useState(false);
+
+    // Fetch user profile
+    const fetchProfile = async () => {
+        try {
+            const response = await fetch(`http://localhost:4000/api/users/${userId}`);
+            const profile = await response.json();
+            setUserData(profile);
+        } catch (err) {
+            console.error("User profile not found:", err);
+        }
+    };
+    useEffect(() => {
+        fetchProfile();
+    }, []);
 
     // toggle for edit mode
-    const handleEditToggle = () => {
-        if (isEditing) {
-            // save changes
-            setUserData(editData);
+    const handleEditToggle = async () => {
+        if (isEditing) try {
+            const res = await fetch(`http://localhost:4000/api/users/edit/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstName: userData.firstName,
+                    lastName: userData.lastName,
+                    email: userData.email,
+                    phone: userData.phone,
+                    address: userData.address,
+                    promotion: userData.promotion
+                })
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+        } catch (err) {
+            console.log('Failed to edit profile:', err);
+            await fetchProfile();
         }
         setIsEditing(!isEditing);
     };
 
     // handling changes in edit mode
     const handleInputChange = (field, value) => {
-        setEditData(prev => ({
+        if (field === 'phone') {
+            value = value.replace(/^(\d{3})(\d{3})(\d{4})$/, "($1)-$2-$3");
+            value = value.slice(0, 14);
+        }
+        setUserData(prev => ({
             ...prev,
             [field]: value
         }));
@@ -37,9 +156,9 @@ const Profile = () => {
 
     // promo toggle
     const handlePromoToggle = () => {
-        setEditData(prev => ({
+        setUserData(prev => ({
             ...prev,
-            acceptPromos: !prev.acceptPromos
+            promotion: !prev.promotion
         }));
     };
 
@@ -55,15 +174,75 @@ const Profile = () => {
     };
 
     // payment info edit
-    const handleEditPayment = (paymentId) => {
-        alert(`Edit payment method ${paymentId}`);
-        // more db stuff
+    const handleEditPayment = async (cardId, cardData) => {
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/card/edit/${cardId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cardData)
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+
+            setUserData(prev => {
+                let index = prev.paymentCards.findIndex(card => card._id === cardId);
+                prev.paymentCards[index] = {
+                    ...prev.paymentCards[index],
+                    ...cardData
+                }
+                return prev;
+            });
+        } catch (err) {
+            console.log('Failed to edit payment card:', err);
+            await fetchProfile();
+        }
     };
 
     // add payment method
-    const handleAddPayment = () => {
-        alert('Add new payment method');
-        // more db stuff
+    const handleAddPayment = async (cardId, cardData) => {
+        if (!cardData.lastFour || !cardData.cardType || !cardData.expirationMonth || !cardData.expirationYear) return;
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/card/add/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cardData)
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+            await fetchProfile();
+        } catch (err) {
+            console.log('Failed to add payment card:', err);
+        }
+        setAddPaymentCard(false);
+    };
+
+    // delete payment method
+    const handleDeletePayment = async cardId => {
+        if (!window.confirm("Are you sure you want to delete this payment card?")) return;
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/users/card/remove/${cardId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            else console.log(data.message);
+
+            setUserData(prev => ({
+                ...prev,
+                paymentCards: prev.paymentCards.filter(card => card._id !== cardId)
+            }));
+        } catch (err) {
+            console.log('Failed to delete payment card:', err);
+            await fetchProfile();
+        }
     };
 
     // delete account
@@ -100,30 +279,37 @@ const Profile = () => {
                                 <input
                                     className="input_field"
                                     type="text"
-                                    value={editData.firstName}
+                                    value={userData.firstName ?? ""}
                                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                                     placeholder="First Name"
                                 />
                                 <input
                                     className="input_field"
                                     type="text"
-                                    value={editData.lastName}
+                                    value={userData.lastName ?? ""}
                                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                                     placeholder="Last Name"
                                 />
                                 <input
                                     className="input_field"
                                     type="email"
-                                    value={editData.email}
+                                    value={userData.email ?? ""}
                                     onChange={(e) => handleInputChange('email', e.target.value)}
                                     placeholder="Email Address"
                                 />
                                 <input
                                     className="input_field"
                                     type="tel"
-                                    value={editData.phone}
+                                    value={userData.phone ?? ""}
                                     onChange={(e) => handleInputChange('phone', e.target.value)}
                                     placeholder="Phone Number"
+                                />
+                                <input
+                                    className="input_field"
+                                    type="text"
+                                    value={userData.address ?? ""}
+                                    onChange={(e) => handleInputChange('address', e.target.value)}
+                                    placeholder="Billing Address"
                                 />
                             </div>
                         ) : (
@@ -131,15 +317,19 @@ const Profile = () => {
                             <div>
                                 <div className="info_row">
                                     <span className="info_label">Name</span>
-                                    <span className="info_value">{userData.firstName} {userData.lastName}</span>
+                                    <span className="info_value">{userData.firstName ?? ""} {userData.lastName ?? ""}</span>
                                 </div>
                                 <div className="info_row">
                                     <span className="info_label">Email</span>
-                                    <span className="info_value">{userData.email}</span>
+                                    <span className="info_value">{userData.email ?? ""}</span>
                                 </div>
                                 <div className="info_row">
                                     <span className="info_label">Phone</span>
-                                    <span className="info_value">{userData.phone}</span>
+                                    <span className="info_value">{userData.phone ?? ""}</span>
+                                </div>
+                                <div className="info_row">
+                                    <span className="info_label">Billing Address</span>
+                                    <span className="info_value">{userData.address ?? ""}</span>
                                 </div>
                             </div>
                         )}
@@ -179,7 +369,7 @@ const Profile = () => {
                             <label className="toggle_switch">
                                 <input 
                                     type="checkbox" 
-                                    checked={isEditing ? editData.acceptPromos : userData.acceptPromos}
+                                    checked={isEditing ? userData.promotion ?? false : userData.promotion ?? false}
                                     onChange={handlePromoToggle}
                                     disabled={!isEditing}
                                 />
@@ -194,26 +384,24 @@ const Profile = () => {
                             <h3>Payment Methods</h3>
                             <button 
                                 className="action_button"
-                                onClick={handleAddPayment}
+                                onClick={() => { setAddPaymentCard(userData.paymentCards && userData.paymentCards.length < 4) }}
                             >
                                 Add New
                             </button>
                         </div>
                         <div className="payment_methods">
-                            {userData.paymentMethods.map(payment => (
-                                <div key={payment.id} className="payment_item">
-                                    <div>
-                                        <span className="info_value">{payment.type} •••• {payment.lastFour}</span>
-                                        <span className="info_label"> Expires {payment.expiry}</span>
-                                    </div>
-                                    <button 
-                                        className="secondary_button"
-                                        onClick={() => handleEditPayment(payment.id)}
-                                    >
-                                        Edit
-                                    </button>
+                            {addPaymentCard ? (
+                                <div key="new">
+                                    <PaymentCard newCard onEdit={handleAddPayment} onDelete={() => { setAddPaymentCard(false) }}/>
                                 </div>
-                            ))}
+                            ) : <></> }
+                            {userData.paymentCards ? userData.paymentCards.map(card => (
+                                <div key={card._id}>
+                                    <PaymentCard card={card} onEdit={handleEditPayment} onDelete={handleDeletePayment}/>
+                                </div>
+                            )) : (
+                                <p>No payment methods added</p>
+                            )}
                         </div>
                     </div>
 
