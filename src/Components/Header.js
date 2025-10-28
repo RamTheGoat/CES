@@ -4,6 +4,11 @@ import "./Header.css";
 
 export default function Header() {
   const isLoggedIn = false; // Replace with actual authentication logic
+
+  const handleLogout = () => {
+    window.location.href = "/login";
+  }
+
   return (
     <div className="nav-shell">
       <header className="nav-inner">
@@ -26,6 +31,22 @@ export default function Header() {
           <NavLink to={isLoggedIn ? "/profile" : "/login"} className="profile-button" aria-label="Profile" title={isLoggedIn ? "Profile" : "Login"}>
             <span className="material-symbols-outlined">account_circle</span>
           </NavLink>
+
+          {/* logout button, only show when logged in} */}
+          {isLoggedIn && (
+            <button
+              type = "button"
+              className = "logout-button"
+            
+          onClick = {handleLogout}
+            aria-label="Logout"
+            title="Logout"
+          >
+            <span
+            className="material-symbols-outlined">logout</span>
+          </button>
+        )}
+
           {/* light mode toggle button */
           <button type="button" className="light-mode-button">
             <span className="material-symbols-outlined">light_mode</span>
