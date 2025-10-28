@@ -5,6 +5,7 @@ import "./Login.css";
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -86,6 +87,15 @@ const Login = () => {
               required
             />
           </label>
+          <div className='rememberMe'>
+            <input
+              type="checkbox"
+              name='rememberMe'
+              value={rememberMe}
+              onChange={() => setRememberMe(prev => !prev)}
+            />
+            <span>Remember Me</span>
+          </div>
           <div className='forgotPassword'>
             <a href='/forgotpassword' className='fPassword'>Forgot Password?</a>
           </div>
