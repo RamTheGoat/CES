@@ -49,7 +49,7 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
     return isEditing || newCard ? (
         <div className="payment_item" id="edit">
             <input
-                className="input_field"
+                className={newCard ? "input_field" : "display_field"}
                 type={newCard ? "number" : "text"}
                 value={newCard ? cardData.cardNumber : `XXXX-XXXX-XXXX-${cardData.lastFour}`}
                 onChange={e => handleInputChange('cardNumber', e.target.value)}
@@ -138,7 +138,6 @@ const Profile = () => {
                 body: JSON.stringify({
                     firstName: userData.firstName,
                     lastName: userData.lastName,
-                    email: userData.email,
                     phone: userData.phone,
                     address: userData.address,
                     promotion: userData.promotion
@@ -334,11 +333,11 @@ const Profile = () => {
                                     placeholder="Last Name"
                                 />
                                 <input
-                                    className="input_field"
+                                    className="display_field"
                                     type="email"
                                     value={userData.email ?? ""}
-                                    onChange={(e) => handleInputChange('email', e.target.value)}
                                     placeholder="Email Address"
+                                    readOnly
                                 />
                                 <input
                                     className="input_field"
