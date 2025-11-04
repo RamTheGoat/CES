@@ -112,18 +112,25 @@ app.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate a unique verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+
     const newUser = new User({
       firstName,
       lastName,
       email,
       phone,
       password: hashedPassword,
-      isActive: false, // initially inactive
+      isActive: false,
+      verificationToken,
     });
 
     await newUser.save();
 
-    // Send confirmation email (inform user account created)
+    // ✅ Use localhost for testing
+    const verifyUrl = `http://localhost:4000/verify/${verificationToken}`;
+
+    // Send verification email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -135,15 +142,42 @@ app.post("/register", async (req, res) => {
     await transporter.sendMail({
       from: '"E-Cinema" <Jiexian0902@gmail.com>',
       to: email,
-      subject: "Registration Confirmation",
-      html: `<h2>Hello, ${firstName}</h2><p>Your account has been created. You will be active after your first login.</p>`,
+      subject: "Verify Your E-Cinema Account",
+      html: `
+        <h2>Hello, ${firstName}</h2>
+        <p>Click below to verify your account:</p>
+        <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
+      `,
     });
 
-    res.status(201).json({ message: "User registered successfully. Confirmation email sent." });
-
+    res.status(201).json({
+      message:
+        "User registered successfully. Verification email sent. Please check your inbox.",
+    });
   } catch (err) {
     console.error("Register error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+// handle verfication 
+app.get("/verify/:token", async (req, res) => {
+  try {
+    const user = await User.findOne({ verificationToken: req.params.token });
+
+    if (!user)
+      return res
+        .status(400)
+        .send("<h3>Invalid or expired verification link.</h3>");
+
+    user.isActive = true;
+    user.verificationToken = undefined;
+    await user.save();
+
+    res.send("<h3>Your account has been verified successfully! You can now log in.</h3>");
+  } catch (err) {
+    console.error("Verification error:", err);
+    res.status(500).send("<h3>Server error. Please try again later.</h3>");
   }
 });
 
@@ -203,43 +237,54 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) return res.status(401).json({ message: "Invalid password" });
-
-    // Activate user on first login
+    // 🚫 Block unverified users
     if (!user.isActive) {
-      user.isActive = true;
-      await user.save();
+      return res.status(403).json({
+        message: "Your account is not verified. Please check your email for the verification link.",
+      });
     }
 
-    // Check temporary password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+
+    // Check if using a temporary password
     if (user.mustChangePassword) {
       if (user.tempPasswordExpires && user.tempPasswordExpires < Date.now()) {
-        return res.status(401).json({ message: "Temporary password expired. Request a new one." });
+        return res
+          .status(401)
+          .json({ message: "Temporary password expired. Request a new one." });
       }
-      // Generate token for temporary login
+
       const token = jwt.sign(
-        { id: user._id, email: user.email, mustChangePassword: true, role: user.role },
-          JWT_SECRET, 
+        {
+          id: user._id,
+          email: user.email,
+          mustChangePassword: true,
+          role: user.role,
+        },
+        JWT_SECRET,
         { expiresIn: "1h" }
       );
 
       return res.status(200).json({
-        message: "Login successful — temporary password in use. Change required.",
+        message:
+          "Login successful — temporary password in use. Change required.",
         token,
-        user: { 
-          _id: user._id, 
-          email: user.email, 
+        user: {
+          _id: user._id,
+          email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
           isActive: user.isActive,
-          role: user.role
+          role: user.role,
         },
-        mustChangePassword: true
+        mustChangePassword: true,
       });
     }
 
-    // Normal login
+    // ✅ Normal verified user login
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       JWT_SECRET,
@@ -249,22 +294,22 @@ app.post("/login", async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       token,
-      user: { 
-        _id: user._id, 
-        email: user.email, 
-        firstName: user.firstName, 
+      user: {
+        _id: user._id,
+        email: user.email,
+        firstName: user.firstName,
         lastName: user.lastName,
         isActive: user.isActive,
-        role: user.role
+        role: user.role,
       },
-      mustChangePassword: false
+      mustChangePassword: false,
     });
-
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 // GET user profile
 app.get("/api/users/:userId", async (req, res) => {
