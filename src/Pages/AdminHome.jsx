@@ -55,7 +55,7 @@ export default function AdminHome() {
       <div className="edit-showtimes-container">
         <button
           className="edit-showtimes-btn"
-          onClick={() => navigate("/edit-showtimes")}
+          onClick={() => navigate("/editShowTimes")}
         >
           ✏️ Edit Showtimes
         </button>
