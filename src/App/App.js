@@ -12,6 +12,8 @@ import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import Profile from "../Pages/Profile";
 import ForgotPassword from "../Pages/ForgotPassword";
+import EditShowTimes from "../Pages/editShowTimes";
+import AdminDetails from "../Pages/adminDetails";
 
 export default function App() {
   return (
@@ -29,6 +31,8 @@ export default function App() {
           <Route path="/register" element={<Register/>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/forgotpassword" element={<ForgotPassword/>} />
+          <Route path="/editShowTimes" element={<EditShowTimes />} />
+          <Route path="/adminDetails/:id" element={<AdminDetails />} />
         </Routes>
       </main>
     </div>
