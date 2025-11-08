@@ -24,6 +24,22 @@ function Rail({ title, items }) {
   );
 }
 
+// this is editing movie stuff
+const [showDeleteMode, setShowDeleteMode] = useState(false);
+const handleDeleteMovie = async (movieId) => {
+  if (window.confirm("Delete this movie?")) {
+    try {
+      await fetch(`http://localhost:4000/api/movies/${movieId}`, {
+        method: "DELETE"
+      });
+      // will refrash the page if it updates
+      window.location.reload();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  }
+};
+
 export default function AdminHome() {
   const [movie, setMovie] = useState(null);
   const [nowPlaying, setNowPlaying] = useState([]);
@@ -61,6 +77,21 @@ export default function AdminHome() {
         </button>
       </div>
 
+      <div className="admin-actions-container">
+        <button
+          className="admin-action-btn"
+          onClick={() => navigate("/add-movie")}
+        >
+          Add Movie
+        </button>
+        <button
+          className="admin-action-btn"
+          onClick={() => setShowDeleteMode(!showDeleteMode)}
+        >
+          {showDeleteMode ? "Cancel Delete" : "Delete Movies"}
+        </button>
+      </div>
+
       {/* Featured Movie */}
       <section
         className="movie"
@@ -86,8 +117,20 @@ export default function AdminHome() {
         </div>
       </section>
 
-      <Rail title="Now Playing" items={nowPlaying} />
-      <Rail title="Coming Soon" items={comingSoon} />
+      {/* was fine as is, but updated it to add the edit features,,hopefully works */}
+      <Rail 
+        title="Now Playing" 
+        items={nowPlaying} 
+        showDeleteMode={showDeleteMode}
+        onDeleteMovie={handleDeleteMovie}
+      />
+      <Rail 
+        title="Coming Soon" 
+        items={comingSoon} 
+        showDeleteMode={showDeleteMode}
+        onDeleteMovie={handleDeleteMovie}
+      />
+
     </main>
   );
 }
