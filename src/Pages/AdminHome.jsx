@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react";
-import "./AdminHome.css";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "./AdminHome.css";
 
+// Function for movie cards
 function Rail({ title, items }) {
   return (
     <section className="rail">
-      <h2 className="rail__title">{title}</h2>
+      { title ? <h2 className="rail__title">{title}</h2> : <></> }
       <div className="rail__track">
         {items.map((m) => (
-          <Link key={m._id || m.id} to={`/details/${m._id}`} className="card-link">
+          <Link key={m._id} to={`/details/${m._id}`} className="card-link">
             <article
               className="card"
-              style={{ backgroundImage: `url(${m.posterurl})` }}
+              style={{ backgroundImage: `url(${m.posterUrl})` }}
               aria-label={m.title}
               title={m.title}
             >
@@ -20,6 +21,11 @@ function Rail({ title, items }) {
           </Link>
         ))}
       </div>
+
+      {title === "Now Playing" && (
+        <div className="times"> 
+        </div>
+      )}
     </section>
   );
 }
@@ -37,13 +43,17 @@ export default function AdminHome() {
         const moviesData = await res.json();
 
         setMovie(moviesData[0]);
-        setNowPlaying(moviesData.slice(0, 6));
+
+        setNowPlaying(moviesData.filter((m) => m.status === "Now Playing"));
+        setComingSoon(moviesData.filter((m) => m.status === "Coming Soon"));
+        /*
+        setNowPlaying(moviesData.(0, 6));
         setComingSoon(moviesData.slice(6));
+        */
       } catch (err) {
         console.error("Failed to fetch movies:", err);
       }
     };
-
     fetchMovies();
   }, []);
 
@@ -63,43 +73,20 @@ export default function AdminHome() {
     }
   };
 
+  // Render a loading state while data is being fetched
   if (!movie) return <p>Loading...</p>;
 
   return (
     <main className="home">
-      {/* BUTTON directly below header */}
-      <div className="edit-showtimes-container">
-        <button
-          className="edit-showtimes-btn"
-          onClick={() => navigate("/editShowTimes")}
-        >
-          ✏️ Edit Showtimes
-        </button>
-      </div>
-
-      <div className="admin-actions-container">
-        <button
-          className="admin-action-btn"
-          onClick={() => navigate("/add-movie")}
-        >
-          Add Movie
-        </button>
-        <button
-          className="admin-action-btn"
-          onClick={() => setShowDeleteMode(!showDeleteMode)}
-        >
-          {showDeleteMode ? "Cancel Delete" : "Delete Movies"}
-        </button>
-      </div>
-
-      {/* Featured Movie */}
+      {/* MOVIE */}
       <section
         className="movie"
-        style={{ backgroundImage: `url(${movie.posterurl})` }}
+        style={{ backgroundImage: `url(${movie.bannerImage})` }}
       >
         <div className="movie__scrim" />
         <div className="movie__content">
           <h1 className="movie__title">{movie.title}</h1>
+
           <p className="movie__summary">{movie.synopsis}</p>
 
           <div className="movie__meta">
@@ -107,30 +94,58 @@ export default function AdminHome() {
               {movie.tags?.map((t) => (
                 <span key={t} className="tag">{t}</span>
               ))}
-              {!movie.tags && <span className="tag">{movie.genre}</span>}
+
+              {/* Or, since your DB has "genre", just show that */}
+              {!movie.tags && <span className="tag">{movie.genre.join("/")}</span>}
             </div>
             <div className="rating">
               <span className="stars">★★★★★</span>
-              <span className="rating__num">{movie.reviews}</span>
+              <div className="rating__num">
+                <p>IMDb: {movie.review?.IMDb}</p>
+                <p>Rotten Tomatoes: {movie.review?.RottenTomatoes}</p>
+                <p>Letterboxd: {movie.review?.Letterboxd}</p>
+              </div>
             </div>
+          </div>
+
+          <div className="movie__actions">
+            <button className="btn btn--primary">Watch Movie</button>
+              <button className="btn btn--ghost">More Info</button>
           </div>
         </div>
       </section>
 
-      {/* was fine as is, but updated it to add the edit features,,hopefully works */}
-      <Rail 
-        title="Now Playing" 
-        items={nowPlaying} 
-        showDeleteMode={showDeleteMode}
-        onDeleteMovie={handleDeleteMovie}
-      />
-      <Rail 
-        title="Coming Soon" 
-        items={comingSoon} 
-        showDeleteMode={showDeleteMode}
-        onDeleteMovie={handleDeleteMovie}
-      />
+      {/* ADMIN BUTTONS */}
+      <div className="admin-actions-container">
+        <h2 className="rail__title">Now Playing</h2>
+        <div>
+          <button
+            className="admin-action-btn"
+            onClick={() => navigate("/add-movie")}
+          >
+            Add Movie
+          </button>
+          <button
+            className="admin-action-btn"
+            onClick={() => setShowDeleteMode(!showDeleteMode)}
+          >
+            {showDeleteMode ? "Cancel Delete" : "Delete Movies"}
+          </button>
+        </div>
+      </div>
 
+      {/* RAILS */}
+      <Rail
+        items={nowPlaying}
+        showDeleteMode={showDeleteMode}
+        onDeleteMovie={handleDeleteMovie}
+      />
+      <Rail
+        title="Coming Soon"
+        items={comingSoon}
+        showDeleteMode={showDeleteMode}
+        onDeleteMovie={handleDeleteMovie}
+      />
     </main>
   );
 }

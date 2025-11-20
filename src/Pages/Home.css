@@ -12,6 +12,7 @@
 /* Homepage Basics */
 .home{
   min-height: 100svh;
+  max-width: 100%;
   width: 100vw;  
   background: var(--bg); /*might want to change to black or gradient later*/
   /*background: radial-gradient(1200px 600px at 20% 0%, #11183a 0%, var(--bg) 40%, var(--bg-2) 100%);*/
