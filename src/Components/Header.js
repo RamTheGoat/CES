@@ -10,7 +10,6 @@ export default function Header() {
   const token = localStorage.getItem("token");
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const isLoggedIn = !!token && !!storedUser;
-  const role = storedUser?.role;
 
   // Handle logout and clear session
   const handleLogout = () => {
@@ -26,7 +25,7 @@ export default function Header() {
       <header className="nav-inner">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />        
         <nav>
-          <NavLink to={!isLoggedIn ? "/" : role === "admin" ? "/adminHome" : "/"} end>Home</NavLink>
+          <NavLink to={"/"} end>Home</NavLink>
           <NavLink to="/browse">Browse</NavLink>
           <NavLink to="/pricing">Pricing</NavLink>
           <NavLink to="/faq">FAQ</NavLink>

@@ -14,6 +14,7 @@ import Profile from "../Pages/Profile";
 import ForgotPassword from "../Pages/ForgotPassword";
 import EditShowTimes from "../Pages/editShowTimes";
 import AdminDetails from "../Pages/adminDetails";
+import Admin from "../Components/AdminElement";
 
 export default function App() {
   return (
@@ -21,10 +22,11 @@ export default function App() {
       <Header/>
       <main className="App-main">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/adminHome" element={<AdminHome />} />
+          <Route path="/" element={<Admin element={<AdminHome />} />}>
+          <Route path="/" element={<Home />} /></Route>
           <Route path="/browse" element={<Browse />} />
-          <Route path="/details/:id" element={<Details />} />
+          <Route path="/details/:id" element={<Admin element={<AdminDetails />} />}>
+          <Route path="/details/:id" element={<Details />} /></Route>
           <Route path="/search" element={<Search />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/login" element={<Login/>} />
@@ -32,7 +34,6 @@ export default function App() {
           <Route path="/profile" element={<Profile/>} />
           <Route path="/forgotpassword" element={<ForgotPassword/>} />
           <Route path="/editShowTimes" element={<EditShowTimes />} />
-          <Route path="/adminDetails/:id" element={<AdminDetails />} />
         </Routes>
       </main>
     </div>

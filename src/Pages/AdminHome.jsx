@@ -24,22 +24,6 @@ function Rail({ title, items }) {
   );
 }
 
-// this is editing movie stuff
-const [showDeleteMode, setShowDeleteMode] = useState(false);
-const handleDeleteMovie = async (movieId) => {
-  if (window.confirm("Delete this movie?")) {
-    try {
-      await fetch(`http://localhost:4000/api/movies/${movieId}`, {
-        method: "DELETE"
-      });
-      // will refrash the page if it updates
-      window.location.reload();
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
-  }
-};
-
 export default function AdminHome() {
   const [movie, setMovie] = useState(null);
   const [nowPlaying, setNowPlaying] = useState([]);
@@ -62,6 +46,22 @@ export default function AdminHome() {
 
     fetchMovies();
   }, []);
+
+  // this is editing movie stuff
+  const [showDeleteMode, setShowDeleteMode] = useState(false);
+  const handleDeleteMovie = async (movieId) => {
+    if (window.confirm("Delete this movie?")) {
+      try {
+        await fetch(`http://localhost:4000/api/movies/${movieId}`, {
+          method: "DELETE"
+        });
+        // will refrash the page if it updates
+        window.location.reload();
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
+    }
+  };
 
   if (!movie) return <p>Loading...</p>;
 
