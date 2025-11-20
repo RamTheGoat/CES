@@ -1,8 +1,8 @@
 // a lot of this file is still empty bc it has to connect to the db
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-export default function AddMovie() {
+export default function AddMovies() {
   const [title, setTitle] = useState('');
   const [genre, setGenre] = useState('');
   const [image, setImage] = useState('');

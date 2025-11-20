@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import "./adminDetails.css";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import "./AdminDetails.css";
 
 // Generate about a week of days to choose from
 const getNextSevenDays = () => {
@@ -24,7 +24,7 @@ const defaultShowtimes = {
   6: ["11:00 AM", "2:00 PM", "5:00 PM", "8:00 PM"]
 };
 
-export default function Details() {
+export default function AdminDetails() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [showtimes, setShowtimes] = useState(defaultShowtimes);

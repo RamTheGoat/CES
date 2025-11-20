@@ -12,8 +12,8 @@ import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import Profile from "../Pages/Profile";
 import ForgotPassword from "../Pages/ForgotPassword";
-import EditShowTimes from "../Pages/editShowTimes";
-import AdminDetails from "../Pages/adminDetails";
+import EditShowTimes from "../Pages/EditShowTimes";
+import AdminDetails from "../Pages/AdminDetails";
 import Admin from "../Components/AdminElement";
 
 export default function App() {

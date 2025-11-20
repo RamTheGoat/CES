@@ -1,11 +1,9 @@
-import React from 'react';
 import { useState, useEffect } from 'react';
-import './Search.css';
 import { Link } from 'react-router-dom';
-// import { movies } from '../Components/movies.js';
+import './EditShowTimes.css';
 
-function Search() {
-  const [query, setQuery] = React.useState("");
+export default function EditShowTimes() {
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [filteredMovies, setFilteredMovies] = useState([]);
 
@@ -71,5 +69,3 @@ function Search() {
     </div>
   );
 }
-
-export default Search;
