@@ -94,6 +94,16 @@ app.delete("/api/movies/:id", async (req, res) => {
   }
 });
 
+app.post("/api/movies", async (req, res) => {
+  try {
+    const newMovie = await Movie.create(req.body);
+    if (!newMovie) throw new Error("Failed to create the movie");
+    else res.status(200).json({ message: "Successfully added movie", movie: newMovie });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/api/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find()
