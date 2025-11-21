@@ -26,21 +26,21 @@ export default function AddMovie() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title,
-          genre,
-          cast,
-          producer,
-          director,
-          synopsis,
+          title: title,
+          genre: genre.split(",").map(g => g.trim()),
+          cast: cast.split(",").map(c => c.trim()),
+          producer: producer.split(",").map(p => p.trim()),
+          director: director.split(",").map(d => d.trim()),
+          synopsis: synopsis,
           review: {
-              IMDb: IMDBReview,
-              Letterboxd: letterboxReview,
-              RottenTomatoes: rottenTomatoesReview
+              IMDb: `${IMDBReview}/10`,
+              Letterboxd: `${letterboxReview}/5`,
+              RottenTomatoes: `${rottenTomatoesReview}%`
           },
-          trailerUrl,
-          posterUrl,
-          bannerUrl,
-          status
+          trailerUrl: trailerUrl,
+          posterUrl: posterUrl,
+          bannerImage: bannerUrl,
+          status: status
         })
       });
       navigate("/");
@@ -136,6 +136,7 @@ export default function AddMovie() {
           onChange={e => setIMDBReview(e.target.value)}
           style={{gridColumn: "1 / span 1"}}
           className="movie-form-input"
+          step={0.1}
         />
         <input
           type="number"
@@ -144,6 +145,7 @@ export default function AddMovie() {
           onChange={e => setLetterboxReview(e.target.value)}
           style={{gridColumn: "2 / span 2"}}
           className="movie-form-input"
+          step={0.1}
         />
         <input
           type="number"
@@ -152,6 +154,7 @@ export default function AddMovie() {
           onChange={e => setRottenTomatoesReview(e.target.value)}
           style={{gridColumn: "4 / span 1"}}
           className="movie-form-input"
+          step={0.1}
         />
         <select
           value={rating}
