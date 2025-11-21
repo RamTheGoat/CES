@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-export default function AddMovies() {
+export default function AddMovie() {
   const [title, setTitle] = useState('');
   const [genre, setGenre] = useState('');
   const [image, setImage] = useState('');
@@ -20,7 +20,7 @@ export default function AddMovies() {
           posterurl: image
         })
       });
-      navigate("/admin");
+      navigate("/");
     } catch (err) {
       console.error("Add movie failed:", err);
     }

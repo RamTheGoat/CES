@@ -14,6 +14,7 @@ import Profile from "../Pages/Profile";
 import ForgotPassword from "../Pages/ForgotPassword";
 import EditShowTimes from "../Pages/EditShowTimes";
 import AdminDetails from "../Pages/AdminDetails";
+import AddMovie from "../Pages/AddMovie";
 import Admin from "../Components/AdminElement";
 
 export default function App() {
@@ -33,7 +34,8 @@ export default function App() {
           <Route path="/register" element={<Register/>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/forgotpassword" element={<ForgotPassword/>} />
-          <Route path="/editShowTimes" element={<EditShowTimes />} />
+          <Route path="/editShowTimes" element={<Admin element={<EditShowTimes/>} redirect/>} />
+          <Route path="/addMovie" element={<Admin element={<AddMovie/>} redirect/>} />
         </Routes>
       </main>
     </div>

@@ -130,7 +130,7 @@ export default function AdminHome() {
         <div>
           <button
             className="admin-action-btn"
-            onClick={() => navigate("/add-movie")}
+            onClick={() => navigate("/addMovie")}
           >
             Add Movie
           </button>

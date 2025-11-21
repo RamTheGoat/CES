@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
-export default function Admin(props) {
+export default function AdminElement(props) {
     const [user, setUser] = useState({});
+    const navigate = useNavigate();
 
     useEffect(() => {
         setUser(JSON.parse(localStorage.getItem("user")) ?? {});
     }, []);
 
-    return user.role === "admin" ? props.element : <Outlet/>;
+    if (props.redirect && user.role !== "admin") navigate("/");
+    else return user.role === "admin" ? props.element : <Outlet/>;
 }
