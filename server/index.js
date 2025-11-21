@@ -84,6 +84,16 @@ app.get("/api/movies/:id", async (req, res) => {
   }
 });
 
+app.delete("/api/movies/:id", async (req, res) => {
+  try {
+    const movie = await Movie.findByIdAndDelete(req.params.id);
+    if (!movie) return res.status(404).json({ error: "Movie not found" });
+    res.status(200).json({ message: "Successfully deleted movie" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/api/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find()
