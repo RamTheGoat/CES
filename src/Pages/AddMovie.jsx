@@ -22,7 +22,7 @@ export default function AddMovie() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch("http://localhost:4000/api/movies", { //gotta double check this later
+      const res = await fetch("http://localhost:4000/api/movies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -43,9 +43,14 @@ export default function AddMovie() {
           status: status
         })
       });
-      navigate("/");
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      else console.log(data.message);
+
+      navigate(`/details/${data.movie._id}`);
     } catch (err) {
-      console.error("Add movie failed:", err);
+      console.error("Add movie failed:", err.message);
     }
   };
 
