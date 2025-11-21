@@ -58,6 +58,7 @@ export default function AddMovie() {
           placeholder="Movie Title"
           value={title}
           onChange={e => setTitle(e.target.value)}
+          style={{gridColumn: "1 / span 4"}}
           className="movie-form-input"
           required
         />
@@ -66,6 +67,7 @@ export default function AddMovie() {
           placeholder="Genre(s)"
           value={genre}
           onChange={e => setGenre(e.target.value)}
+          style={{gridColumn: "1 / span 4"}}
           className="movie-form-input"
           required
         />
@@ -74,6 +76,7 @@ export default function AddMovie() {
           placeholder="Cast"
           value={cast}
           onChange={e => setCast(e.target.value)}
+          style={{gridColumn: "1 / span 4"}}
           className="movie-form-input"
         />
         <input
@@ -81,6 +84,7 @@ export default function AddMovie() {
           placeholder="Producer(s)"
           value={producer}
           onChange={e => setProducer(e.target.value)}
+          style={{gridColumn: "1 / span 2"}}
           className="movie-form-input"
         />
         <input
@@ -88,6 +92,7 @@ export default function AddMovie() {
           placeholder="Director(s)"
           value={director}
           onChange={e => setDirector(e.target.value)}
+          style={{gridColumn: "3 / span 2"}}
           className="movie-form-input"
         />
         <textarea
@@ -96,6 +101,7 @@ export default function AddMovie() {
           rows={5}
           maxLength={250}
           onChange={e => setSynopsis(e.target.value)}
+          style={{gridColumn: "1 / span 4"}}
           className="movie-form-input"
           required
         />
@@ -104,6 +110,7 @@ export default function AddMovie() {
           placeholder="Trailer Video URL"
           value={trailerUrl}
           onChange={e => setTrailerUrl(e.target.value)}
+          style={{gridColumn: "1 / span 1"}}
           className="movie-form-input"
         />
         <input
@@ -111,6 +118,7 @@ export default function AddMovie() {
           placeholder="Poster Image URL"
           value={posterUrl}
           onChange={e => setPosterUrl(e.target.value)}
+          style={{gridColumn: "2 / span 2"}}
           className="movie-form-input"
         />
         <input
@@ -118,6 +126,7 @@ export default function AddMovie() {
           placeholder="Banner Image URL"
           value={bannerUrl}
           onChange={e => setBannerUrl(e.target.value)}
+          style={{gridColumn: "4 / span 1"}}
           className="movie-form-input"
         />
         <input
@@ -125,6 +134,7 @@ export default function AddMovie() {
           placeholder="IMBd Review Score"
           value={IMDBReview}
           onChange={e => setIMDBReview(e.target.value)}
+          style={{gridColumn: "1 / span 1"}}
           className="movie-form-input"
         />
         <input
@@ -132,6 +142,7 @@ export default function AddMovie() {
           placeholder="Letterboxd Review Score"
           value={letterboxReview}
           onChange={e => setLetterboxReview(e.target.value)}
+          style={{gridColumn: "2 / span 2"}}
           className="movie-form-input"
         />
         <input
@@ -139,12 +150,14 @@ export default function AddMovie() {
           placeholder="Rotten Tomatoes Review Score"
           value={rottenTomatoesReview}
           onChange={e => setRottenTomatoesReview(e.target.value)}
+          style={{gridColumn: "4 / span 1"}}
           className="movie-form-input"
         />
         <select
-          className="movie-form-select"
           value={rating}
           onChange={e => setRating(e.target.value)}
+          style={{gridColumn: "1 / span 2"}}
+          className="movie-form-select"
           required
         >
           <option value="" disabled>MPAA Rating</option>
@@ -154,16 +167,21 @@ export default function AddMovie() {
           <option value="R">R</option>
         </select>
         <select
-          className="movie-form-select"
           value={status}
           onChange={e => setStatus(e.target.value)}
+          style={{gridColumn: "3 / span 2"}}
+          className="movie-form-select"
           required
         >
           <option value="" disabled>Movie Status</option>
           <option value="Now Playing">Now Playing</option>
           <option value="Coming Soon">Coming Soon</option>
         </select>
-        <button type="submit" className="movie-form-submit">
+        <button
+          type="submit"
+          className="movie-form-submit"
+          style={{gridColumn: "2 / span 2"}}
+        >
           Add Movie
         </button>
       </form>
