@@ -163,90 +163,87 @@ export default function AdminDetails() {
             )}
           </div>
         </section>
-        </div>
 
-      {/* Now Playing*/}
-      {isNowPlaying && (
-        <section className="details_section">
-          <div className="details_section-header">
+        {/* Now Playing*/}
+        {isNowPlaying && (
+          <section className="details_section">
             <h2 className="details_section-title">Showtimes</h2>
-          </div>
 
-          {/* Day selection */}
-          <div className="details_days">
-            {days.map((day, index) => (
-              <button
-                key={index}
-                className={`details_day-btn ${selectedDay === index ? 'details_day-btn--active' : ''}`}
-                onClick={() => setSelectedDay(index)}
-              >
-                {day}
-              </button>
-            ))}
-          </div>
-
-          {/* New showtimes */}
-          {isEditing && (
-            <div className="details_add-showtime">
-              <input
-                type="text"
-                value={newTime}
-                onChange={(e) => setNewTime(e.target.value)}
-                placeholder="Enter time (e.g., 7:00 PM)"
-                className="details_time-input"
-              />
-              <button onClick={addShowtime} className="details_add-btn">
-                Add Time
-              </button>
-            </div>
-          )}
-
-          {/* Time selection */}
-          <div className="details_times">
-            {showtimes[selectedDay] && showtimes[selectedDay].map((time, index) => (
-              <div key={index} className="details_time-container">
-                {isEditing ? (
-                  <>
-                    <span className="details_time-text">{time}</span>
-                    <button
-                      className="details_remove-btn"
-                      onClick={() => removeShowtime(index)}
-                    >
-                      ×
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className="details_time-btn"
-                    onClick={() => navigate("/booking", {
-                      state: {
-                        movieTitle: movie.title,
-                        showtime: time,
-                        date: days[selectedDay]
-                      }
-                    })}
-                  >
-                    {time}
-                  </button>
-                )}
-              </div>
-            ))}
-            
-            {(!showtimes[selectedDay] || showtimes[selectedDay].length === 0) && (
-              <p className="details_no-showtimes">No showtimes available for this day</p>
-            )}
-          </div>
-
-          <div>
-              <button 
-                className="details_edit-btn"
-                onClick={() => setIsEditing(!isEditing)}
-              >
-                {isEditing ? 'Done Editing' : 'Edit Showtimes'}
+            {/* Day selection */}
+            <div className="details_days">
+              {days.map((day, index) => (
+                <button
+                  key={index}
+                  className={`details_day-btn ${selectedDay === index ? 'details_day-btn--active' : ''}`}
+                  onClick={() => setSelectedDay(index)}
+                >
+                  {day}
                 </button>
+              ))}
             </div>
+
+            {/* New showtimes */}
+            {isEditing && (
+              <div className="details_add-showtime">
+                <input
+                  type="text"
+                  value={newTime}
+                  onChange={(e) => setNewTime(e.target.value)}
+                  placeholder="Enter time (e.g., 7:00 PM)"
+                  className="details_time-input"
+                />
+                <button onClick={addShowtime} className="details_add-btn">
+                  Add Time
+                </button>
+              </div>
+            )}
+
+            {/* Time selection */}
+            <div className="details_times">
+              {showtimes[selectedDay] && showtimes[selectedDay].map((time, index) => (
+                <div key={index} className="details_time-container">
+                  {isEditing ? (
+                    <>
+                      <span className="details_time-text">{time}</span>
+                      <button
+                        className="details_remove-btn"
+                        onClick={() => removeShowtime(index)}
+                      >
+                        <span className="material-symbols-outlined">delete</span>
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="details_time-btn"
+                      onClick={() => navigate("/booking", {
+                        state: {
+                          movieTitle: movie.title,
+                          showtime: time,
+                          date: days[selectedDay]
+                        }
+                      })}
+                    >
+                      {time}
+                    </button>
+                  )}
+                </div>
+              ))}
+              
+              {(!showtimes[selectedDay] || showtimes[selectedDay].length === 0) && (
+                <p className="details_no-showtimes">No showtimes available for this day</p>
+              )}
+            </div>
+          </section>
+        )}
+        <section className="details_edit-section">
+          <button 
+            className="details_edit-btn"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {isEditing ? 'Done Editing' : 'Edit Showtimes'}
+          </button>
         </section>
-      )}
+      </div>
     </main>
   );
 }
