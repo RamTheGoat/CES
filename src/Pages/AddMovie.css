@@ -24,6 +24,24 @@
   width: 100%;
   padding: 10px;
   margin: 10px 0;
+  font-size: 14px;
+}
+
+.movie-form-select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.movie-form-select,
+.movie-form-select option {
+  color: black;
+}
+
+.movie-form-select:invalid,
+.movie-form-select option[value=""] {
+  color: gray;
 }
 
 .movie-form-submit {

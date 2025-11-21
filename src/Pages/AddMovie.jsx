@@ -5,7 +5,18 @@ import "./AddMovie.css";
 export default function AddMovie() {
   const [title, setTitle] = useState('');
   const [genre, setGenre] = useState('');
-  const [image, setImage] = useState('');
+  const [cast, setCast] = useState('');
+  const [producer, setProducer] = useState('');
+  const [director, setDirector] = useState('');
+  const [rating, setRating] = useState('');
+  const [synopsis, setSynopsis] = useState('');
+  const [IMDBReview, setIMDBReview] = useState('');
+  const [letterboxReview, setLetterboxReview] = useState('');
+  const [rottenTomatoesReview, setRottenTomatoesReview] = useState('');
+  const [trailerUrl, setTrailerUrl] = useState('');
+  const [posterUrl, setPosterUrl] = useState('');
+  const [bannerUrl, setBannerUrl] = useState('');
+  const [status, setStatus] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -15,9 +26,21 @@ export default function AddMovie() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: title,
-          genre: genre,
-          posterurl: image
+          title,
+          genre,
+          cast,
+          producer,
+          director,
+          synopsis,
+          review: {
+              IMDb: IMDBReview,
+              Letterboxd: letterboxReview,
+              RottenTomatoes: rottenTomatoesReview
+          },
+          trailerUrl,
+          posterUrl,
+          bannerUrl,
+          status
         })
       });
       navigate("/");
@@ -34,24 +57,112 @@ export default function AddMovie() {
           type="text"
           placeholder="Movie Title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={e => setTitle(e.target.value)}
           className="movie-form-input"
           required
         />
         <input
           type="text"
-          placeholder="Genre"
+          placeholder="Genre(s)"
           value={genre}
-          onChange={(e) => setGenre(e.target.value)}
+          onChange={e => setGenre(e.target.value)}
+          className="movie-form-input"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Cast"
+          value={cast}
+          onChange={e => setCast(e.target.value)}
           className="movie-form-input"
         />
         <input
-          type="url"
-          placeholder="Image URL"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
+          type="text"
+          placeholder="Producer(s)"
+          value={producer}
+          onChange={e => setProducer(e.target.value)}
           className="movie-form-input"
         />
+        <input
+          type="text"
+          placeholder="Director(s)"
+          value={director}
+          onChange={e => setDirector(e.target.value)}
+          className="movie-form-input"
+        />
+        <textarea
+          placeholder="Movie Synopsis"
+          value={synopsis}
+          rows={5}
+          maxLength={250}
+          onChange={e => setSynopsis(e.target.value)}
+          className="movie-form-input"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Trailer Video URL"
+          value={trailerUrl}
+          onChange={e => setTrailerUrl(e.target.value)}
+          className="movie-form-input"
+        />
+        <input
+          type="text"
+          placeholder="Poster Image URL"
+          value={posterUrl}
+          onChange={e => setPosterUrl(e.target.value)}
+          className="movie-form-input"
+        />
+        <input
+          type="text"
+          placeholder="Banner Image URL"
+          value={bannerUrl}
+          onChange={e => setBannerUrl(e.target.value)}
+          className="movie-form-input"
+        />
+        <input
+          type="number"
+          placeholder="IMBd Review Score"
+          value={IMDBReview}
+          onChange={e => setIMDBReview(e.target.value)}
+          className="movie-form-input"
+        />
+        <input
+          type="number"
+          placeholder="Letterboxd Review Score"
+          value={letterboxReview}
+          onChange={e => setLetterboxReview(e.target.value)}
+          className="movie-form-input"
+        />
+        <input
+          type="number"
+          placeholder="Rotten Tomatoes Review Score"
+          value={rottenTomatoesReview}
+          onChange={e => setRottenTomatoesReview(e.target.value)}
+          className="movie-form-input"
+        />
+        <select
+          className="movie-form-select"
+          value={rating}
+          onChange={e => setRating(e.target.value)}
+          required
+        >
+          <option value="" disabled>MPAA Rating</option>
+          <option value="G">G</option>
+          <option value="PG">PG</option>
+          <option value="PG-13">PG-13</option>
+          <option value="R">R</option>
+        </select>
+        <select
+          className="movie-form-select"
+          value={status}
+          onChange={e => setStatus(e.target.value)}
+          required
+        >
+          <option value="" disabled>Movie Status</option>
+          <option value="Now Playing">Now Playing</option>
+          <option value="Coming Soon">Coming Soon</option>
+        </select>
         <button type="submit" className="movie-form-submit">
           Add Movie
         </button>
