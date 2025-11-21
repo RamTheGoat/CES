@@ -10,7 +10,7 @@ function Rail({ title, items }) {
       <h2 className="rail__title">{title}</h2>
       <div className="rail__track">
         {items.map((m) => (
-          <Link ey={m.id} to={`/details/${m._id}`} className="card-link">
+          <Link key={m._id} to={`/details/${m._id}`} className="card-link">
             <article
               className="card"
               style={{ backgroundImage: `url(${m.posterUrl})` }}

@@ -1,0 +1,80 @@
+:root {
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+.add-movie {
+  padding: 5%;
+  background: var(--bg);
+  color: white;
+  min-height: 100vh;
+}
+
+.add-movie-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  column-gap: 5px;
+  row-gap: 20px;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 30px;
+  background: var(--card);
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+
+.movie-form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  resize: none;
+}
+
+.movie-form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.movie-form-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.movie-form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.movie-form-select,
+.movie-form-select option {
+  color: var(--text);
+}
+
+.movie-form-select:invalid,
+.movie-form-select option[value=""] {
+  color: gray;
+}
+
+.movie-form-submit {
+  background: linear-gradient(90deg, #8b14d1, #cc12cc);
+  color: white;
+  margin-top: 10px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}

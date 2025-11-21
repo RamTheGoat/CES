@@ -44,7 +44,7 @@ const Login = () => {
 
         // ✅ Normal role-based navigation
         if (data.user.role === "admin") {
-        navigate("/adminHome");
+        navigate("/");
         return;
         }
 

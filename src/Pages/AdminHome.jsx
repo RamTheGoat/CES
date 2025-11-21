@@ -1,44 +1,40 @@
-import React, { useState, useEffect } from "react";
-import "./AdminHome.css";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "./AdminHome.css";
 
-function Rail({ title, items }) {
+// Function for movie cards
+function Rail({ title, items, showDeleteMode, onDeleteMovie }) {
   return (
     <section className="rail">
-      <h2 className="rail__title">{title}</h2>
+      { title ? <h2 className="rail__title">{title}</h2> : <></> }
       <div className="rail__track">
-        {items.map((m) => (
-          <Link key={m._id || m.id} to={`/details/${m._id}`} className="card-link">
+        {items.map((m) => {
+          const link = showDeleteMode ? null : `/details/${m._id}`;
+          const action = () => { if (showDeleteMode) onDeleteMovie(m._id) };
+          const classes = `card__fade${showDeleteMode ? " card-delete" : ""}`;
+
+          return <Link key={m._id} to={link} onClick={action} className="card-link">
             <article
               className="card"
-              style={{ backgroundImage: `url(${m.posterurl})` }}
+              style={{ backgroundImage: `url(${m.posterUrl})` }}
               aria-label={m.title}
               title={m.title}
             >
-              <div className="card__fade" />
+              <div className={classes}>
+                <span className="material-symbols-outlined">delete</span>
+              </div>
             </article>
           </Link>
-        ))}
+        })}
       </div>
+
+      {title === "Now Playing" && (
+        <div className="times"> 
+        </div>
+      )}
     </section>
   );
 }
-
-// this is editing movie stuff
-const [showDeleteMode, setShowDeleteMode] = useState(false);
-const handleDeleteMovie = async (movieId) => {
-  if (window.confirm("Delete this movie?")) {
-    try {
-      await fetch(`http://localhost:4000/api/movies/${movieId}`, {
-        method: "DELETE"
-      });
-      // will refrash the page if it updates
-      window.location.reload();
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
-  }
-};
 
 export default function AdminHome() {
   const [movie, setMovie] = useState(null);
@@ -53,53 +49,53 @@ export default function AdminHome() {
         const moviesData = await res.json();
 
         setMovie(moviesData[0]);
-        setNowPlaying(moviesData.slice(0, 6));
-        setComingSoon(moviesData.slice(6));
+
+        setNowPlaying(moviesData.filter((m) => m.status === "Now Playing"));
+        setComingSoon(moviesData.filter((m) => m.status === "Coming Soon"));
       } catch (err) {
         console.error("Failed to fetch movies:", err);
       }
     };
-
     fetchMovies();
   }, []);
 
+  // this is editing movie stuff
+  const [showDeleteMode, setShowDeleteMode] = useState(false);
+  const handleDeleteMovie = async (movieId) => {
+    if (window.confirm("Delete this movie?")) {
+      try {
+        const res = await fetch(`http://localhost:4000/api/movies/${movieId}`, {
+          method: "DELETE",
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        else console.log(data.message);
+
+        // Update local data
+        setNowPlaying(prev => prev.filter(m => m._id !== movieId));
+        setComingSoon(prev => prev.filter(m => m._id !== movieId));
+        setMovie(nowPlaying[0]);
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
+    }
+  };
+
+  // Render a loading state while data is being fetched
   if (!movie) return <p>Loading...</p>;
 
   return (
     <main className="home">
-      {/* BUTTON directly below header */}
-      <div className="edit-showtimes-container">
-        <button
-          className="edit-showtimes-btn"
-          onClick={() => navigate("/editShowTimes")}
-        >
-          ✏️ Edit Showtimes
-        </button>
-      </div>
-
-      <div className="admin-actions-container">
-        <button
-          className="admin-action-btn"
-          onClick={() => navigate("/add-movie")}
-        >
-          Add Movie
-        </button>
-        <button
-          className="admin-action-btn"
-          onClick={() => setShowDeleteMode(!showDeleteMode)}
-        >
-          {showDeleteMode ? "Cancel Delete" : "Delete Movies"}
-        </button>
-      </div>
-
-      {/* Featured Movie */}
+      {/* MOVIE */}
       <section
         className="movie"
-        style={{ backgroundImage: `url(${movie.posterurl})` }}
+        style={{ backgroundImage: `url(${movie.bannerImage})` }}
       >
         <div className="movie__scrim" />
         <div className="movie__content">
           <h1 className="movie__title">{movie.title}</h1>
+
           <p className="movie__summary">{movie.synopsis}</p>
 
           <div className="movie__meta">
@@ -107,30 +103,58 @@ export default function AdminHome() {
               {movie.tags?.map((t) => (
                 <span key={t} className="tag">{t}</span>
               ))}
-              {!movie.tags && <span className="tag">{movie.genre}</span>}
+
+              {/* Or, since your DB has "genre", just show that */}
+              {!movie.tags && <span className="tag">{movie.genre.join("/")}</span>}
             </div>
             <div className="rating">
               <span className="stars">★★★★★</span>
-              <span className="rating__num">{movie.reviews}</span>
+              <div className="rating__num">
+                <p>IMDb: {movie.review?.IMDb}</p>
+                <p>Rotten Tomatoes: {movie.review?.RottenTomatoes}</p>
+                <p>Letterboxd: {movie.review?.Letterboxd}</p>
+              </div>
             </div>
+          </div>
+
+          <div className="movie__actions">
+            <button className="btn btn--primary">Watch Movie</button>
+              <button className="btn btn--ghost">More Info</button>
           </div>
         </div>
       </section>
 
-      {/* was fine as is, but updated it to add the edit features,,hopefully works */}
-      <Rail 
-        title="Now Playing" 
-        items={nowPlaying} 
-        showDeleteMode={showDeleteMode}
-        onDeleteMovie={handleDeleteMovie}
-      />
-      <Rail 
-        title="Coming Soon" 
-        items={comingSoon} 
-        showDeleteMode={showDeleteMode}
-        onDeleteMovie={handleDeleteMovie}
-      />
+      {/* ADMIN BUTTONS */}
+      <div className="admin-actions-container">
+        <h2 className="rail__title">Now Playing</h2>
+        <div>
+          <button
+            className="admin-action-btn"
+            onClick={() => navigate("/addMovie")}
+          >
+            Add Movie
+          </button>
+          <button
+            className="admin-action-btn"
+            onClick={() => setShowDeleteMode(!showDeleteMode)}
+          >
+            {showDeleteMode ? "Cancel Delete" : "Delete Movie"}
+          </button>
+        </div>
+      </div>
 
+      {/* RAILS */}
+      <Rail
+        items={nowPlaying}
+        showDeleteMode={showDeleteMode}
+        onDeleteMovie={handleDeleteMovie}
+      />
+      <Rail
+        title="Coming Soon"
+        items={comingSoon}
+        showDeleteMode={showDeleteMode}
+        onDeleteMovie={handleDeleteMovie}
+      />
     </main>
   );
 }

@@ -84,6 +84,26 @@ app.get("/api/movies/:id", async (req, res) => {
   }
 });
 
+app.delete("/api/movies/:id", async (req, res) => {
+  try {
+    const movie = await Movie.findByIdAndDelete(req.params.id);
+    if (!movie) return res.status(404).json({ error: "Movie not found" });
+    res.status(200).json({ message: "Successfully deleted movie" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/movies", async (req, res) => {
+  try {
+    const newMovie = await Movie.create(req.body);
+    if (!newMovie) throw new Error("Failed to create the movie");
+    else res.status(200).json({ message: "Successfully added movie", movie: newMovie });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/api/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find()
