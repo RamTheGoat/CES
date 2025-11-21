@@ -3,23 +3,29 @@ import { Link, useNavigate } from "react-router-dom";
 import "./AdminHome.css";
 
 // Function for movie cards
-function Rail({ title, items }) {
+function Rail({ title, items, showDeleteMode, onDeleteMovie }) {
   return (
     <section className="rail">
       { title ? <h2 className="rail__title">{title}</h2> : <></> }
       <div className="rail__track">
-        {items.map((m) => (
-          <Link key={m._id} to={`/details/${m._id}`} className="card-link">
+        {items.map((m) => {
+          const link = showDeleteMode ? null : `/details/${m._id}`;
+          const action = () => { if (showDeleteMode) onDeleteMovie(m._id) };
+          const classes = `card__fade${showDeleteMode ? " card-delete" : ""}`;
+
+          return <Link key={m._id} to={link} onClick={action} className="card-link">
             <article
               className="card"
               style={{ backgroundImage: `url(${m.posterUrl})` }}
               aria-label={m.title}
               title={m.title}
             >
-              <div className="card__fade" />
+              <div className={classes}>
+                <span className="material-symbols-outlined">delete</span>
+              </div>
             </article>
           </Link>
-        ))}
+        })}
       </div>
 
       {title === "Now Playing" && (
@@ -46,10 +52,6 @@ export default function AdminHome() {
 
         setNowPlaying(moviesData.filter((m) => m.status === "Now Playing"));
         setComingSoon(moviesData.filter((m) => m.status === "Coming Soon"));
-        /*
-        setNowPlaying(moviesData.(0, 6));
-        setComingSoon(moviesData.slice(6));
-        */
       } catch (err) {
         console.error("Failed to fetch movies:", err);
       }
@@ -62,11 +64,18 @@ export default function AdminHome() {
   const handleDeleteMovie = async (movieId) => {
     if (window.confirm("Delete this movie?")) {
       try {
-        await fetch(`http://localhost:4000/api/movies/${movieId}`, {
-          method: "DELETE"
+        const res = await fetch(`http://localhost:4000/api/movies/${movieId}`, {
+          method: "DELETE",
+          headers: { 'Content-Type': 'application/json' }
         });
-        // will refrash the page if it updates
-        window.location.reload();
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        else console.log(data.message);
+
+        // Update local data
+        setNowPlaying(prev => prev.filter(m => m._id !== movieId));
+        setComingSoon(prev => prev.filter(m => m._id !== movieId));
+        setMovie(nowPlaying[0]);
       } catch (err) {
         console.error("Delete failed:", err);
       }
@@ -129,7 +138,7 @@ export default function AdminHome() {
             className="admin-action-btn"
             onClick={() => setShowDeleteMode(!showDeleteMode)}
           >
-            {showDeleteMode ? "Cancel Delete" : "Delete Movies"}
+            {showDeleteMode ? "Cancel Delete" : "Delete Movie"}
           </button>
         </div>
       </div>

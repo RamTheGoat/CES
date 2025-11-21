@@ -197,9 +197,16 @@ h1,h2,p{ margin: 0; }
   box-shadow: 0 18px 42px rgba(204,18,204,.25);
 }
 .card__fade{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   position: absolute;
   inset: 0;
   z-index: 1;
+}
+.card-delete:hover{
+  transition: all .15s;
+  background-color: #0f152c90;
 }
 
 /* section for the almightly edit movies button for admin */
@@ -220,4 +227,17 @@ h1,h2,p{ margin: 0; }
   cursor: pointer;
   font-weight: 600;
   margin-left: 15px;
+}
+
+.card-delete .material-symbols-outlined {
+  transform: scale(4);
+  color: #0000;
+}
+.card-delete:hover .material-symbols-outlined {
+  transition: all .15s;
+  color: white;
+}
+.card__fade .material-symbols-outlined {
+  transform: scale(4);
+  color: #0000;
 }
