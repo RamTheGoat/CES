@@ -124,7 +124,7 @@ app.get("/api/bookings", async (req, res) => {
 // ------------------------- REGISTER -------------------------
 app.post("/register", async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, password } = req.body;
+    const { firstName, lastName, email, phone, password, confirmPassword, agreeToTerms, acceptPromos } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser)
@@ -141,8 +141,10 @@ app.post("/register", async (req, res) => {
       email,
       phone,
       password: hashedPassword,
+      address: "",
       isActive: false,
       verificationToken,
+      promotion: acceptPromos,
     });
 
     await newUser.save();
