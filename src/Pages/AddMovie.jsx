@@ -1,6 +1,6 @@
-// a lot of this file is still empty bc it has to connect to the db
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import "./AddMovie.css";
 
 export default function AddMovie() {
   const [title, setTitle] = useState('');
@@ -27,39 +27,32 @@ export default function AddMovie() {
   };
 
   return (
-    <div style={{padding: '40px', background: '#0b1020', color: 'white', minHeight: '100vh'}}>
+    <div className="add-movie">
       <h2>Add New Movie</h2>
-      <form onSubmit={handleSubmit} style={{maxWidth: '500px', margin: '0 auto'}}>
+      <form onSubmit={handleSubmit} className="add-movie-form">
         <input
           type="text"
           placeholder="Movie Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          className="movie-form-input"
           required
-          style={{width: '100%', padding: '10px', margin: '10px 0'}}
         />
         <input
           type="text"
           placeholder="Genre"
           value={genre}
           onChange={(e) => setGenre(e.target.value)}
-          style={{width: '100%', padding: '10px', margin: '10px 0'}}
+          className="movie-form-input"
         />
         <input
           type="url"
           placeholder="Image URL"
           value={image}
           onChange={(e) => setImage(e.target.value)}
-          style={{width: '100%', padding: '10px', margin: '10px 0'}}
+          className="movie-form-input"
         />
-        <button type="submit" style={{
-          background: 'linear-gradient(90deg, #8b14d1, #cc12cc)',
-          color: 'white',
-          padding: '12px 24px',
-          border: 'none',
-          borderRadius: '12px',
-          cursor: 'pointer'
-        }}>
+        <button type="submit" className="movie-form-submit">
           Add Movie
         </button>
       </form>

@@ -1,0 +1,36 @@
+:root {
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+.add-movie {
+  padding: 5%;
+  background: #0b1020;
+  color: white;
+  min-height: 100vh;
+}
+
+.add-movie-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.movie-form-input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.movie-form-submit {
+  background: linear-gradient(90deg, #8b14d1, #cc12cc);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
