@@ -24,6 +24,12 @@
 *{ box-sizing: border-box; }
 h1,h2,p{ margin: 0; }
 
+.admin-buttons {
+  font-size: 35px;
+  padding: 5% 10% 3% 10%;
+  text-align: center;
+}
+
 /* Movie */
 .movie{
   position: relative;
