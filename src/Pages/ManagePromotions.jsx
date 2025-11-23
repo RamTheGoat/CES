@@ -1,13 +1,35 @@
 import { useEffect, useState } from "react";
 import "./ManagePromotions.css";
 
-const PromotionItem = ({ promotion }) => {
-  const handleSendPromotion = () => {
-    window.confirm("Are you sure you want to send this promotion?\nThis will send an email to every user with promotions enabled.");
+const PromotionItem = ({ promotion, onDelete }) => {
+  const handleSendPromotion = async () => {
+    if (!window.confirm("Are you sure you want to send this promotion?\nThis will send an email to every user with promotions enabled.")) return;
+    try {
+      const res = await fetch(`http://localhost:4000/api/promotions/${promotion._id}`, {
+        method: 'PUT'
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      else alert(data.message);
+    } catch (error) {
+      console.log('Failed to send promotion:', error);
+    }
   }
 
-  const handleDeletePromotion = () => {
-    window.confirm("Are you sure you want to delete this promotion?\nThis cannot be undone!");
+  const handleDeletePromotion = async () => {
+    if (!window.confirm("Are you sure you want to delete this promotion?\nThis cannot be undone!")) return;
+    try {
+      const res = await fetch(`http://localhost:4000/api/promotions/${promotion._id}`, {
+        method: 'DELETE'
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      else onDelete(promotion._id);
+    } catch (error) {
+      console.log('Failed to send promotion:', error);
+    }
   }
 
   const dateString = new Date(promotion.expiration).toLocaleDateString();
@@ -81,6 +103,11 @@ export default function ManagePromotions() {
     }
   };
 
+  const handleDeletePromotion = (promoId) => {
+    setPromotions(prev => prev.filter(promo => promo._id !== promoId));
+    console.log("Successfully deleted promotion");
+  }
+
   return (
     <main className="manage-promotions">
       <h2>Manage Promotions</h2>
@@ -133,7 +160,7 @@ export default function ManagePromotions() {
       </form>
       <div className="promotion-list">
         {promotions.map(promo => (
-          <PromotionItem promotion={promo} key={promo._id}/>
+          <PromotionItem promotion={promo} onDelete={handleDeletePromotion} key={promo._id}/>
         ))}
       </div>
     </main>
