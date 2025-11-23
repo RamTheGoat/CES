@@ -1,14 +1,58 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./ManagePromotions.css";
 
+const PromotionItem = ({ promotion }) => {
+  const handleSendPromotion = () => {
+    window.confirm("Are you sure you want to send this promotion?\nThis will send an email to every user with promotions enabled.");
+  }
+
+  const handleDeletePromotion = () => {
+    window.confirm("Are you sure you want to delete this promotion?\nThis cannot be undone!");
+  }
+
+  const dateString = new Date(promotion.expiration).toLocaleDateString();
+  return (
+    <div className="promotion-item">
+      <h3 style={{margin: 0}}>{promotion.code} • {promotion.discount}% • {dateString}</h3>
+      <div className="promotion-item-row">
+        <button
+            className="send-button"
+            onClick={handleSendPromotion}
+        >
+          Send Email
+        </button>
+        <button
+            className="delete-button"
+            onClick={handleDeletePromotion}
+        >
+          Delete
+        </button>
+    </div>
+    </div>
+  );
+}
+
 export default function ManagePromotions() {
+  const [promotions, setPromotions] = useState([]);
   const [code, setCode] = useState('');
   const [discount, setDiscount] = useState('');
   const [expiration, setExpiration] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleSend = async (e) => {
+  useEffect(() => {
+    const fetchPromos = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/promotions");
+        const promotionsData = await res.json();
+        setPromotions(promotionsData);
+      } catch (error) {
+        console.error("Failed to fetch promotions:", error.message);
+      }
+    };
+    fetchPromos();
+  }, []);
+
+  const handleAddPromotion = async (e) => {
     e.preventDefault();
     try {
       const res = await fetch("http://localhost:4000/api/promotions", {
@@ -25,15 +69,22 @@ export default function ManagePromotions() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       else console.log(data.message);
+
+      setCode('');
+      setDiscount('');
+      setExpiration('');
+      setMessage('');
+      setPromotions(prev => [...prev, data.promotion]);
     } catch (err) {
-      console.error("Send promotion failed:", err.message);
+      console.error("Add promotion failed:", err.message);
+      alert("Add promotion failed");
     }
   };
 
   return (
-    <div className="send-promotion">
+    <main className="manage-promotions">
       <h2>Manage Promotions</h2>
-      <form onSubmit={handleSend} className="promotion-form">
+      <form onSubmit={handleAddPromotion} className="promotion-form">
         <input
           type="text"
           placeholder="Promo Code"
@@ -45,7 +96,7 @@ export default function ManagePromotions() {
         />
         <input
           type="number"
-          placeholder="Discount Percent"
+          placeholder="Discount %"
           value={discount}
           onChange={e => setDiscount(e.target.value)}
           style={{gridColumn: "1 / span 2"}}
@@ -80,6 +131,11 @@ export default function ManagePromotions() {
           Add Promotion
         </button>
       </form>
-    </div>
+      <div className="promotion-list">
+        {promotions.map(promo => (
+          <PromotionItem promotion={promo} key={promo._id}/>
+        ))}
+      </div>
+    </main>
   );
 }
