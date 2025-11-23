@@ -5,6 +5,7 @@ import cors from "cors";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
 import User from "./models/User.js";
+import Promotion from "./models/Promotion.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendProfileUpdateEmail, sendPromotionalEmail } from "./mailer.js";
@@ -446,15 +447,49 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
   }
 });
 
+app.get("/api/promotions", async (req, res) => {
+  try {
+    const promos = await Promotion.find();
+    res.status(200).json(promos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post("/api/promotions", async (req, res) => {
   try {
+    const newPromo = await Promotion.create(req.body);
+    if (!newPromo) throw new Error("Failed to create the promotion");
+    else res.status(200).json({ message: "Successfully added promotion", promotion: newPromo });
+  } catch (error) {
+    console.error("Add promotion error:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/api/promotions/:promoId", async (req, res) => {
+  try {
+    const promo = await Promotion.findById(req.params.promoId);
+    if (!promo) return res.status(404).json({ error: "Promotion not found" });
+
     (await User.find({ promotion: true })).forEach(user => {
-      sendPromotionalEmail(user.email, user.firstName, req.body);
+      sendPromotionalEmail(user.email, user.firstName, promo);
     });
 
     res.status(200).json({ message: "Successfully sent promotion emails" });
   } catch (error) {
-    console.error("Password update error:", error.message);
+    console.error("Send promotion emails error:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/api/promotions/:promoId", async (req, res) => {
+  try {
+    const promo = await Promotion.findByIdAndDelete(req.params.promoId);
+    if (!promo) return res.status(404).json({ error: "Promotion not found" });
+    res.status(200).json({ message: "Successfully deleted promotion" });
+  } catch (error) {
+    console.error("Delete promotion error:", error.message);
     res.status(500).json({ error: error.message });
   }
 });
