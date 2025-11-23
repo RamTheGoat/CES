@@ -5,9 +5,10 @@ import cors from "cors";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
 import User from "./models/User.js";
-import nodemailer from "nodemailer";
+import Promotion from "./models/Promotion.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { sendProfileUpdateEmail, sendPromotionalEmail } from "./mailer.js";
 const JWT_SECRET = "secret"; 
 
 const app = express();
@@ -35,35 +36,6 @@ function generateTempPassword(length = 12) {
   return pw;
 }
 
-async function sendProfileUpdateEmail(email, name, updatedField) {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "Jiexian0902@gmail.com", 
-        pass: "wpyhctrfiwlroqea",   
-      },
-    });
-
-    const mailOptions = {
-      from: '"E-Cinema Support" <yourgmail@gmail.com>',
-      to: email,
-      subject: "Your account was updated",
-      html: `
-        <h2>Hello ${name},</h2>
-        <p>Your ${updatedField} was successfully updated on your E-Cinema account.</p>
-        <p>If you didn’t make this change, please reset your password immediately.</p>
-        <br>
-        <p>Thank you,<br>The E-Cinema Team</p>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Email sent to ${email} about ${updatedField} update`);
-  } catch (error) {
-    console.error("❌ Error sending email:", error);
-  }
-}
 // ------------------------- MOVIES & BOOKINGS -------------------------
 app.get("/api/movies", async (req, res) => {
   try {
@@ -472,6 +444,53 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
     else return res.status(200).json({ message: "No changes were made to the payment card" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/promotions", async (req, res) => {
+  try {
+    const promos = await Promotion.find();
+    res.status(200).json(promos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/promotions", async (req, res) => {
+  try {
+    const newPromo = await Promotion.create(req.body);
+    if (!newPromo) throw new Error("Failed to create the promotion");
+    else res.status(200).json({ message: "Successfully added promotion", promotion: newPromo });
+  } catch (error) {
+    console.error("Add promotion error:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/api/promotions/:promoId", async (req, res) => {
+  try {
+    const promo = await Promotion.findById(req.params.promoId);
+    if (!promo) return res.status(404).json({ error: "Promotion not found" });
+
+    (await User.find({ promotion: true })).forEach(user => {
+      sendPromotionalEmail(user.email, user.firstName, promo);
+    });
+
+    res.status(200).json({ message: "Successfully sent promotion emails" });
+  } catch (error) {
+    console.error("Send promotion emails error:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/api/promotions/:promoId", async (req, res) => {
+  try {
+    const promo = await Promotion.findByIdAndDelete(req.params.promoId);
+    if (!promo) return res.status(404).json({ error: "Promotion not found" });
+    res.status(200).json({ message: "Successfully deleted promotion" });
+  } catch (error) {
+    console.error("Delete promotion error:", error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 

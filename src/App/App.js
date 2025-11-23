@@ -15,6 +15,7 @@ import ForgotPassword from "../Pages/ForgotPassword";
 import EditShowTimes from "../Pages/EditShowTimes";
 import AdminDetails from "../Pages/AdminDetails";
 import AddMovie from "../Pages/AddMovie";
+import ManagePromotions from "../Pages/ManagePromotions";
 import Admin from "../Components/AdminElement";
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/forgotpassword" element={<ForgotPassword/>} />
           <Route path="/editShowTimes" element={<Admin element={<EditShowTimes/>} redirect/>} />
           <Route path="/addMovie" element={<Admin element={<AddMovie/>} redirect/>} />
+          <Route path="/promotions" element={<Admin element={<ManagePromotions/>} redirect/>} />
         </Routes>
       </main>
     </div>

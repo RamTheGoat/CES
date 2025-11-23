@@ -87,46 +87,30 @@ export default function AdminHome() {
 
   return (
     <main className="home">
-      {/* MOVIE */}
-      <section
-        className="movie"
-        style={{ backgroundImage: `url(${movie.bannerImage})` }}
-      >
-        <div className="movie__scrim" />
-        <div className="movie__content">
-          <h1 className="movie__title">{movie.title}</h1>
-
-          <p className="movie__summary">{movie.synopsis}</p>
-
-          <div className="movie__meta">
-            <div className="tags">
-              {movie.tags?.map((t) => (
-                <span key={t} className="tag">{t}</span>
-              ))}
-
-              {/* Or, since your DB has "genre", just show that */}
-              {!movie.tags && <span className="tag">{movie.genre.join("/")}</span>}
-            </div>
-            <div className="rating">
-              <span className="stars">★★★★★</span>
-              <div className="rating__num">
-                <p>IMDb: {movie.review?.IMDb}</p>
-                <p>Rotten Tomatoes: {movie.review?.RottenTomatoes}</p>
-                <p>Letterboxd: {movie.review?.Letterboxd}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="movie__actions">
-            <button className="btn btn--primary">Watch Movie</button>
-              <button className="btn btn--ghost">More Info</button>
-          </div>
+      {/* ADMIN BUTTONS */}
+      <section className="admin-buttons">
+        <h2>Admin Home</h2>
+        <div>
+          <button
+            className="admin-action-btn"
+            style={{margin: "10px"}}
+            onClick={() => navigate("/promotions")}
+          >
+            Manage Promotions
+          </button>
+          <button
+            className="admin-action-btn"
+            style={{margin: "10px"}}
+            onClick={() => {}}
+          >
+            Manage Users
+          </button>
         </div>
       </section>
 
-      {/* ADMIN BUTTONS */}
+      {/* MOVIE BUTTONS */}
       <div className="admin-actions-container">
-        <h2 className="rail__title">Now Playing</h2>
+        <h2 className="rail__title" style={{margin: 0}}>Now Playing</h2>
         <div>
           <button
             className="admin-action-btn"
