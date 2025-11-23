@@ -1,0 +1,74 @@
+:root {
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+.send-promotion {
+  padding: 5%;
+  background: var(--bg);
+  color: white;
+  min-height: 100vh;
+}
+
+.promotion-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  column-gap: 5px;
+  row-gap: 20px;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 30px;
+  background: var(--card);
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+
+.promotion-form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  resize: none;
+}
+
+.promotion-form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+.date-input:before {
+  content: attr(placeholder);
+  position: absolute;
+  background: var(--bg);
+  color: gray;
+  pointer-events: none;
+}
+
+.date-input:focus:before,
+.date-input:not([value=""]):before
+{
+  display: none;
+}
+
+.promotion-form-submit {
+  background: linear-gradient(90deg, #8b14d1, #cc12cc);
+  color: white;
+  margin-top: 10px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}

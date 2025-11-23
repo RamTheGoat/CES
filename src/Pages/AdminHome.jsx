@@ -94,9 +94,9 @@ export default function AdminHome() {
           <button
             className="admin-action-btn"
             style={{margin: "10px"}}
-            onClick={() => {}}
+            onClick={() => navigate("/promotions")}
           >
-            Send Promotion
+            Manage Promotions
           </button>
           <button
             className="admin-action-btn"
@@ -110,7 +110,7 @@ export default function AdminHome() {
 
       {/* MOVIE BUTTONS */}
       <div className="admin-actions-container">
-        <h2 className="rail__title">Now Playing</h2>
+        <h2 className="rail__title" style={{margin: 0}}>Now Playing</h2>
         <div>
           <button
             className="admin-action-btn"
