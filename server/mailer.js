@@ -30,8 +30,11 @@ export async function sendProfileUpdateEmail(email, name, updatedField) {
   }
 }
 
-export async function sendPromotionalEmail(email, name, message) {
+export async function sendPromotionalEmail(email, name, promotion) {
   try {
+    const { code, discount, expiration, message } = promotion;
+    const date = new Date(expiration).toLocaleString("en-US", { dateStyle: "long" });
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -41,15 +44,15 @@ export async function sendPromotionalEmail(email, name, message) {
     });
 
     const mailOptions = {
-      from: '"E-Cinema Support" <yourgmail@gmail.com>',
+      from: '"E-Cinema System" <yourgmail@gmail.com>',
       to: email,
-      subject: "PROMOTION WOW",
+      subject: `PROMOTION: Use code ${code.toUpperCase()} for ${discount}% off!`,
       html: `
-        <h2>Hello ${name},</h2>
-        <p>There is a new promotion code that you can redeem or something!</p>
-        <p>${message}<p>
-        <br>
+        <h2>${name}, use code ${code.toUpperCase()} for ${discount}% off today!</h2>
+        <p>Code expires on ${date}, use this code soon in order to claim the discount!</p>
+        <p>${message}</p>
         <p>Book your tickets today!</p>
+        <p>Thank you,<br>The E-Cinema Team</p>
       `,
     };
 

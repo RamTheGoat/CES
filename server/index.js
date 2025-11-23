@@ -5,10 +5,9 @@ import cors from "cors";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
 import User from "./models/User.js";
-import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { sendProfileUpdateEmail } from "./mailer.js";
+import { sendProfileUpdateEmail, sendPromotionalEmail } from "./mailer.js";
 const JWT_SECRET = "secret"; 
 
 const app = express();
@@ -444,6 +443,19 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
     else return res.status(200).json({ message: "No changes were made to the payment card" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/promotions", async (req, res) => {
+  try {
+    (await User.find({ promotion: true })).forEach(user => {
+      sendPromotionalEmail(user.email, user.firstName, req.body);
+    });
+
+    res.status(200).json({ message: "Successfully sent promotion emails" });
+  } catch (error) {
+    console.error("Password update error:", error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 
