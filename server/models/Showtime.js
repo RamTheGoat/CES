@@ -12,6 +12,12 @@ const ShowtimeSchema = new mongoose.Schema({
     required: true,
   },
 
+  showroom: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Showroom",
+    required: true,
+  },
+
   date: {
     type: String,
     required: true,

@@ -501,20 +501,30 @@ app.delete("/api/promotions/:promoId", async (req, res) => {
   }
 });
 
+app.get("/api/showtimes", async (req, res) => {
+  try {
+    const showtimes = await Showtime.find();
+    res.status(200).json(showtimes);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // CREATE — Create a new showtime
 app.post("/api/showtimes", async (req, res) => {
   try {
-    const { movieId, movieTitle, date, time } = req.body;
+    const { movieId, movieTitle, showroom, date, time } = req.body;
 
     const newShowtime = await Showtime.create({
       movieId,
       movieTitle,
+      showroom,
       date,
       time,
       // seatMap is empty initially; frontend will render seats
     });
 
-    res.status(201).json(newShowtime);
+    res.status(200).json({ message: "Successfully added showtime", showtime: newShowtime});
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
