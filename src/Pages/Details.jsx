@@ -5,11 +5,12 @@ import { useNavigate, useParams } from "react-router-dom";
 export default function Details() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
-  const [dbShowtimes, setDbShowtimes] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [showtimes, setShowtimes] = useState([]);
+  const [selectedDay, setSelectedDay] = useState(0);
+  const [days, setDays] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch movie info
+  // Fetch movie and showtimes
   useEffect(() => {
     const fetchMovie = async () => {
       try {
@@ -17,11 +18,23 @@ export default function Details() {
         const data = await response.json();
         setMovie(data);
       } catch (error) {
-        console.error("Failed to fetch movie data.", error);
+        console.error("Failed to fetch movie data:", error.message);
+      }
+    };
+
+    const fetchShowtimes = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/api/showtimes/${id}`);
+        const data = await response.json();
+        setShowtimes(data);
+        setDays(Array.from(new Set(data.map(showtime => showtime.date))));
+      } catch (error) {
+        console.error("Failed to fetch showtime data:", error.message);
       }
     };
 
     fetchMovie();
+    fetchShowtimes();
   }, [id]);
 
   // Fetch showtimes from database
@@ -153,13 +166,19 @@ export default function Details() {
 
             {/* Times */}
             <div className="details_times">
-              {showtimesByDate[selectedDate].map((s) => (
+              {showtimes[selectedDay].map((time, index) => (
                 <button
                   key={s._id}
                   className="details_time-btn"
-                  onClick={() => navigate(`/booking/${s._id}`)}
+                  onClick={() => navigate("/booking", {
+                    state: {
+                      movieTitle: movie.title,
+                      showtime: time,
+                      date: days[selectedDay]
+                    }
+                  })}
                 >
-                  {s.time}
+                  {time}
                 </button>
               ))}
             </div>
