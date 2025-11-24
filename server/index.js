@@ -350,7 +350,9 @@ app.put("/api/users/edit/:userId", async (req, res) => {
 
     await User.updateOne({ _id: profile._id }, { $set: changes });
 
-    await sendProfileUpdateEmail(profile.email, profile.firstName, "profile information");
+    if (!req.body.dontSendProfileUpdateEmail) {
+      await sendProfileUpdateEmail(profile.email, profile.firstName, "profile information");
+    }
 
     return res.status(200).json({ message: "Edit user profile was successful" });
   } catch (err) {
