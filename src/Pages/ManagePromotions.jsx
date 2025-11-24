@@ -32,10 +32,13 @@ const PromotionItem = ({ promotion, onDelete }) => {
     }
   }
 
-  const dateString = new Date(promotion.expiration).toLocaleDateString();
+  const dateString = new Date(promotion.expiration).toLocaleDateString("en-US", { dateStyle: "medium" });
   return (
     <div className="promotion-item">
-      <h3 style={{margin: 0}}>{promotion.code.toUpperCase()} • {promotion.discount}% • {dateString}</h3>
+      <div style={{textAlign: "left"}}>
+        <h3 style={{margin: 0}}>{promotion.code.toUpperCase()} • {promotion.discount}% OFF</h3>
+        <p style={{color: "lightgray"}}>Expires on {dateString}</p>
+      </div>
       <div>
         <button
           className="send-button"
