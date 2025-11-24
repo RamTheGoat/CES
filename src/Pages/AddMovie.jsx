@@ -40,7 +40,8 @@ export default function AddMovie() {
           trailerUrl: trailerUrl,
           posterUrl: posterUrl,
           bannerImage: bannerUrl,
-          status: status
+          filmRating: rating,
+          status: status,
         })
       });
 
