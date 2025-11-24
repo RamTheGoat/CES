@@ -9,6 +9,7 @@ import User from "./models/User.js";
 import Promotion from "./models/Promotion.js";
 import Ticket from "./models/Ticket.js";
 import Showtime from "./models/Showtime.js";
+import Showroom from "./models/Showroom.js"
 import SeatHold from "./models/SeatHold.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -501,6 +502,15 @@ app.delete("/api/promotions/:promoId", async (req, res) => {
   }
 });
 
+app.get("/api/showrooms", async (req, res) => {
+  try {
+    const showrooms = await Showroom.find();
+    res.status(200).json(showrooms);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get("/api/showtimes", async (req, res) => {
   try {
     const showtimes = await Showtime.find();
@@ -526,7 +536,7 @@ app.post("/api/showtimes", async (req, res) => {
 
     res.status(200).json({ message: "Successfully added showtime", showtime: newShowtime});
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
