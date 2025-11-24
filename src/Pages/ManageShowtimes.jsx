@@ -76,7 +76,7 @@ export default function ManageShowtimes() {
     fetchShowtimes();
     fetchShowrooms();
     fetchMovies();
-  }, []);
+  }, [id]);
 
   const handleAddShowtime = async (e) => {
     e.preventDefault();
