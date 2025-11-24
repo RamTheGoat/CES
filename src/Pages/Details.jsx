@@ -4,11 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 
 export default function Details() {
   const { id } = useParams();
-  const [movie, setMovie] = useState(null);
-  const [showtimes, setShowtimes] = useState([]);
-  const [selectedDay, setSelectedDay] = useState(0);
-  const [days, setDays] = useState([]);
   const navigate = useNavigate();
+
+  const [movie, setMovie] = useState(null);
+  const [dbShowtimes, setDbShowtimes] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
 
   // Fetch movie and showtimes
   useEffect(() => {
@@ -24,23 +24,6 @@ export default function Details() {
 
     const fetchShowtimes = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/api/showtimes/${id}`);
-        const data = await response.json();
-        setShowtimes(data);
-        setDays(Array.from(new Set(data.map(showtime => showtime.date))));
-      } catch (error) {
-        console.error("Failed to fetch showtime data:", error.message);
-      }
-    };
-
-    fetchMovie();
-    fetchShowtimes();
-  }, [id]);
-
-  // Fetch showtimes from database
-  useEffect(() => {
-    const fetchShowtimes = async () => {
-      try {
         const res = await fetch(`http://localhost:4000/api/showtimes?movieId=${id}`);
         const data = await res.json();
         setDbShowtimes(data);
@@ -54,6 +37,7 @@ export default function Details() {
       }
     };
 
+    fetchMovie();
     fetchShowtimes();
   }, [id]);
 
@@ -79,14 +63,13 @@ export default function Details() {
 
   return (
     <main className="details">
-
       {/* Banner */}
       <section
         className="details_banner"
         style={{ backgroundImage: `url(${movie.bannerImage || ""})` }}
       />
 
-      {/* Images */}
+      {/* Gallery Images */}
       <section className="details_gallery">
         {(movie.galleryImages || []).map((img, index) => (
           <div
@@ -98,15 +81,15 @@ export default function Details() {
       </section>
 
       <div className="details_content">
-        {/* About */}
+        {/* About Section */}
         <section className="details_section">
           <h2 className="details_section-title">About {movie.title}</h2>
           <p className="details_description">{movie.synopsis}</p>
 
           <div className="details_info">
-            <p><strong>Cast:</strong> {movie.cast.join(", ") || "N/A"}</p>
-            <p><strong>Producers:</strong> {movie.producer.join(", ") || "N/A"}</p>
-            <p><strong>Director:</strong> {movie.director.join(", ") || "N/A"}</p>
+            <p><strong>Cast:</strong> {(movie.cast || []).join(", ") || "N/A"}</p>
+            <p><strong>Producers:</strong> {(movie.producer || []).join(", ") || "N/A"}</p>
+            <p><strong>Director:</strong> {(movie.director || []).join(", ") || "N/A"}</p>
             <p><strong>Film Rating:</strong> {movie.filmRating || "N/A"}</p>
 
             <div>
@@ -118,7 +101,7 @@ export default function Details() {
           </div>
         </section>
 
-        {/* Genres */}
+        {/* Genres Section */}
         <section className="details_section">
           <h2 className="details_section-title">Genres</h2>
           <div className="details_genres">
@@ -129,7 +112,7 @@ export default function Details() {
           </div>
         </section>
 
-        {/* Trailer */}
+        {/* Trailer Section */}
         <section className="details_section">
           <h2 className="details_section-title">Trailer</h2>
           <div className="details_trailer-container">
@@ -146,7 +129,7 @@ export default function Details() {
           </div>
         </section>
 
-        {/* Showtimes (from DB) */}
+        {/* Showtimes Section */}
         {isNowPlaying && availableDates.length > 0 && (
           <section className="details_section">
             <h2 className="details_section-title">Showtimes</h2>
@@ -166,26 +149,28 @@ export default function Details() {
 
             {/* Times */}
             <div className="details_times">
-              {showtimes[selectedDay].map((time, index) => (
+              {(showtimesByDate[selectedDate] || []).map((s) => (
                 <button
                   key={s._id}
                   className="details_time-btn"
-                  onClick={() => navigate("/booking", {
-                    state: {
-                      movieTitle: movie.title,
-                      showtime: time,
-                      date: days[selectedDay]
-                    }
-                  })}
+                  onClick={() =>
+                    navigate(`/booking/${s._id}`, { // <-- Pass showtimeId in URL
+                      state: {
+                        movieTitle: movie.title,
+                        showtime: s.time,
+                        date: selectedDate,
+                      },
+                    })
+                  }
                 >
-                  {time}
+                  {s.time}
                 </button>
               ))}
             </div>
           </section>
         )}
 
-        {/* Book button */}
+        {/* Book Button Section */}
         <section className="details_book-section">
           {isNowPlaying ? (
             <button className="details_book-btn">Book Your Tickets Today!</button>

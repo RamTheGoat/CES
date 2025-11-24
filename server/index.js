@@ -655,8 +655,19 @@ setInterval(async () => {
 
   for (let hold of expiredHolds) {
     const showtime = await Showtime.findById(hold.showtimeId);
+    
+    if (!showtime) {
+      console.warn(`Showtime not found for hold ${hold._id} (ID: ${hold.showtimeId})`);
+      // Remove the hold anyway to clean up
+      await SeatHold.findByIdAndDelete(hold._id);
+      continue;
+    }
+
+    // Release seats
     hold.seats.forEach(seat => {
-      if (showtime.seatMap[seat] === "held") showtime.seatMap[seat] = "available";
+      if (showtime.seatMap && showtime.seatMap[seat] === "held") {
+        showtime.seatMap[seat] = "available";
+      }
       if (showtime.heldBy) delete showtime.heldBy[seat];
     });
 
@@ -665,7 +676,6 @@ setInterval(async () => {
   }
 }, 60 * 1000);
 
-// POST — Confirm checkout
 // POST — Confirm checkout
 app.post("/api/checkout", async (req, res) => {
   try {
