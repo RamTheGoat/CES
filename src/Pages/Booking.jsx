@@ -5,16 +5,26 @@ import "./Booking.css";
 export default function Booking() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { showtimeId } = useParams(); // You MUST navigate to this page using /booking/:showtimeId
+  const { showtimeId } = useParams();
 
   // movie info passed from previous page
   const { movieTitle = "Movie", date = "", showtime = "" } = location.state || {};
 
-  const [seatLayout, setSeatLayout] = useState([]); // rows with seats
+  const ticketPrice = 12.99;
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const ticketPrice = 12.99;
+  // Hardcoded seat layout: rows A–J, 10 seats each
+  const initialSeatLayout = "ABCDEF".split("").map((row) => ({
+    row,
+    seats: Array.from({ length: 10 }, (_, i) => ({
+      id: `${row}${i + 1}`,
+      status: "available", // can later be "held" or "sold"
+      heldBy: null,
+    })),
+  }));
+
+  const [seatLayout, setSeatLayout] = useState(initialSeatLayout);
 
   // Helper to get current user ID
   const getUserId = () => {
@@ -23,65 +33,9 @@ export default function Booking() {
     try { return JSON.parse(u)._id; } catch { return null; }
   };
 
-  // Load seat map from backend
-  useEffect(() => {
-    if (!showtimeId) return;
-    fetchSeatMap();
-  }, [showtimeId]);
-
-  async function fetchSeatMap() {
-    try {
-      const res = await fetch(`http://localhost:4000/api/showtimes/${showtimeId}/seats`);
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Error fetching seat map:", data);
-        return;
-      }
-
-      // Convert backend flat list to your row-based grid
-      const rows = {};
-      data.seats.forEach((seat) => {
-        const rowLetter = seat.seatNumber[0];
-        if (!rows[rowLetter]) rows[rowLetter] = { row: rowLetter, seats: [] };
-
-        rows[rowLetter].seats.push({
-          id: seat.seatNumber,
-          status: seat.status,      // available / sold / held
-          heldBy: seat.heldBy,
-        });
-      });
-
-      // Sort rows alphabetically, seats numerically
-      const finalLayout = Object.values(rows)
-        .sort((a, b) => a.row.localeCompare(b.row))
-        .map((rowData) => ({
-          row: rowData.row,
-          seats: rowData.seats.sort((a, b) => {
-            const n1 = parseInt(a.id.slice(1), 10);
-            const n2 = parseInt(b.id.slice(1), 10);
-            return n1 - n2;
-          }),
-        }));
-
-      setSeatLayout(finalLayout);
-
-      // Deselect any seats that became unavailable
-      setSelectedSeats((prev) =>
-        prev.filter((seatId) => {
-          const seat = data.seats.find((s) => s.seatNumber === seatId);
-          return seat && seat.status === "available";
-        })
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   // Seat click logic
   const handleSeatClick = (seat) => {
     const userId = getUserId();
-
     if (seat.status === "sold") return;
     if (seat.status === "held" && seat.heldBy !== userId) return;
 
@@ -118,7 +72,6 @@ export default function Booking() {
 
       if (!res.ok) {
         alert(data.message || "Unable to hold seats.");
-        await fetchSeatMap();
         setLoading(false);
         return;
       }
@@ -262,3 +215,4 @@ export default function Booking() {
     </main>
   );
 }
+
