@@ -97,6 +97,7 @@ export default function ManageShowtimes() {
   };
 
   const handleDeleteShowtime = async (showtimeId) => {
+    if (!window.confirm("Are you sure you want to delete this showtime?\nThis cannot be undone!")) return;
     try {
       const res = await fetch(`http://localhost:4000/api/showtimes/${showtimeId}`, {
         method: "DELETE",
