@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import "./ManageUsers.css";
 
-const UserItem = ({ user, admin }) => {
+const UserItem = ({ user, onChangeRole, onChangeActive, admin }) => {
   return (
     <div className="user-item">
       <h3 style={{margin: 0}}>{user.name} • {user.email}</h3>
       <div>
         <button
           className="action-button"
-          onClick={() => window.confirm("Are you sure?")}
+          onClick={() => onChangeRole(user.id, admin != null)}
         >
           {admin ? "Make User" : "Make Admin"}
         </button>
         <button
-          className={user.isActive ? "delete-button" : "activate-button"}
-          onClick={() => window.confirm("Are you sure?")}
+          className={user.isActive ? "deactivate-button" : "activate-button"}
+          onClick={() => onChangeActive(user.id, admin != null)}
         >
           {user.isActive ? "Deactivate" : "Activate"}
         </button>
@@ -45,18 +45,37 @@ export default function ManageUsers() {
     fetchUsers();
   }, []);
 
+  const handleChangeRole = async (userId, isAdmin) => {
+    window.confirm("Are you sure?");
+  }
+
+  const handleChangeActive = async (userId, isAdmin) => {
+    window.confirm("Are you sure?");
+  }
+
   return (
     <main className="manage-users">
       <h2>Manage Admins</h2>
       <div className="user-list">
         {users.filter(user => user.role === "admin").map(user => (
-          <UserItem user={user} admin key={user.id}/>
+          <UserItem
+            key={user.id}
+            user={user}
+            onChangeRole={handleChangeRole}
+            onChangeActive={handleChangeActive}
+            admin
+          />
         ))}
       </div>
       <h2>Manage Users</h2>
       <div className="user-list">
         {users.filter(user => user.role === "user").map(user => (
-          <UserItem user={user} key={user.id}/>
+          <UserItem
+            key={user.id}
+            user={user}
+            onChangeRole={handleChangeRole}
+            onChangeActive={handleChangeActive}
+          />
         ))}
       </div>
     </main>
