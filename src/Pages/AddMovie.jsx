@@ -83,6 +83,7 @@ export default function AddMovie() {
           onChange={e => setCast(e.target.value)}
           style={{gridColumn: "1 / span 4"}}
           className="movie-form-input"
+          required
         />
         <input
           type="text"
@@ -91,6 +92,7 @@ export default function AddMovie() {
           onChange={e => setProducer(e.target.value)}
           style={{gridColumn: "1 / span 2"}}
           className="movie-form-input"
+          required
         />
         <input
           type="text"
@@ -99,6 +101,7 @@ export default function AddMovie() {
           onChange={e => setDirector(e.target.value)}
           style={{gridColumn: "3 / span 2"}}
           className="movie-form-input"
+          required
         />
         <textarea
           placeholder="Movie Synopsis"
@@ -117,6 +120,7 @@ export default function AddMovie() {
           onChange={e => setTrailerUrl(e.target.value)}
           style={{gridColumn: "1 / span 1"}}
           className="movie-form-input"
+          required
         />
         <input
           type="text"
@@ -125,6 +129,7 @@ export default function AddMovie() {
           onChange={e => setPosterUrl(e.target.value)}
           style={{gridColumn: "2 / span 2"}}
           className="movie-form-input"
+          required
         />
         <input
           type="text"
@@ -133,6 +138,7 @@ export default function AddMovie() {
           onChange={e => setBannerUrl(e.target.value)}
           style={{gridColumn: "4 / span 1"}}
           className="movie-form-input"
+          required
         />
         <input
           type="number"
