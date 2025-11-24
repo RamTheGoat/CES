@@ -540,6 +540,16 @@ app.post("/api/showtimes", async (req, res) => {
   }
 });
 
+app.delete("/api/showtimes/:id", async (req, res) => {
+  try {
+    const showtime = await Showtime.findByIdAndDelete(req.params.id);
+    if (!showtime) return res.status(404).json({ error: "Showtime not found" });
+    res.status(200).json({ message: "Successfully deleted showtime" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // ------------------------- SEAT SELECTION -------------------------
 // GET seat status for a showtime
