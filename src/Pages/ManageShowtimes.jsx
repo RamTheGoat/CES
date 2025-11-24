@@ -2,9 +2,15 @@ import { useState, useEffect } from "react";
 import "./ManageShowtimes.css";
 
 const ShowtimeItem = ({ showtime, onDelete }) => {
+  const date = new Date(`${showtime.date} ${showtime.time}`);
+  const dateString = date.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+
   return (
     <div className="showtime-item">
-      <h3 style={{margin: 0}}>{showtime.movieTitle} • {showtime.date} • {showtime.time}</h3>
+      <div style={{textAlign: "left"}}>
+        <h3 style={{margin: 0}}>{showtime.movieTitle}</h3>
+        <p style={{color: "lightgray"}}>{showtime.showroomName} • {dateString}</p>
+      </div>
       <button
         className="delete-button"
         onClick={() => onDelete(showtime._id)}
@@ -91,8 +97,8 @@ export default function ManageShowtimes() {
       setTime('');
       setShowtimes(prev => [...prev, data.showtime]);
     } catch (error) {
-      console.error("Add showtime failed:", error.message);
-      alert("Add showtime failed");
+      console.error("Failed to add showtime:", error.message);
+      alert(`Failed to add showtime: ${error.message}`);
     }
   };
 
@@ -170,9 +176,10 @@ export default function ManageShowtimes() {
         </button>
       </form>
       <div className="showtime-list">
-        {showtimes.map(showtime => (
-          <ShowtimeItem key={showtime._id} showtime={showtime} onDelete={handleDeleteShowtime} />
-        ))}
+        {showtimes.sort((a, b) => (a.movieTitle.localeCompare(b.movieTitle))).map(showtime => {
+          const showroomName = (showrooms.find(showroom => showroom.id === showtime.showroom) ?? {}).name ?? "Showroom";
+          return <ShowtimeItem key={showtime._id} showtime={{ ...showtime, showroomName }} onDelete={handleDeleteShowtime} />
+        })}
       </div>
     </main>
   );

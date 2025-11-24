@@ -35,7 +35,7 @@ const PromotionItem = ({ promotion, onDelete }) => {
   const dateString = new Date(promotion.expiration).toLocaleDateString();
   return (
     <div className="promotion-item">
-      <h3 style={{margin: 0}}>{promotion.code} • {promotion.discount}% • {dateString}</h3>
+      <h3 style={{margin: 0}}>{promotion.code.toUpperCase()} • {promotion.discount}% • {dateString}</h3>
       <div>
         <button
           className="send-button"
@@ -81,7 +81,7 @@ export default function ManagePromotions() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          code,
+          code: code.toUpperCase(),
           discount,
           expiration,
           message,

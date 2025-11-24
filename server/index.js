@@ -537,6 +537,9 @@ app.post("/api/showtimes", async (req, res) => {
   try {
     const { movieId, movieTitle, showroom, date, time } = req.body;
 
+    const showtime = await Showtime.findOne({ showroom, date, time });
+    if (showtime) return res.status(409).json({ error: "Another movie is already showing at this room and time!" });
+
     const newShowtime = await Showtime.create({
       movieId,
       movieTitle,
