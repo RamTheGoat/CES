@@ -2,36 +2,15 @@ import React, { useState, useEffect } from "react";
 import "./Details.css";
 import { useNavigate, useParams } from "react-router-dom";
 
-// Generate about a week of days to choose from
-const getNextSevenDays = () => {
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    days.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
-  }
-  return days;
-};
-
-// Sample showtimes for each day
-const showtimes = {
-  0: ["1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"],
-  1: ["1:30 PM", "4:30 PM", "7:30 PM", "10:30 PM"],
-  2: ["2:00 PM", "5:00 PM", "8:00 PM", "11:00 PM"],
-  3: ["12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"],
-  4: ["1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"],
-  5: ["2:30 PM", "5:30 PM", "8:30 PM", "11:30 PM"],
-  6: ["11:00 AM", "2:00 PM", "5:00 PM", "8:00 PM"]
-};
-
 export default function Details() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  const [showtimes, setShowtimes] = useState([]);
   const [selectedDay, setSelectedDay] = useState(0);
-  const days = getNextSevenDays();
+  const [days, setDays] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch movie
+  // Fetch movie and showtimes
   useEffect(() => {
     const fetchMovie = async () => {
       try {
@@ -40,10 +19,23 @@ export default function Details() {
         console.log("Fetched movie:", data);
         setMovie(data);
       } catch (error) {
-        console.error("Failed to fetch movie data.", error);
+        console.error("Failed to fetch movie data:", error.message);
       }
     };
+
+    const fetchShowtimes = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/api/showtimes/${id}`);
+        const data = await response.json();
+        setShowtimes(data);
+        setDays(Array.from(new Set(data.map(showtime => showtime.date))));
+      } catch (error) {
+        console.error("Failed to fetch showtime data:", error.message);
+      }
+    };
+
     fetchMovie();
+    fetchShowtimes();
   }, [id]);
 
   if (!movie) return <p>Loading...</p>;
@@ -157,19 +149,19 @@ export default function Details() {
 
             {/* Time selection */}
             <div className="details_times">
-              {showtimes[selectedDay].map((time, index) => (
+              {showtimes.filter(showtime => showtime.date === days[selectedDay]).map((showtime, index) => (
                 <button
                   key={index}
                   className="details_time-btn"
                   onClick={() => navigate("/booking", {
                     state: {
                       movieTitle: movie.title,
-                      showtime: time,
-                      date: days[selectedDay]
+                      showtime: showtime.time,
+                      date: showtime.date
                     }
                   })}
                 >
-                  {time}
+                  {showtime.time}
                 </button>
               ))}
             </div>

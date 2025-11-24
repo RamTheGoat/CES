@@ -532,10 +532,22 @@ app.get("/api/showtimes", async (req, res) => {
   }
 });
 
+app.get("/api/showtimes/:movieId", async (req, res) => {
+  try {
+    const showtimes = await Showtime.find({ movieId: req.params.movieId });
+    res.status(200).json(showtimes);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // CREATE — Create a new showtime
 app.post("/api/showtimes", async (req, res) => {
   try {
     const { movieId, movieTitle, showroom, date, time } = req.body;
+
+    const showtime = await Showtime.findOne({ showroom, date, time });
+    if (showtime) return res.status(409).json({ error: "Another movie is already showing at this room and time!" });
 
     const newShowtime = await Showtime.create({
       movieId,

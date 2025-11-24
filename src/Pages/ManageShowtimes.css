@@ -20,7 +20,7 @@
   grid-template-columns: 2fr 1fr 1fr 2fr;
   column-gap: 5px;
   row-gap: 20px;
-  max-width: 600px;
+  max-width: 700px;
   margin: 20px auto;
   padding: 30px;
   background: var(--card);
@@ -42,6 +42,20 @@
 .showtime-form-input:focus {
     outline: none;
     border-color: var(--accent);
+}
+
+.showtime-form-display {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.showtime-form-display:focus {
+  outline: none;
 }
 
 .date-input::-webkit-calendar-picker-indicator {
@@ -121,7 +135,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 600px;
+  max-width: 700px;
   margin: 20px auto;
   padding: 20px;
   background: var(--card);
