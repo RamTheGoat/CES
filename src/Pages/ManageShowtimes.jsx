@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import "./ManageShowtimes.css";
 
 const ShowtimeItem = ({ showtime, onDelete }) => {
@@ -29,13 +30,14 @@ export default function ManageShowtimes() {
   const [showroom, setShowroom] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchShowtimes = async () => {
       try {
         const res = await fetch("http://localhost:4000/api/showtimes");
         const showtimesData = await res.json();
-        setShowtimes(showtimesData);
+        setShowtimes(id ? showtimesData.filter(showtime => showtime.movieId === id) : showtimesData);
       } catch (error) {
         console.error("Failed to fetch showtimes:", error.message);
       }
@@ -62,6 +64,10 @@ export default function ManageShowtimes() {
           id: movie._id.toString(),
           title: movie.title,
         })));
+        if (id) {
+          const movie = moviesData.find(movie => movie._id.toString() === id);
+          setMovie({ id: movie._id, title: movie.title });
+        }
       } catch (error) {
         console.error("Failed to fetch movies:", error.message);
       }
@@ -91,7 +97,7 @@ export default function ManageShowtimes() {
       if (data.error) throw new Error(data.error);
       else console.log(data.message);
 
-      setMovie({id: ''});
+      if (!id) setMovie({id: ''});
       setShowroom('');
       setDate('');
       setTime('');
@@ -123,18 +129,28 @@ export default function ManageShowtimes() {
     <main className="manage-showtimes">
       <h2>Manage Showtimes</h2>
       <form onSubmit={handleAddShowtime} className="showtime-form">
-        <select
-          value={movie.id}
-          onChange={e => setMovie({ id: e.target.value, title: e.target.options[e.target.selectedIndex].text })}
-          style={{gridColumn: "1 / span 2"}}
-          className="showtime-form-select"
-          required
-        >
-          <option value="" disabled>Movie</option>
-          {movies.map(movie => (
-            <option key={movie.id} value={movie.id}>{movie.title}</option>
-          ))}
-        </select>
+        {id ? (
+          <input
+            type="text"
+            value={movie.title ?? "Movie"}
+            style={movie.title ? {gridColumn: "1 / span 2"} : {gridColumn: "1 / span 2", color: "gray"}}
+            className="showtime-form-display"
+            readOnly
+          />
+        ) : (
+          <select
+            value={movie.id}
+            onChange={e => setMovie({ id: e.target.value, title: e.target.options[e.target.selectedIndex].text })}
+            style={{gridColumn: "1 / span 2"}}
+            className="showtime-form-select"
+            required
+          >
+            <option value="" disabled>Movie</option>
+            {movies.map(movie => (
+              <option key={movie.id} value={movie.id}>{movie.title}</option>
+            ))}
+          </select>
+        )}
         <select
           value={showroom}
           onChange={e => setShowroom(e.target.value)}
@@ -176,7 +192,14 @@ export default function ManageShowtimes() {
         </button>
       </form>
       <div className="showtime-list">
-        {showtimes.sort((a, b) => (a.movieTitle.localeCompare(b.movieTitle))).map(showtime => {
+        {showtimes.sort((a, b) => {
+          const compareName = a.movieTitle.localeCompare(b.movieTitle);
+          if (compareName !== 0) return compareName;
+
+          const dateA = new Date(`${a.date} ${a.time}`);
+          const dateB = new Date(`${b.date} ${b.time}`);
+          return dateA - dateB;
+        }).map(showtime => {
           const showroomName = (showrooms.find(showroom => showroom.id === showtime.showroom) ?? {}).name ?? "Showroom";
           return <ShowtimeItem key={showtime._id} showtime={{ ...showtime, showroomName }} onDelete={handleDeleteShowtime} />
         })}

@@ -44,6 +44,20 @@
     border-color: var(--accent);
 }
 
+.showtime-form-display {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.showtime-form-display:focus {
+  outline: none;
+}
+
 .date-input::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
