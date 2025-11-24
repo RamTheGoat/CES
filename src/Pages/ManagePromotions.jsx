@@ -36,16 +36,16 @@ const PromotionItem = ({ promotion, onDelete }) => {
   return (
     <div className="promotion-item">
       <h3 style={{margin: 0}}>{promotion.code} • {promotion.discount}% • {dateString}</h3>
-      <div className="promotion-item-row">
+      <div>
         <button
-            className="send-button"
-            onClick={handleSendPromotion}
+          className="send-button"
+          onClick={handleSendPromotion}
         >
           Send Email
         </button>
         <button
-            className="delete-button"
-            onClick={handleDeletePromotion}
+          className="delete-button"
+          onClick={handleDeletePromotion}
         >
           Delete
         </button>
