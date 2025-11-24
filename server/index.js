@@ -524,133 +524,157 @@ app.get("/api/showtimes/:id/seats", async (req, res) => {
     const seats = Object.entries(showtime.seatMap).map(([seatNumber, status]) => ({
       seatNumber,
       status,
-      heldBy: status === "held" ? "unknown" : null // or real user ID if stored
+      heldBy: status === "held" ? showtime.heldBy?.[seatNumber] || null : null
     }));
 
-    res.json({ seats });
+    return res.json({ seats });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Seat map error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 
+// POST — HOLD seats temporarily
 app.post("/api/hold-seats", async (req, res) => {
   try {
     const { userId, showtimeId, seats } = req.body;
 
     const showtime = await Showtime.findById(showtimeId);
-    if (!showtime) return res.status(404).json({ message: "Showtime not found" });
+    if (!showtime) {
+      return res.status(404).json({ message: "Showtime not found" });
+    }
 
-    //  Check if any seat is unavailable
+    // Check availability
     for (let seat of seats) {
       if (showtime.seatMap[seat] !== "available") {
-        return res.status(409).json({
-          message: `Seat ${seat} is no longer available`
-        });
+        return res.status(409).json({ message: `Seat ${seat} is no longer available` });
       }
     }
 
-    // ⏳ Mark seats as HELD
-    seats.forEach(seat => showtime.seatMap[seat] = "held");
+    // Mark seats as HELD
+    seats.forEach(seat => {
+      showtime.seatMap[seat] = "held";
+
+      // store who is holding it
+      if (!showtime.heldBy) showtime.heldBy = {};
+      showtime.heldBy[seat] = userId;
+    });
+
     await showtime.save();
 
     // Create SeatHold record
     const hold = await SeatHold.create({
-      showtime_id: showtimeId,
-      user_id: userId,
+      userId,
+      showtimeId,
       seats,
-      expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+      expiresAt: Date.now() + 5 * 60 * 1000 // 5 mins
     });
 
-    res.json({ message: "Seats held", holdId: hold._id });
+    return res.json({
+      message: "Seats held",
+      holdId: hold._id,
+      expiresAt: hold.expiresAt
+    });
+
   } catch (err) {
-    console.error("Seat hold error:", err);
+    console.error("Hold seats error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+
+// DELETE — RELEASE an expired or cancelled hold
 app.delete("/api/release-hold/:holdId", async (req, res) => {
   try {
     const hold = await SeatHold.findById(req.params.holdId);
     if (!hold) return res.status(404).json({ message: "Hold not found" });
 
-    const showtime = await Showtime.findById(hold.showtime_id);
+    const showtime = await Showtime.findById(hold.showtimeId);
 
-    // Reset held seats back to "available"
     hold.seats.forEach(seat => {
       if (showtime.seatMap[seat] === "held") {
         showtime.seatMap[seat] = "available";
       }
+      if (showtime.heldBy) delete showtime.heldBy[seat];
     });
 
     await showtime.save();
-    await SeatHold.findByIdAndDelete(req.params.holdId);
+    await SeatHold.findByIdAndDelete(hold._id);
 
     res.json({ message: "Seat hold released" });
   } catch (err) {
-    console.error("Release hold error:", err);
+    console.error("Release error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+
+// AUTO-EXPIRE HOLDS every 60 seconds
 setInterval(async () => {
   const now = Date.now();
-  const expired = await SeatHold.find({ expiresAt: { $lt: now } });
+  const expiredHolds = await SeatHold.find({ expiresAt: { $lt: now } });
 
-  for (let hold of expired) {
-    const showtime = await Showtime.findById(hold.showtime_id);
+  for (let hold of expiredHolds) {
+    const showtime = await Showtime.findById(hold.showtimeId);
+
     hold.seats.forEach(seat => {
       if (showtime.seatMap[seat] === "held") {
         showtime.seatMap[seat] = "available";
       }
+      if (showtime.heldBy) delete showtime.heldBy[seat];
     });
+
     await showtime.save();
     await SeatHold.findByIdAndDelete(hold._id);
   }
-}, 60 * 1000); // runs every 60 seconds
+}, 60 * 1000);
 
-// Checkout
 
+// POST — CHECKOUT (final purchase)
 app.post("/api/checkout", async (req, res) => {
   try {
     const { userId, showtimeId, holdId } = req.body;
 
     const hold = await SeatHold.findById(holdId);
-    if (!hold) return res.status(400).json({ message: "Hold not found or expired" });
+    if (!hold) {
+      return res.status(400).json({ message: "Hold not found or expired" });
+    }
 
     const showtime = await Showtime.findById(showtimeId);
 
-    //  Prevent double booking
+    // Prevent double booking
     for (let seat of hold.seats) {
       if (showtime.seatMap[seat] === "sold") {
-        return res.status(409).json({
-          message: `Seat ${seat} was already purchased`
-        });
+        return res.status(409).json({ message: `Seat ${seat} already purchased` });
       }
     }
 
-    //  Convert HELD → SOLD
-    hold.seats.forEach(seat => showtime.seatMap[seat] = "sold");
+    // Convert HELD → SOLD
+    hold.seats.forEach(seat => {
+      showtime.seatMap[seat] = "sold";
+      if (showtime.heldBy) delete showtime.heldBy[seat];
+    });
+
     await showtime.save();
 
-    // Create Ticket
+    // Create ticket
     const ticket = await Ticket.create({
-      user_id: userId,
-      showtime_id: showtimeId,
+      userId,
+      showtimeId,
       seats: hold.seats,
       purchaseDate: new Date()
     });
 
-    // Remove hold
     await SeatHold.findByIdAndDelete(holdId);
 
     res.json({ message: "Purchase successful", ticket });
+
   } catch (err) {
     console.error("Checkout error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 const PORT = 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
