@@ -1,18 +1,13 @@
 import mongoose from "mongoose";
 
-const bookingSchema = new mongoose.Schema({
-    user_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-    },
-    showtime_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Showtime"
-    },
-    seats: [String],
-    bookingDate: Date,
-    totalAmount: Number
+const { Schema, model } = mongoose;
+
+const BookingSchema = new Schema({
+  user_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  showtime_id: { type: Schema.Types.ObjectId, ref: "Showtime", required: true },
+  seats: [String],
+  total: Number,
+  createdAt: { type: Date, default: Date.now }
 });
 
-const Booking = mongoose.model("Booking", bookingSchema);
-export default Booking;
+export default model("Booking", BookingSchema);
