@@ -12,7 +12,6 @@ import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import Profile from "../Pages/Profile";
 import ForgotPassword from "../Pages/ForgotPassword";
-import EditShowTimes from "../Pages/EditShowTimes";
 import AdminDetails from "../Pages/AdminDetails";
 import AddMovie from "../Pages/AddMovie";
 import ManageShowtimes from "../Pages/ManageShowtimes";
@@ -37,7 +36,6 @@ export default function App() {
           <Route path="/register" element={<Register/>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/forgotpassword" element={<ForgotPassword/>} />
-          <Route path="/editShowTimes" element={<Admin element={<EditShowTimes/>} redirect/>} />
           <Route path="/addMovie" element={<Admin element={<AddMovie/>} redirect/>} />
           <Route path="/promotions" element={<Admin element={<ManagePromotions/>} redirect/>} />
           <Route path="/showtimes" element={<Admin element={<ManageShowtimes/>} redirect/>} />
