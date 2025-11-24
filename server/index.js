@@ -9,6 +9,7 @@ import User from "./models/User.js";
 import Promotion from "./models/Promotion.js";
 import Ticket from "./models/Ticket.js";
 import Showtime from "./models/Showtime.js";
+import Showroom from "./models/Showroom.js"
 import SeatHold from "./models/SeatHold.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -511,29 +512,74 @@ app.delete("/api/promotions/:promoId", async (req, res) => {
   }
 });
 
+app.get("/api/showrooms", async (req, res) => {
+  try {
+    const showrooms = await Showroom.find();
+    res.status(200).json(showrooms);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/api/showtimes", async (req, res) => {
+  try {
+    const showtimes = await Showtime.find();
+    res.status(200).json(showtimes);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// CREATE — Create a new showtime
+app.post("/api/showtimes", async (req, res) => {
+  try {
+    const { movieId, movieTitle, showroom, date, time } = req.body;
+
+    const newShowtime = await Showtime.create({
+      movieId,
+      movieTitle,
+      showroom,
+      date,
+      time,
+      // seatMap is empty initially; frontend will render seats
+    });
+
+    res.status(200).json({ message: "Successfully added showtime", showtime: newShowtime});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/api/showtimes/:id", async (req, res) => {
+  try {
+    const showtime = await Showtime.findByIdAndDelete(req.params.id);
+    if (!showtime) return res.status(404).json({ error: "Showtime not found" });
+    res.status(200).json({ message: "Successfully deleted showtime" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // ------------------------- SEAT SELECTION -------------------------
-// Seat Selection
+// GET seat status for a showtime
 app.get("/api/showtimes/:id/seats", async (req, res) => {
   try {
     const showtime = await Showtime.findById(req.params.id);
-    if (!showtime) {
-      return res.status(404).json({ message: "Showtime not found" });
-    }
+    if (!showtime) return res.status(404).json({ message: "Showtime not found" });
 
-    // Convert seatMap object → array of seat objects
-    const seats = Object.entries(showtime.seatMap).map(([seatNumber, status]) => ({
-      seatNumber,
-      status,
-      heldBy: status === "held" ? showtime.heldBy?.[seatNumber] || null : null
-    }));
-
-    return res.json({ seats });
+    // Return only the held/sold info for seats
+    return res.json({
+      heldBy: showtime.heldBy || {},
+      soldSeats: Object.entries(showtime.seatMap || {})
+        .filter(([_, status]) => status === "sold")
+        .map(([seat]) => seat),
+    });
   } catch (err) {
     console.error("Seat map error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 // POST — HOLD seats temporarily
 app.post("/api/hold-seats", async (req, res) => {
@@ -541,13 +587,13 @@ app.post("/api/hold-seats", async (req, res) => {
     const { userId, showtimeId, seats } = req.body;
 
     const showtime = await Showtime.findById(showtimeId);
-    if (!showtime) {
-      return res.status(404).json({ message: "Showtime not found" });
-    }
+    if (!showtime) return res.status(404).json({ message: "Showtime not found" });
+
+    if (!showtime.seatMap) showtime.seatMap = {};
 
     // Check availability
     for (let seat of seats) {
-      if (showtime.seatMap[seat] !== "available") {
+      if (showtime.seatMap[seat] === "sold" || showtime.seatMap[seat] === "held") {
         return res.status(409).json({ message: `Seat ${seat} is no longer available` });
       }
     }
@@ -555,8 +601,6 @@ app.post("/api/hold-seats", async (req, res) => {
     // Mark seats as HELD
     seats.forEach(seat => {
       showtime.seatMap[seat] = "held";
-
-      // store who is holding it
       if (!showtime.heldBy) showtime.heldBy = {};
       showtime.heldBy[seat] = userId;
     });
@@ -571,18 +615,12 @@ app.post("/api/hold-seats", async (req, res) => {
       expiresAt: Date.now() + 5 * 60 * 1000 // 5 mins
     });
 
-    return res.json({
-      message: "Seats held",
-      holdId: hold._id,
-      expiresAt: hold.expiresAt
-    });
-
+    res.json({ message: "Seats held", holdId: hold._id, expiresAt: hold.expiresAt });
   } catch (err) {
     console.error("Hold seats error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 // DELETE — RELEASE an expired or cancelled hold
 app.delete("/api/release-hold/:holdId", async (req, res) => {
@@ -591,11 +629,8 @@ app.delete("/api/release-hold/:holdId", async (req, res) => {
     if (!hold) return res.status(404).json({ message: "Hold not found" });
 
     const showtime = await Showtime.findById(hold.showtimeId);
-
     hold.seats.forEach(seat => {
-      if (showtime.seatMap[seat] === "held") {
-        showtime.seatMap[seat] = "available";
-      }
+      if (showtime.seatMap[seat] === "held") showtime.seatMap[seat] = "available";
       if (showtime.heldBy) delete showtime.heldBy[seat];
     });
 
@@ -609,7 +644,6 @@ app.delete("/api/release-hold/:holdId", async (req, res) => {
   }
 });
 
-
 // AUTO-EXPIRE HOLDS every 60 seconds
 setInterval(async () => {
   const now = Date.now();
@@ -617,11 +651,8 @@ setInterval(async () => {
 
   for (let hold of expiredHolds) {
     const showtime = await Showtime.findById(hold.showtimeId);
-
     hold.seats.forEach(seat => {
-      if (showtime.seatMap[seat] === "held") {
-        showtime.seatMap[seat] = "available";
-      }
+      if (showtime.seatMap[seat] === "held") showtime.seatMap[seat] = "available";
       if (showtime.heldBy) delete showtime.heldBy[seat];
     });
 
@@ -630,16 +661,13 @@ setInterval(async () => {
   }
 }, 60 * 1000);
 
-
 // POST — CHECKOUT (final purchase)
 app.post("/api/checkout", async (req, res) => {
   try {
     const { userId, showtimeId, holdId } = req.body;
 
     const hold = await SeatHold.findById(holdId);
-    if (!hold) {
-      return res.status(400).json({ message: "Hold not found or expired" });
-    }
+    if (!hold) return res.status(400).json({ message: "Hold not found or expired" });
 
     const showtime = await Showtime.findById(showtimeId);
 
@@ -669,12 +697,12 @@ app.post("/api/checkout", async (req, res) => {
     await SeatHold.findByIdAndDelete(holdId);
 
     res.json({ message: "Purchase successful", ticket });
-
   } catch (err) {
     console.error("Checkout error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 const PORT = 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

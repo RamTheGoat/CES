@@ -12,29 +12,34 @@ const ShowtimeSchema = new mongoose.Schema({
     required: true,
   },
 
+  showroom: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Showroom",
+    required: true,
+  },
+
   date: {
-    type: String, 
+    type: String,
     required: true,
   },
 
   time: {
-    type: String, 
+    type: String,
     required: true,
   },
 
-  // seatMap stores: seatNumber "available" | "held" | "sold"
   seatMap: {
-    type: Object,
-    required: true,
-    default: {} // Filled when showtime is created
+    type: Map,
+    of: String, // "held" | "sold"
+    default: {},
   },
 
-  // Store which user is holding which seat
   heldBy: {
-    type: Object,   
-    default: {}
+    type: Map,
+    of: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: {},
   },
-
 }, { timestamps: true });
 
 export default mongoose.model("Showtime", ShowtimeSchema);

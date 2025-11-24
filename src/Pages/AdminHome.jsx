@@ -105,6 +105,13 @@ export default function AdminHome() {
           >
             Manage Users
           </button>
+          <button
+            className="admin-action-btn"
+            style={{margin: "10px"}}
+            onClick={() => navigate("/showtimes")}
+          >
+            Manage Showtimes
+          </button>
         </div>
       </section>
 
