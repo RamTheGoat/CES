@@ -47,6 +47,11 @@ export default function Details() {
   }, [id]);
 
   if (!movie) return <p>Loading...</p>;
+  else if (!movie.title) return (
+    <main className="details">
+      <h2 style={{padding: "100px"}}>Movie Not Found!</h2>
+    </main>
+  );
 
   // Determine if movie is "Now Playing"
   const isNowPlaying = movie.status === "Now Playing";
