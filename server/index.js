@@ -310,6 +310,16 @@ app.post("/login", async (req, res) => {
 });
 
 
+// GET all user profiles
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET user profile
 app.get("/api/users/:userId", async (req, res) => {
   try {
@@ -340,7 +350,9 @@ app.put("/api/users/edit/:userId", async (req, res) => {
 
     await User.updateOne({ _id: profile._id }, { $set: changes });
 
-    await sendProfileUpdateEmail(profile.email, profile.firstName, "profile information");
+    if (!req.body.dontSendProfileUpdateEmail) {
+      await sendProfileUpdateEmail(profile.email, profile.firstName, "profile information");
+    }
 
     return res.status(200).json({ message: "Edit user profile was successful" });
   } catch (err) {

@@ -101,7 +101,7 @@ export default function AdminHome() {
           <button
             className="admin-action-btn"
             style={{margin: "10px"}}
-            onClick={() => {}}
+            onClick={() => navigate("/users")}
           >
             Manage Users
           </button>
