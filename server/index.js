@@ -2,10 +2,14 @@ import express from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import cors from "cors";
+import nodemailer from "nodemailer";
 import Movie from "./models/Movie.js";
 import Booking from "./models/Booking.js";
 import User from "./models/User.js";
 import Promotion from "./models/Promotion.js";
+import Ticket from "./models/Ticket.js";
+import Showtime from "./models/Showtime.js";
+import SeatHold from "./models/SeatHold.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendProfileUpdateEmail, sendPromotionalEmail } from "./mailer.js";
@@ -381,6 +385,7 @@ app.put("/api/users/password/edit/:userId", async (req, res) => {
   }
 });
 
+// ------------------------- PAYMENT CARD -------------------------
 // PUT edit user payment card
 app.put("/api/users/card/edit/:cardId", async (req, res) => {
   try {
@@ -457,6 +462,8 @@ app.post("/api/users/card/add/:userId", async (req, res) => {
   }
 });
 
+// ------------------------- PROMOTION -------------------------
+
 app.get("/api/promotions", async (req, res) => {
   try {
     const promos = await Promotion.find();
@@ -503,6 +510,147 @@ app.delete("/api/promotions/:promoId", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// ------------------------- SEAT SELECTION -------------------------
+// Seat Selection
+app.get("/api/showtimes/:id/seats", async (req, res) => {
+  try {
+    const showtime = await Showtime.findById(req.params.id);
+    if (!showtime) {
+      return res.status(404).json({ message: "Showtime not found" });
+    }
+
+    // Convert seatMap object → array of seat objects
+    const seats = Object.entries(showtime.seatMap).map(([seatNumber, status]) => ({
+      seatNumber,
+      status,
+      heldBy: status === "held" ? "unknown" : null // or real user ID if stored
+    }));
+
+    res.json({ seats });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+app.post("/api/hold-seats", async (req, res) => {
+  try {
+    const { userId, showtimeId, seats } = req.body;
+
+    const showtime = await Showtime.findById(showtimeId);
+    if (!showtime) return res.status(404).json({ message: "Showtime not found" });
+
+    //  Check if any seat is unavailable
+    for (let seat of seats) {
+      if (showtime.seatMap[seat] !== "available") {
+        return res.status(409).json({
+          message: `Seat ${seat} is no longer available`
+        });
+      }
+    }
+
+    // ⏳ Mark seats as HELD
+    seats.forEach(seat => showtime.seatMap[seat] = "held");
+    await showtime.save();
+
+    // Create SeatHold record
+    const hold = await SeatHold.create({
+      showtime_id: showtimeId,
+      user_id: userId,
+      seats,
+      expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+    });
+
+    res.json({ message: "Seats held", holdId: hold._id });
+  } catch (err) {
+    console.error("Seat hold error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.delete("/api/release-hold/:holdId", async (req, res) => {
+  try {
+    const hold = await SeatHold.findById(req.params.holdId);
+    if (!hold) return res.status(404).json({ message: "Hold not found" });
+
+    const showtime = await Showtime.findById(hold.showtime_id);
+
+    // Reset held seats back to "available"
+    hold.seats.forEach(seat => {
+      if (showtime.seatMap[seat] === "held") {
+        showtime.seatMap[seat] = "available";
+      }
+    });
+
+    await showtime.save();
+    await SeatHold.findByIdAndDelete(req.params.holdId);
+
+    res.json({ message: "Seat hold released" });
+  } catch (err) {
+    console.error("Release hold error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+setInterval(async () => {
+  const now = Date.now();
+  const expired = await SeatHold.find({ expiresAt: { $lt: now } });
+
+  for (let hold of expired) {
+    const showtime = await Showtime.findById(hold.showtime_id);
+    hold.seats.forEach(seat => {
+      if (showtime.seatMap[seat] === "held") {
+        showtime.seatMap[seat] = "available";
+      }
+    });
+    await showtime.save();
+    await SeatHold.findByIdAndDelete(hold._id);
+  }
+}, 60 * 1000); // runs every 60 seconds
+
+// Checkout
+
+app.post("/api/checkout", async (req, res) => {
+  try {
+    const { userId, showtimeId, holdId } = req.body;
+
+    const hold = await SeatHold.findById(holdId);
+    if (!hold) return res.status(400).json({ message: "Hold not found or expired" });
+
+    const showtime = await Showtime.findById(showtimeId);
+
+    //  Prevent double booking
+    for (let seat of hold.seats) {
+      if (showtime.seatMap[seat] === "sold") {
+        return res.status(409).json({
+          message: `Seat ${seat} was already purchased`
+        });
+      }
+    }
+
+    //  Convert HELD → SOLD
+    hold.seats.forEach(seat => showtime.seatMap[seat] = "sold");
+    await showtime.save();
+
+    // Create Ticket
+    const ticket = await Ticket.create({
+      user_id: userId,
+      showtime_id: showtimeId,
+      seats: hold.seats,
+      purchaseDate: new Date()
+    });
+
+    // Remove hold
+    await SeatHold.findByIdAndDelete(holdId);
+
+    res.json({ message: "Purchase successful", ticket });
+  } catch (err) {
+    console.error("Checkout error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 const PORT = 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
