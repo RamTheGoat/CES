@@ -2,45 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./AdminDetails.css";
 
-// Generate about a week of days to choose from
-const getNextSevenDays = () => {
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    days.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
-  }
-  return days;
-};
-
-// Default showtimes
-const defaultShowtimes = {
-  0: ["1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"],
-  1: ["1:30 PM", "4:30 PM", "7:30 PM", "10:30 PM"],
-  2: ["2:00 PM", "5:00 PM", "8:00 PM", "11:00 PM"],
-  3: ["12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"],
-  4: ["1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"],
-  5: ["2:30 PM", "5:30 PM", "8:30 PM", "11:30 PM"],
-  6: ["11:00 AM", "2:00 PM", "5:00 PM", "8:00 PM"]
-};
-
 export default function AdminDetails() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
-  const [showtimes, setShowtimes] = useState(defaultShowtimes);
+  const [showtimes, setShowtimes] = useState([]);
   const [selectedDay, setSelectedDay] = useState(0);
-  const [isEditing, setIsEditing] = useState(false);
-  const [newTime, setNewTime] = useState("");
-  const days = getNextSevenDays();
+  const [days, setDays] = useState([]);
   const navigate = useNavigate();
-
-  // Load showtimes from local storage
-  useEffect(() => {
-    const savedShowtimes = localStorage.getItem(`showtimes_${id}`);
-    if (savedShowtimes) {
-      setShowtimes(JSON.parse(savedShowtimes));
-    }
-  }, [id]);
 
   // Fetch movie
   useEffect(() => {
@@ -53,31 +21,21 @@ export default function AdminDetails() {
         console.error("Failed to fetch movie data.", error);
       }
     };
+
+    const fetchShowtimes = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/api/showtimes/${id}`);
+        const data = await response.json();
+        setShowtimes(data);
+        setDays(Array.from(new Set(data.map(showtime => showtime.date))));
+      } catch (error) {
+        console.error("Failed to fetch showtime data:", error.message);
+      }
+    };
+
     fetchMovie();
+    fetchShowtimes();
   }, [id]);
-
-  const saveShowtimes = (updatedShowtimes) => {
-    setShowtimes(updatedShowtimes);
-    localStorage.setItem(`showtimes_${id}`, JSON.stringify(updatedShowtimes));
-  };
-
-  const addShowtime = () => {
-    if (!newTime.trim()) return;
-    
-    const updatedShowtimes = { ...showtimes };
-    if (!updatedShowtimes[selectedDay]) {
-      updatedShowtimes[selectedDay] = [];
-    }
-    updatedShowtimes[selectedDay].push(newTime);
-    saveShowtimes(updatedShowtimes);
-    setNewTime("");
-  };
-
-  const removeShowtime = (timeIndex) => {
-    const updatedShowtimes = { ...showtimes };
-    updatedShowtimes[selectedDay].splice(timeIndex, 1);
-    saveShowtimes(updatedShowtimes);
-  };
 
   if (!movie) return <p>Loading...</p>;
   else if (!movie.title) return (
@@ -188,55 +146,27 @@ export default function AdminDetails() {
               ))}
             </div>
 
-            {/* New showtimes */}
-            {isEditing && (
-              <div className="details_add-showtime">
-                <input
-                  type="text"
-                  value={newTime}
-                  onChange={(e) => setNewTime(e.target.value)}
-                  placeholder="Enter time (e.g., 7:00 PM)"
-                  className="details_time-input"
-                />
-                <button onClick={addShowtime} className="details_add-btn">
-                  Add Time
-                </button>
-              </div>
-            )}
-
             {/* Time selection */}
             <div className="details_times">
-              {showtimes[selectedDay] && showtimes[selectedDay].map((time, index) => (
+              {showtimes.filter(showtime => showtime.date === days[selectedDay]).map((showtime, index) => (
                 <div key={index} className="details_time-container">
-                  {isEditing ? (
-                    <>
-                      <span className="details_time-text">{time}</span>
-                      <button
-                        className="details_remove-btn"
-                        onClick={() => removeShowtime(index)}
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      className="details_time-btn"
-                      onClick={() => navigate("/booking", {
-                        state: {
-                          movieTitle: movie.title,
-                          showtime: time,
-                          date: days[selectedDay]
-                        }
-                      })}
-                    >
-                      {time}
-                    </button>
-                  )}
+                  <button
+                    className="details_time-btn"
+                    onClick={() => navigate("/booking", {
+                      state: {
+                        movieTitle: movie.title,
+                        showtime: showtime.time,
+                        date: showtime.date
+                      }
+                    })}
+                  >
+                    {showtime.time}
+                  </button>
                 </div>
               ))}
               
               {(!showtimes[selectedDay] || showtimes[selectedDay].length === 0) && (
-                <p className="details_no-showtimes">No showtimes available for this day</p>
+                <p className="details_no-showtimes">No showtimes currently available for this movie</p>
               )}
             </div>
           </section>
@@ -244,9 +174,9 @@ export default function AdminDetails() {
         <section className="details_edit-section">
           <button 
             className="details_edit-btn"
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => navigate(`/showtimes/${id}`)}
           >
-            {isEditing ? 'Done Editing' : 'Edit Showtimes'}
+            Edit Showtimes
           </button>
         </section>
       </div>
