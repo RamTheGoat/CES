@@ -16,6 +16,7 @@ import EditShowTimes from "../Pages/EditShowTimes";
 import AdminDetails from "../Pages/AdminDetails";
 import AddMovie from "../Pages/AddMovie";
 import ManagePromotions from "../Pages/ManagePromotions";
+import ManageUsers from "../Pages/ManageUsers";
 import Admin from "../Components/AdminElement";
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/editShowTimes" element={<Admin element={<EditShowTimes/>} redirect/>} />
           <Route path="/addMovie" element={<Admin element={<AddMovie/>} redirect/>} />
           <Route path="/promotions" element={<Admin element={<ManagePromotions/>} redirect/>} />
+          <Route path="/users" element={<Admin element={<ManageUsers/>} redirect/>} />
         </Routes>
       </main>
     </div>
