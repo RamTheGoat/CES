@@ -39,7 +39,7 @@ export default function App() {
           <Route path="/editShowTimes" element={<Admin element={<EditShowTimes/>} redirect/>} />
           <Route path="/addMovie" element={<Admin element={<AddMovie/>} redirect/>} />
           <Route path="/promotions" element={<Admin element={<ManagePromotions/>} redirect/>} />
-          <Route path="/manageShowtimes" element={<Admin element={<ManageShowtimes/>} redirect/>} />
+          <Route path="/showtimes" element={<Admin element={<ManageShowtimes/>} redirect/>} />
         </Routes>
       </main>
     </div>
