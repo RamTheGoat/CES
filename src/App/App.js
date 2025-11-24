@@ -19,6 +19,7 @@ import ManageShowtimes from "../Pages/ManageShowtimes";
 import ManagePromotions from "../Pages/ManagePromotions";
 import ManageUsers from "../Pages/ManageUsers";
 import Admin from "../Components/AdminElement";
+import Checkout from "../Pages/Checkout";
 
 export default function App() {
   return (
@@ -32,7 +33,8 @@ export default function App() {
           <Route path="/details/:id" element={<Admin element={<AdminDetails />} />}>
           <Route path="/details/:id" element={<Details />} /></Route>
           <Route path="/search" element={<Search />} />
-          <Route path="/booking" element={<Booking />} />
+          <Route path="/booking/:showtimeId" element={<Booking />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Register/>} />
           <Route path="/profile" element={<Profile/>} />

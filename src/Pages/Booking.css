@@ -1,4 +1,3 @@
-/* color pallete - same as other pages */
 :root{
   --bg: #0b1020;
   --bg-2:#0b0f1a;
@@ -53,6 +52,38 @@
   margin-right: auto;
 }
 
+/* Ticket selectors */
+.ticket-selection {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ticket-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.ticket-input label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ticket-input input {
+  width: 60px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.2);
+  text-align: center;
+  background: var(--chip);
+  color: var(--text);
+}
+
 /* Seat selection section */
 .booking_section{
   background: var(--card);
@@ -86,7 +117,7 @@
   letter-spacing: 2px;
 }
 
-/* Seat grid - arranged in proper rows */
+/* Seat grid */
 .booking_seats-grid{
   display: flex;
   flex-direction: column;
@@ -186,7 +217,7 @@
   background: rgba(255,255,255,.1);
 }
 
-/* Order summary side panel */
+/* Order summary */
 .booking_order{
   background: var(--card);
   border-radius: 16px;
@@ -292,7 +323,7 @@
   transform: none;
 }
 
-/* testing out what it looks like on smallerier screen */
+/* Responsive */
 @media (max-width: 768px) {
   .booking_content {
     grid-template-columns: 1fr;
@@ -320,4 +351,30 @@
   .booking_seats-in-row {
     gap: 6px;
   }
+
+  .ticket-selection {
+    gap: 12px;
+  }
+
+  .ticket-input input {
+    width: 50px;
+    padding: 5px;
+  }
+}
+
+.booking_seat--sold {
+  background: red;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.booking_seat--held {
+  background: orange;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.booking_seat--held-by-me {
+  background: yellow;
+  cursor: pointer;
 }

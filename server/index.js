@@ -587,40 +587,30 @@ app.get("/api/showtimes/:id/seats", async (req, res) => {
 app.post("/api/hold-seats", async (req, res) => {
   try {
     const { userId, showtimeId, seats } = req.body;
-
-    const showtime = await Showtime.findById(showtimeId);
-    if (!showtime) return res.status(404).json({ message: "Showtime not found" });
-
-    if (!showtime.seatMap) showtime.seatMap = {};
-
-    // Check availability
-    for (let seat of seats) {
-      if (showtime.seatMap[seat] === "sold" || showtime.seatMap[seat] === "held") {
-        return res.status(409).json({ message: `Seat ${seat} is no longer available` });
-      }
+    if (!userId || !showtimeId || !seats?.length) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Mark seats as HELD
-    seats.forEach(seat => {
-      showtime.seatMap[seat] = "held";
-      if (!showtime.heldBy) showtime.heldBy = {};
-      showtime.heldBy[seat] = userId;
+    // Check if any seat is already booked
+    const Booking = mongoose.model("Booking");
+    const conflict = await Booking.findOne({
+      showtime_id: showtimeId,
+      seats: { $in: seats },
     });
+    if (conflict) return res.status(400).json({ message: "One or more seats are already booked" });
 
-    await showtime.save();
-
-    // Create SeatHold record
+    // Create hold (expires in 5 min)
     const hold = await SeatHold.create({
-      userId,
-      showtimeId,
+      user_id: userId,
+      showtime_id: showtimeId,
       seats,
-      expiresAt: Date.now() + 5 * 60 * 1000 // 5 mins
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    res.json({ message: "Seats held", holdId: hold._id, expiresAt: hold.expiresAt });
+    res.json({ holdId: hold._id, expiresAt: hold.expiresAt });
   } catch (err) {
-    console.error("Hold seats error:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({ message: "Server error holding seats" });
   }
 });
 
@@ -663,47 +653,98 @@ setInterval(async () => {
   }
 }, 60 * 1000);
 
-// POST — CHECKOUT (final purchase)
+// POST — Confirm checkout
+// POST — Confirm checkout
 app.post("/api/checkout", async (req, res) => {
   try {
-    const { userId, showtimeId, holdId } = req.body;
+    const { userId, showtimeId, holdId, seats, tickets } = req.body;
 
-    const hold = await SeatHold.findById(holdId);
-    if (!hold) return res.status(400).json({ message: "Hold not found or expired" });
+    console.log("Checkout request body:", req.body); // Debug logging
 
-    const showtime = await Showtime.findById(showtimeId);
-
-    // Prevent double booking
-    for (let seat of hold.seats) {
-      if (showtime.seatMap[seat] === "sold") {
-        return res.status(409).json({ message: `Seat ${seat} already purchased` });
-      }
+    // 1️⃣ Validate required fields
+    if (!userId || !showtimeId || !holdId || !seats?.length || !tickets) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Convert HELD → SOLD
-    hold.seats.forEach(seat => {
-      showtime.seatMap[seat] = "sold";
-      if (showtime.heldBy) delete showtime.heldBy[seat];
+    // 2️⃣ Validate user exists
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // 3️⃣ Validate hold
+    const hold = await SeatHold.findById(holdId);
+    if (!hold || hold.expiresAt < new Date()) {
+      return res.status(400).json({ message: "Hold not found or expired" });
+    }
+
+    // 4️⃣ Validate showtime exists
+    const showtime = await Showtime.findById(showtimeId);
+    if (!showtime) return res.status(404).json({ message: "Showtime not found" });
+
+    // 5️⃣ Calculate total
+    const total =
+      (tickets.adult || 0) * 12 +
+      (tickets.child || 0) * 8 +
+      (tickets.senior || 0) * 10;
+
+    // 6️⃣ Create booking
+    const booking = await Booking.create({
+      user_id: user._id,        // must match schema field
+      showtime_id: showtime._id, 
+      seats,
+      total,
     });
 
-    await showtime.save();
+    // 7️⃣ Create tickets for each seat
+    const ticketDocs = [];
+    let seatIndex = 0;
 
-    // Create ticket
-    const ticket = await Ticket.create({
-      userId,
-      showtimeId,
-      seats: hold.seats,
-      purchaseDate: new Date()
-    });
+    for (let i = 0; i < (tickets.adult || 0); i++) {
+      ticketDocs.push({
+        user_id: user._id,
+        booking_id: booking._id,
+        seat: seats[seatIndex++],
+        price: 12,
+      });
+    }
 
+    for (let i = 0; i < (tickets.child || 0); i++) {
+      ticketDocs.push({
+        user_id: user._id,
+        booking_id: booking._id,
+        seat: seats[seatIndex++],
+        price: 8,
+      });
+    }
+
+    for (let i = 0; i < (tickets.senior || 0); i++) {
+      ticketDocs.push({
+        user_id: user._id,
+        booking_id: booking._id,
+        seat: seats[seatIndex++],
+        price: 10,
+      });
+    }
+
+    // 8️⃣ Insert tickets
+    await Ticket.insertMany(ticketDocs);
+
+    // 9️⃣ Remove the hold
     await SeatHold.findByIdAndDelete(holdId);
 
-    res.json({ message: "Purchase successful", ticket });
+    // 🔟 Update showtime seat map to mark seats as sold
+    seats.forEach((seat) => {
+      if (showtime.seatMap[seat] === "held") showtime.seatMap[seat] = "sold";
+      if (showtime.heldBy) delete showtime.heldBy[seat];
+    });
+    await showtime.save();
+
+    res.status(200).json({ message: "Booking confirmed", bookingId: booking._id });
   } catch (err) {
     console.error("Checkout error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error during checkout", error: err });
   }
 });
+
 
 
 const PORT = 4000;

@@ -2,69 +2,78 @@ import React, { useState, useEffect } from "react";
 import "./Details.css";
 import { useNavigate, useParams } from "react-router-dom";
 
-// Generate about a week of days to choose from
-const getNextSevenDays = () => {
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    days.push(date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
-  }
-  return days;
-};
-
-// Sample showtimes for each day
-const showtimes = {
-  0: ["1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"],
-  1: ["1:30 PM", "4:30 PM", "7:30 PM", "10:30 PM"],
-  2: ["2:00 PM", "5:00 PM", "8:00 PM", "11:00 PM"],
-  3: ["12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"],
-  4: ["1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"],
-  5: ["2:30 PM", "5:30 PM", "8:30 PM", "11:30 PM"],
-  6: ["11:00 AM", "2:00 PM", "5:00 PM", "8:00 PM"]
-};
-
 export default function Details() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(0);
-  const days = getNextSevenDays();
+  const [dbShowtimes, setDbShowtimes] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch movie
+  // Fetch movie info
   useEffect(() => {
     const fetchMovie = async () => {
       try {
         const response = await fetch(`http://localhost:4000/api/movies/${id}`);
         const data = await response.json();
-        console.log("Fetched movie:", data);
         setMovie(data);
       } catch (error) {
         console.error("Failed to fetch movie data.", error);
       }
     };
+
     fetchMovie();
   }, [id]);
 
-  if (!movie) return <p>Loading...</p>;
-  else if (!movie.title) return (
-    <main className="details">
-      <h2 style={{padding: "100px"}}>Movie Not Found!</h2>
-    </main>
-  );
+  // Fetch showtimes from database
+  useEffect(() => {
+    const fetchShowtimes = async () => {
+      try {
+        const res = await fetch(`http://localhost:4000/api/showtimes?movieId=${id}`);
+        const data = await res.json();
+        setDbShowtimes(data);
 
-  // Determine if movie is "Now Playing"
+        // Auto-select first available date
+        if (data.length > 0) {
+          setSelectedDate(data[0].date);
+        }
+      } catch (error) {
+        console.error("Error loading showtimes:", error);
+      }
+    };
+
+    fetchShowtimes();
+  }, [id]);
+
+  if (!movie) return <p>Loading...</p>;
+  if (!movie.title) {
+    return (
+      <main className="details">
+        <h2 style={{ padding: "100px" }}>Movie Not Found!</h2>
+      </main>
+    );
+  }
+
   const isNowPlaying = movie.status === "Now Playing";
+
+  // Group showtimes by date
+  const showtimesByDate = dbShowtimes.reduce((acc, s) => {
+    if (!acc[s.date]) acc[s.date] = [];
+    acc[s.date].push(s);
+    return acc;
+  }, {});
+
+  const availableDates = Object.keys(showtimesByDate);
 
   return (
     <main className="details">
-      {/* Movie banner */}
+
+      {/* Banner */}
       <section
         className="details_banner"
-        style={{ backgroundImage: `url(${movie.bannerImage || "placeholder-url-here"})` }}
+        style={{ backgroundImage: `url(${movie.bannerImage || ""})` }}
       />
 
-      {/* Image gallery */}
+      {/* Images */}
       <section className="details_gallery">
         {(movie.galleryImages || []).map((img, index) => (
           <div
@@ -75,9 +84,8 @@ export default function Details() {
         ))}
       </section>
 
-      {/* Content sections */}
       <div className="details_content">
-        {/* About section */}
+        {/* About */}
         <section className="details_section">
           <h2 className="details_section-title">About {movie.title}</h2>
           <p className="details_description">{movie.synopsis}</p>
@@ -97,7 +105,7 @@ export default function Details() {
           </div>
         </section>
 
-        {/* Genre section */}
+        {/* Genres */}
         <section className="details_section">
           <h2 className="details_section-title">Genres</h2>
           <div className="details_genres">
@@ -108,7 +116,7 @@ export default function Details() {
           </div>
         </section>
 
-        {/* Trailer section */}
+        {/* Trailer */}
         <section className="details_section">
           <h2 className="details_section-title">Trailer</h2>
           <div className="details_trailer-container">
@@ -120,68 +128,48 @@ export default function Details() {
                 allowFullScreen
               />
             ) : (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--muted)'
-              }}>
-                Trailer link will be added here
-              </div>
+              <div className="no-trailer">Trailer link will be added here</div>
             )}
           </div>
         </section>
 
-        {/* Showtimes section — only for Now Playing movies */}
-        {isNowPlaying && showtimes[selectedDay] && (
+        {/* Showtimes (from DB) */}
+        {isNowPlaying && availableDates.length > 0 && (
           <section className="details_section">
             <h2 className="details_section-title">Showtimes</h2>
 
-            {/* Day selection */}
+            {/* Dates */}
             <div className="details_days">
-              {days.map((day, index) => (
+              {availableDates.map((date) => (
                 <button
-                  key={index}
-                  className={`details_day-btn ${selectedDay === index ? 'details_day-btn--active' : ''}`}
-                  onClick={() => setSelectedDay(index)}
+                  key={date}
+                  className={`details_day-btn ${selectedDate === date ? "details_day-btn--active" : ""}`}
+                  onClick={() => setSelectedDate(date)}
                 >
-                  {day}
+                  {date}
                 </button>
               ))}
             </div>
 
-            {/* Time selection */}
+            {/* Times */}
             <div className="details_times">
-              {showtimes[selectedDay].map((time, index) => (
+              {showtimesByDate[selectedDate].map((s) => (
                 <button
-                  key={index}
+                  key={s._id}
                   className="details_time-btn"
-                  onClick={() => navigate("/booking", {
-                    state: {
-                      movieTitle: movie.title,
-                      showtime: time,
-                      date: days[selectedDay]
-                    }
-                  })}
+                  onClick={() => navigate(`/booking/${s._id}`)}
                 >
-                  {time}
+                  {s.time}
                 </button>
               ))}
             </div>
           </section>
         )}
 
-        {/* Book tickets button */}
+        {/* Book button */}
         <section className="details_book-section">
           {isNowPlaying ? (
-            <button className="details_book-btn">
-              Book Your Tickets Today!
-            </button>
+            <button className="details_book-btn">Book Your Tickets Today!</button>
           ) : (
             <p className="coming-soon-text">Coming Soon</p>
           )}
