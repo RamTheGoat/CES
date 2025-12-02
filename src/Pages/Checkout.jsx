@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate} from "react-router-dom";
+import "./Checkout.css";
 
 export default function Checkout() {
   const location = useLocation();
@@ -97,28 +98,31 @@ export default function Checkout() {
   };
 
   return (
-    <main style={{ padding: 20 }}>
-      <h2>Checkout</h2>
-      <div>Movie: {showtime.movieTitle || "Unknown"}</div>
-      <div>
-        Showtime: {showtime.date || ""} • {showtime.time || ""}
+    <main className="checkoutPage" style={{ padding: 20 }}>
+      <div className="checkoutSummary">
+      <div className="movieTitle"> {showtime.movieTitle || "Unknown"} </div>
+      <div className="showtimeInfo">
+        {showtime.date || ""} | {showtime.time || ""}
       </div>
-      <div>Seats: {seats.length > 0 ? seats.join(", ") : "None selected"}</div>
 
-      <div style={{ marginTop: 12 }}>
-        <strong>Tickets:</strong>
+      <h2 className="OrderTitle">Order Details</h2>
+
+      <div className="ticketTypes" style={{ marginTop: 12 }}>
+        <strong>TICKETS</strong>
         <div>Adult: {tickets.adult || 0}</div>
         <div>Senior: {tickets.senior || 0}</div>
         <div>Child: {tickets.child || 0}</div>
       </div>
 
-      <div style={{ marginTop: 12 }}>
-        <strong>Total: </strong>${totalPrice.toFixed(2)}
+      <div className="seats">Seats {seats.length > 0 ? seats.join(", ") : "None selected"}</div>
+
+      <div className="totalCost" style={{ marginTop: 12 }}>
+        <strong>TOTAL </strong>${totalPrice.toFixed(2)}
       </div>
 
-      <div style={{ marginTop: 12 }}>
+      <div className="ticketTimer" style={{ marginTop: 12 }}>
         {timeLeft > 0 ? (
-          <div>
+          <div className="timeLeft">
             Time left to complete purchase: <strong>{formatSeconds(timeLeft)}</strong>
           </div>
         ) : (
@@ -128,7 +132,7 @@ export default function Checkout() {
         )}
       </div>
 
-      <div style={{ marginTop: 20 }}>
+      <div className="decisionButtons" style={{ marginTop: 20 }}>
         <button
           onClick={handleConfirm}
           disabled={processing || timeLeft <= 0 || !showtimeId}
@@ -138,6 +142,7 @@ export default function Checkout() {
         <button onClick={handleCancel} style={{ marginLeft: 12 }}>
           Cancel
         </button>
+      </div>
       </div>
     </main>
   );
