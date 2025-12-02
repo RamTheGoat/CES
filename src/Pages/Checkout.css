@@ -1,0 +1,119 @@
+/* color pallete */
+:root{
+  --bg: #0b1020;
+  --bg-2:#0b0f1a;
+  --text:#eef2ff;
+  --muted:#b9c1d9;
+  --accent:#cc12cc;
+  --card: #0f152c;
+  --chip: #16203b;
+}
+
+.OrderTitle{
+  font-size: 32px;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+/* Layout */
+.checkoutPage {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.checkoutSummary {
+    margin-top: 60px;
+  background: var(--card);
+  padding: 24px;
+  width: 100%;
+  max-width: 450px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Movie title & info */
+.movieTitle {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.showtimeInfo {
+  font-size: 0.95rem;
+  color: #656565;
+  margin-bottom: 20px;
+}
+
+/* Section titles */
+.OrderTitle {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+}
+
+/* Ticket types */
+.ticketTypes div {
+  margin: 2px 0;
+}
+
+/* Seats */
+.seats {
+  margin-top: 14px;
+}
+
+/* Total cost */
+.totalCost {
+  margin-top: 14px;
+  font-size: 1.1rem;
+}
+
+/* Timer */
+.ticketTimer {
+  margin-top: 14px;
+  background: #fff5cc;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.timeLeft {
+  color: var(--bg)
+}
+
+.ticketTimer strong {
+  color: #b34a00;
+}
+
+/* Buttons */
+.decisionButtons button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.decisionButtons button:first-child {
+  background: var(--accent);
+  color: white;
+}
+
+.decisionButtons button:first-child:disabled {
+  background: #fa96f0;
+  cursor: not-allowed;
+}
+
+.decisionButtons button:last-child {
+  background: #ddd;
+  color: black;
+  margin-left: 12px;
+}
+
+.decisionButtons button:hover:not(:disabled) {
+  opacity: 0.9;
+}
