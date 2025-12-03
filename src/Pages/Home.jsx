@@ -47,6 +47,10 @@ export default function Home() {
 
         setNowPlaying(moviesData.filter((m) => m.status === "Now Playing"));
         setComingSoon(moviesData.filter((m) => m.status === "Coming Soon"));
+
+        console.log("movies:", moviesData);
+        console.log("nowPlaying:", moviesData.filter(m => m.status === "Now Playing"));
+
         /*
         setNowPlaying(moviesData.(0, 6));
         setComingSoon(moviesData.slice(6));
