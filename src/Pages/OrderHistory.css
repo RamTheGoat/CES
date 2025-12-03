@@ -1,0 +1,41 @@
+.orderHistoryPage {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+    color: #e0e0e0;
+  }
+  
+  .loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    text-align: center;
+  }
+  
+  .orderCard {
+    transition: all 0.3s ease;
+  }
+  
+  .orderCard:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media print {
+    .orderHistoryPage {
+      background: white !important;
+      color: black !important;
+    }
+    
+    .pagination,
+    .orderCard button {
+      display: none !important;
+    }
+    
+    .orderCard {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      border: 1px solid #000 !important;
+      margin-bottom: 20px !important;
+    }
+  }

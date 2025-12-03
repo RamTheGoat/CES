@@ -19,6 +19,8 @@ import ManagePromotions from "../Pages/ManagePromotions";
 import ManageUsers from "../Pages/ManageUsers";
 import Admin from "../Components/AdminElement";
 import Checkout from "../Pages/Checkout";
+import Confirmation from "../Pages/Confirmation"
+import OrderHistory from "../Pages/OrderHistory";
 
 export default function App() {
   return (
@@ -43,6 +45,9 @@ export default function App() {
           <Route path="/showtimes" element={<Admin element={<ManageShowtimes/>} redirect/>} />
           <Route path="/showtimes/:id" element={<Admin element={<ManageShowtimes/>} redirect/>} />
           <Route path="/users" element={<Admin element={<ManageUsers/>} redirect/>} />
+          <Route path="/confirmation" element={<Confirmation />} />
+          <Route path="/orders" element={<OrderHistory />} />
+          <Route path="/profile/orders" element={<OrderHistory />} />
         </Routes>
       </main>
     </div>
