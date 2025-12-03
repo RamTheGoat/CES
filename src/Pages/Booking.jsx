@@ -161,10 +161,10 @@ export default function Booking() {
                     const isSold = seat.status === "sold";
 
                     let seatClass = "booking_seat";
-                    if (isSelected) seatClass += " booking_seat--selected";
-                    else if (isSold) seatClass += " booking_seat--sold";
-                    else if (isHeldByOther) seatClass += " booking_seat--held";
-                    else if (isHeldByMe) seatClass += " booking_seat--held-by-me";
+                     if (isSold) seatClass += " booking_seat--sold";
+                     else if (isHeldByOther) seatClass += " booking_seat--held";
+                     else if (isHeldByMe) seatClass += " booking_seat--held-by-me";
+                     else if (isSelected) seatClass += " booking_seat--selected";
 
                     const seatDisabled = isSold || isHeldByOther;
 
@@ -183,6 +183,26 @@ export default function Booking() {
               </div>
             ))}
           </div>
+
+          {/* Legend colors */}
+          <div className="booking_legend">
+            <div className="booking_legend-item">
+              <div className="booking_legend-color booking_legend-color--available"></div>
+              <span>Available</span>
+            </div>
+            <div className="booking_legend-item">
+              <div className="booking_legend-color booking_legend-color--selected"></div>
+              <span>Selected</span>
+            </div>
+            <div className="booking_legend-item">
+              <div className="booking_legend-color booking_legend-color--sold"></div>
+              <span>Sold</span>
+            </div>
+            <div className="booking_legend-item">
+              <div className="booking_legend-color booking_legend-color--held"></div>
+              <span>Held</span>
+            </div>
+          </div>          
         </section>
 
         {/* Order summary */}
