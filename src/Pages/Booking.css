@@ -217,6 +217,14 @@
   background: rgba(255,255,255,.1);
 }
 
+.booking_legend-color--sold {
+  background: #ff4757;
+}
+
+.booking_legend-color--held {
+  background: #ffa502;
+}
+
 /* Order summary */
 .booking_order{
   background: var(--card);
