@@ -142,7 +142,7 @@ export default function Details() {
                   className={`details_day-btn ${selectedDate === date ? "details_day-btn--active" : ""}`}
                   onClick={() => setSelectedDate(date)}
                 >
-                  {(new Date(date)).toLocaleDateString("en-US", { dateStyle: "short" })}
+                  {date}
                 </button>
               ))}
             </div>
