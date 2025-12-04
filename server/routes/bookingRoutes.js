@@ -27,6 +27,46 @@ router.get("/api/bookings", async (req, res) => {
   }
 });
 
+// Adding Seat Status
+router.get("/api/showtimes/:showtimeId/seats", async (req, res) => {
+  try {
+    // Find the showtime
+    const showtime = await Showtime.findById(req.params.showtimeId);
+    if (!showtime) {
+      return res.status(404).json({ message: "Showtime not found" });
+    }
+
+    // Find all bookings for this showtime to get sold seats
+    const bookings = await Booking.find({ showtime_id: req.params.showtimeId });
+    const soldSeats = bookings.flatMap(booking => booking.seats);
+
+    // Find all active seat holds (not expired yet)
+    const holds = await SeatHold.find({ 
+      showtime_id: req.params.showtimeId,
+      expiresAt: { $gt: new Date() } // Only get holds that haven't expired
+    });
+
+    // Create object showing who holds each seat
+    const heldBy = {};
+    holds.forEach(hold => {
+      hold.seats.forEach(seat => {
+        heldBy[seat] = hold.user_id;
+      });
+    });
+
+    // Send back the seat data
+    res.json({
+      soldSeats,      // Array of sold seats like ["A1", "B2"]
+      heldBy,         // Object like {"C3": "user123", "C4": "user123"}
+      seatMap: showtime.seatMap || {} // Include any existing seat map
+    });
+
+  } catch (err) {
+    console.error("Error fetching seat status:", err);
+    res.status(500).json({ message: "Server error fetching seats" });
+  }
+});
+
 // POST — HOLD seats temporarily
 router.post("/api/hold-seats", async (req, res) => {
   try {
