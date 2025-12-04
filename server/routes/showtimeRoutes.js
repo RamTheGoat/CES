@@ -1,6 +1,7 @@
 // routes/showtimes.js
 import express from "express";
 import Showtime from "../models/Showtime.js";
+import Booking from "../models/Booking.js";
 
 const router = express.Router();
 
@@ -111,11 +112,15 @@ router.get("/:id/seats", async (req, res) => {
     const showtime = await Showtime.findById(req.params.id);
     if (!showtime) return res.status(404).json({ message: "Showtime not found" });
 
+    const bookings = await Booking.find({ showtime_id: req.params.id });
+    const seats = bookings.flatMap(booking => booking.seats);
+
     return res.json({
       heldBy: showtime.heldBy || {},
-      soldSeats: Object.entries(showtime.seatMap || {})
-        .filter(([_, status]) => status === "sold")
-        .map(([seat]) => seat),
+      // soldSeats: Object.entries(showtime.seatMap || {})
+      //   .filter(([_, status]) => status === "sold")
+      //   .map(([seat]) => seat),
+      soldSeats: seats,
     });
   } catch (err) {
     console.error("Seat map error:", err);
