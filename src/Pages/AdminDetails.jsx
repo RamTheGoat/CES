@@ -141,7 +141,7 @@ export default function AdminDetails() {
                   className={`details_day-btn ${selectedDay === index ? 'details_day-btn--active' : ''}`}
                   onClick={() => setSelectedDay(index)}
                 >
-                  {day}
+                  {(new Date(day)).toLocaleDateString("en-US", { dateStyle: "short" })}
                 </button>
               ))}
             </div>
@@ -152,7 +152,7 @@ export default function AdminDetails() {
                 <div key={index} className="details_time-container">
                   <button
                     className="details_time-btn"
-                    onClick={() => navigate("/booking", {
+                    onClick={() => navigate(`/booking/${showtime._id}`, {
                       state: {
                         movieTitle: movie.title,
                         showtime: showtime.time,
