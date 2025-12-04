@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./Booking.css";
-import "server/routes/bookingRoutes.js";
 
 export default function Booking() {
   const location = useLocation();
@@ -38,16 +37,38 @@ export default function Booking() {
         const res = await fetch(`http://localhost:4000/api/showtimes/${showtimeId}/seats`);
         const data = await res.json();
 
+        // Double Check The Data
+        console.log("Server response:", data);
+        console.log("Sold seats:", data.soldSeats);        
+
         const rows = "ABCDEF".split("").map((row) => ({
           row,
           seats: Array.from({ length: 10 }, (_, i) => {
             const id = `${row}${i + 1}`;
+
+            const currentUserId = getUserId();
+            const isSold = Array.isArray(data.soldSeats) && data.soldSeats.includes(id);
+            const heldByUserId = data.heldBy && data.heldBy[id];
+
+            // check seat status
             let status = "available";
-            if (data.soldSeats.includes(id)) status = "sold";
-            else if (data.heldBy && data.heldBy[id] && data.heldBy[id] !== getUserId())
-              status = "held";
-            else if (data.heldBy && data.heldBy[id] === getUserId()) status = "heldByMe";
-            return { id, status, heldBy: data.heldBy?.[id] || null };
+
+            if (isSold) {
+              status = "sold"; 
+            } else if (heldByUserId) {
+
+              if (heldByUserId === currentUserId) {
+                status = "heldByMe"; 
+              } else {
+                status = "held";
+              }
+            }
+            
+            return { 
+              id, 
+              status, 
+              heldBy: heldByUserId || null 
+            };
           }),
         }));
         setSeatLayout(rows);
