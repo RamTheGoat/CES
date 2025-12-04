@@ -7,6 +7,9 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+  const [dialogMessage, setDialogMessage] = useState("");
+  const [showDialog, setShowDialog] = useState(false);
+
 
     const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +24,9 @@ const Login = () => {
         const data = await res.json();
 
         if (!res.ok) {
-        alert(data.message || "Login failed");
+        setDialogMessage(data.message || "Login failed");
+        setShowDialog(true);
+
         return;
         }
 
@@ -31,7 +36,8 @@ const Login = () => {
         localStorage.setItem("user", JSON.stringify(data.user));
         }
 
-        alert(data.message || "Login successful!");
+        setDialogMessage(data.message || "Login successful");
+        setShowDialog(true);
         console.log("User data:", data.user);
 
         // ✅ If using a temporary password, redirect straight to profile
@@ -53,10 +59,12 @@ const Login = () => {
         return;
         }
 
-        alert("Unknown role.");
+        setDialogMessage("Unkown user role");
+        setShowDialog(true);
     } catch (err) {
         console.error("Login error:", err);
-        alert("Something went wrong!");
+        setDialogMessage("Something went wrong!");
+        setShowDialog(true);
     }
     };
 
@@ -65,6 +73,18 @@ const Login = () => {
   return (
     <div className="login-container">
       <h2>Login</h2>
+      {showDialog && (
+      <dialog open className="popup-dialog">
+         <p>{dialogMessage}</p>
+
+       <button
+         onClick={() => setShowDialog(false)}
+         className="close-btn"
+         > 
+       OK
+      </button>
+      </dialog>
+      )}
       <form onSubmit={handleSubmit}>
         <div className='inputbox'>
           <label className='emailBox'>
