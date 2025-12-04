@@ -69,6 +69,7 @@
   background: var(--bg);
   color: gray;
   pointer-events: none;
+  transform: scaleY(1.1);
 }
 
 .date-input:focus:before,
@@ -88,6 +89,7 @@
   background: var(--bg);
   color: gray;
   pointer-events: none;
+  transform: scaleY(1.1);
 }
 
 .time-input:focus:before,
