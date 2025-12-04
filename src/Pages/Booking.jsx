@@ -66,7 +66,7 @@ export default function Booking() {
             
             return { 
               id, 
-              status, 
+              status,
               heldBy: heldByUserId || null 
             };
           }),
