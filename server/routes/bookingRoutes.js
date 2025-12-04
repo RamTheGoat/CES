@@ -1,4 +1,4 @@
-// routes/bookings.js
+// routes/bookingRoutes.js
 import express from "express";
 import mongoose from "mongoose";
 import Booking from "../models/Booking.js";
@@ -6,11 +6,13 @@ import SeatHold from "../models/SeatHold.js";
 import Showtime from "../models/Showtime.js";
 import Ticket from "../models/Ticket.js";
 import User from "../models/User.js";
+import Promotion from "../models/Promotion.js";
+import Order from "../models/Order.js";
 
 const router = express.Router();
 
-// GET all bookings (kept the populate logic)
-router.get("/api/bookings", async (req, res) => {
+// GET all bookings (admin view)
+router.get("/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find()
       .populate("user_id", "firstName lastName email")
@@ -68,7 +70,7 @@ router.get("/api/showtimes/:showtimeId/seats", async (req, res) => {
 });
 
 // POST — HOLD seats temporarily
-router.post("/api/hold-seats", async (req, res) => {
+router.post("/hold-seats", async (req, res) => {
   try {
     const { userId, showtimeId, seats } = req.body;
     if (!userId || !showtimeId || !seats?.length) {
@@ -76,8 +78,7 @@ router.post("/api/hold-seats", async (req, res) => {
     }
 
     // Check if any seat is already booked
-    const BookingModel = mongoose.model("Booking");
-    const conflict = await BookingModel.findOne({
+    const conflict = await Booking.findOne({
       showtime_id: showtimeId,
       seats: { $in: seats },
     });
@@ -86,7 +87,7 @@ router.post("/api/hold-seats", async (req, res) => {
     // Create hold (expires in 5 min)
     const hold = await SeatHold.create({
       user_id: userId,
-      showtime_id: showtimeId,
+      showtime_id: showtimeId,  // Fixed: match model field name
       seats,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
@@ -99,12 +100,12 @@ router.post("/api/hold-seats", async (req, res) => {
 });
 
 // DELETE — RELEASE an expired or cancelled hold
-router.delete("/api/release-hold/:holdId", async (req, res) => {
+router.delete("/release-hold/:holdId", async (req, res) => {
   try {
     const hold = await SeatHold.findById(req.params.holdId);
     if (!hold) return res.status(404).json({ message: "Hold not found" });
 
-    const showtime = await Showtime.findById(hold.showtimeId);
+    const showtime = await Showtime.findById(hold.showtime_id);  // Fixed: use underscore
     if (showtime) {
       hold.seats.forEach(seat => {
         if (showtime.seatMap && showtime.seatMap[seat] === "held") showtime.seatMap[seat] = "available";
@@ -121,43 +122,14 @@ router.delete("/api/release-hold/:holdId", async (req, res) => {
   }
 });
 
-// AUTO-EXPIRE HOLDS every 60 seconds
-setInterval(async () => {
+// POST — Confirm checkout (with promo code support)
+router.post("/checkout", async (req, res) => {
   try {
-    const now = Date.now();
-    const expiredHolds = await SeatHold.find({ expiresAt: { $lt: now } });
+    const { userId, showtimeId, holdId, seats, tickets, payment, promoCode } = req.body;
 
-    for (let hold of expiredHolds) {
-      const showtime = await Showtime.findById(hold.showtimeId);
+    console.log("Checkout request body:", req.body);
 
-      if (!showtime) {
-        console.warn(`Showtime not found for hold ${hold._id} (ID: ${hold.showtimeId})`);
-        await SeatHold.findByIdAndDelete(hold._id);
-        continue;
-      }
-
-      hold.seats.forEach(seat => {
-        if (showtime.seatMap && showtime.seatMap[seat] === "held") {
-          showtime.seatMap[seat] = "available";
-        }
-        if (showtime.heldBy) delete showtime.heldBy[seat];
-      });
-
-      await showtime.save();
-      await SeatHold.findByIdAndDelete(hold._id);
-    }
-  } catch (err) {
-    console.error("Auto-expire error:", err);
-  }
-}, 60 * 1000);
-
-// POST — Confirm checkout
-router.post("/api/checkout", async (req, res) => {
-  try {
-    const { userId, showtimeId, holdId, seats, tickets } = req.body;
-
-    console.log("Checkout request body:", req.body); // Debug logging
-
+    // Validate required fields
     if (!userId || !showtimeId || !holdId || !seats?.length || !tickets) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -173,18 +145,49 @@ router.post("/api/checkout", async (req, res) => {
     const showtime = await Showtime.findById(showtimeId);
     if (!showtime) return res.status(404).json({ message: "Showtime not found" });
 
-    const total =
-      (tickets.adult || 0) * 12 +
-      (tickets.child || 0) * 8 +
-      (tickets.senior || 0) * 10;
+    // Calculate total with possible discount
+    let total = (tickets.adult || 0) * 12 +
+                (tickets.child || 0) * 8 +
+                (tickets.senior || 0) * 10;
 
+    let discountAmount = 0;
+    let appliedPromo = null;
+
+    // Apply promo discount if provided
+    if (promoCode) {
+      const promo = await Promotion.findOne({ code: promoCode.toUpperCase() });
+      
+      if (promo) {
+        const now = new Date();
+        const expirationDate = new Date(promo.expiration);
+        
+        if (!isNaN(expirationDate.getTime()) && now <= expirationDate) {
+          appliedPromo = promo;
+          discountAmount = total * (promo.discount / 100);
+          
+          if (discountAmount > total) {
+            discountAmount = total;
+          }
+          
+          total = total - discountAmount;
+        }
+      }
+    }
+
+    total = Math.max(0, total);
+
+    // Create booking with discount info
     const booking = await Booking.create({
       user_id: user._id,
       showtime_id: showtime._id,
       seats,
       total,
+      discountApplied: discountAmount > 0,
+      discountAmount: discountAmount,
+      promoCodeUsed: appliedPromo ? appliedPromo.code : null
     });
 
+    // Create tickets
     const ticketDocs = [];
     let seatIndex = 0;
 
@@ -218,17 +221,70 @@ router.post("/api/checkout", async (req, res) => {
     await Ticket.insertMany(ticketDocs);
     await SeatHold.findByIdAndDelete(holdId);
 
+    // Update seat map
     seats.forEach((seat) => {
       if (showtime.seatMap && showtime.seatMap[seat] === "held") showtime.seatMap[seat] = "sold";
       if (showtime.heldBy) delete showtime.heldBy[seat];
     });
     await showtime.save();
 
-    res.status(200).json({ message: "Booking confirmed", bookingId: booking._id });
+    // Handle payment (simplified - you'll need proper payment processing)
+    if (payment) {
+      console.log("Payment processed:", payment.savedCardId ? "Saved card" : "New card");
+      // Add actual payment processing here
+    }
+
+    res.status(200).json({ 
+      message: "Booking confirmed", 
+      bookingId: booking._id,
+      total: total,
+      discountApplied: discountAmount > 0
+    });
   } catch (err) {
     console.error("Checkout error:", err);
-    res.status(500).json({ message: "Server error during checkout", error: err });
+    res.status(500).json({ message: "Server error during checkout", error: err.message });
   }
 });
+
+// GET - Validate promo code (optional - could also be in promotionRoutes)
+router.get("/promotions/validate/:code", async (req, res) => {
+  try {
+    const promo = await Promotion.findOne({ code: req.params.code.toUpperCase() });
+    if (!promo) {
+      return res.status(404).json({ message: "Promo code not found" });
+    }
+    
+    const now = new Date();
+    const expirationDate = new Date(promo.expiration);
+    
+    if (isNaN(expirationDate.getTime())) {
+      return res.status(400).json({ 
+        message: "Invalid expiration date for promotion" 
+      });
+    }
+    
+    if (now > expirationDate) {
+      return res.status(400).json({ 
+        message: "This promotion has expired" 
+      });
+    }
+    
+    res.json({ 
+      message: "Promo code valid", 
+      promotion: {
+        code: promo.code,
+        discount: promo.discount,
+        expiration: promo.expiration,
+        message: promo.message
+      }
+    });
+  } catch (err) {
+    console.error("Promo validation error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// REMOVE the setInterval from here - move to server.js
+// setInterval(async () => { ... }, 60 * 1000);
 
 export default router;

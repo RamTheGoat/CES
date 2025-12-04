@@ -82,6 +82,33 @@ router.put("/password/edit/:userId", async (req, res) => {
   }
 });
 
+// routes/userRoutes.js - ADD THIS ENDPOINT:
+
+// GET user's payment cards
+router.get("/:userId/cards", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select("paymentCards");
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Return payment cards with masked card numbers
+    const cards = user.paymentCards.map(card => ({
+      _id: card._id,
+      cardType: card.cardType,
+      lastFour: card.lastFour,
+      expirationMonth: card.expirationMonth,
+      expirationYear: card.expirationYear,
+    }));
+
+    res.status(200).json({ 
+      message: "Payment cards retrieved successfully",
+      cards 
+    });
+  } catch (err) {
+    console.error("Get payment cards error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Payment card routes (add/edit/remove)
 router.put("/card/edit/:cardId", async (req, res) => {
   try {

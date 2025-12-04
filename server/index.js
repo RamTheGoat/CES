@@ -37,7 +37,7 @@ app.use("/api/movies", moviesRoutes);     // /api/movies, /api/movies/:id
 app.use("/api/showrooms", showroomRoutes); // /api/showrooms
 app.use("/api/showtimes", showtimeRoutes); // /api/showtimes endpoints (including seats GET)
 app.use("/api/promotions", promotionRoutes); // promotions CRUD + send emails
-app.use("/", bookingRoutes);             // hold-seats, release-hold, checkout, /api/bookings
+app.use("/api", bookingRoutes);             // hold-seats, release-hold, checkout, /api/bookings
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
