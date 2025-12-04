@@ -29,6 +29,7 @@ router.get("/bookings", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // Adding Seat Status
 router.get("/api/showtimes/:showtimeId/seats", async (req, res) => {
   try {
@@ -69,6 +70,8 @@ router.get("/api/showtimes/:showtimeId/seats", async (req, res) => {
   }
 });
 
+=======
+>>>>>>> parent of e5bab37 (booking colors)
 // POST — HOLD seats temporarily
 router.post("/hold-seats", async (req, res) => {
   try {
