@@ -7,6 +7,7 @@ import Showtime from "../models/Showtime.js";
 import Ticket from "../models/Ticket.js";
 import User from "../models/User.js";
 import Promotion from "../models/Promotion.js";
+import { sendBookingConfirmationEmail } from '../mailer.js';
 
 const router = express.Router();
 
@@ -226,6 +227,55 @@ router.post("/checkout", async (req, res) => {
       if (showtime.heldBy) delete showtime.heldBy[seat];
     });
     await showtime.save();
+
+    // SEND CONFIRMATION EMAIL HERE
+    try {
+      // Format showtime date and time
+      const showtimeDate = showtime.date 
+        ? new Date(showtime.date).toLocaleDateString("en-US", {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        : "Not specified";
+      
+      const showtimeTime = showtime.time 
+        ? new Date(`2000-01-01T${showtime.time}`).toLocaleTimeString("en-US", {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          })
+        : "Not specified";
+
+      // Prepare booking details for email
+      const bookingDetails = {
+        bookingId: booking._id.toString(),
+        movieTitle: showtime.movie_id?.title || "Movie",
+        showtime: showtimeDate,
+        showtimeTime: showtimeTime,
+        seats: seats,
+        totalAmount: total,
+        cinemaName: showtime.theater_id?.name || "Cinema",
+        tickets: tickets, // Pass tickets object for breakdown if needed
+        discountApplied: discountAmount > 0,
+        discountAmount: discountAmount
+      };
+
+      // Send the email
+      await sendBookingConfirmationEmail(
+        user.email,
+        user.firstName || user.name || "Customer",
+        bookingDetails
+      );
+
+      console.log(`✅ Booking confirmation email sent to ${user.email} for booking ${booking._id}`);
+
+    } catch (emailError) {
+      // Don't fail the checkout if email fails, just log it
+      console.error("❌ Failed to send booking email:", emailError.message);
+      // Continue with checkout success - email failure shouldn't block booking
+    }
 
     // Handle payment (simplified - you'll need proper payment processing)
     if (payment) {

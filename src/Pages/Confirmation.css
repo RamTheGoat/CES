@@ -1,16 +1,16 @@
 /* Confirmation.css */
 :root {
-  --accent: #667eea;
-  --text: #ffffff;
-  --muted: #8a94a7;
-  --background: #0f0f23;
-  --card-bg: #1a1a2e;
+  --conf-accent: #cc12cc;
+  --conf-text: #ffffff;
+  --conf-muted: #8a94a7;
+  --conf-background: #0f0f23;
+  --conf-ard-bg: #1a1a2e;
 }
 
 .confirmationPage {
   min-height: 100vh;
   background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-  color: var(--text);
+  color: var(--conf-text);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   padding: 2rem;
   display: flex;
@@ -71,19 +71,19 @@
 
 .confirmationTitle {
   margin-bottom: 0.5rem;
-  color: var(--text);
+  color: var(--conf-text);
   font-size: 1.8rem;
   font-weight: 600;
 }
 
 .confirmationSubtitle {
-  color: var(--muted);
+  color: var(--conf-muted);
   font-size: 1rem;
   margin-bottom: 0.5rem;
 }
 
 .confirmationId {
-  color: var(--muted);
+  color: var(--conf-muted);
   font-size: 0.85rem;
   font-family: monospace;
   background: rgba(0, 0, 0, 0.2);
@@ -106,7 +106,7 @@
 .movieTitle {
   text-align: center;
   margin-bottom: 1.5rem;
-  color: var(--text);
+  color: var(--conf-text);
   font-size: 1.5rem;
   font-weight: 600;
   padding-bottom: 1rem;
@@ -127,7 +127,7 @@
 }
 
 .showtimeLabel {
-  color: var(--muted);
+  color: var(--conf-muted);
   font-size: 0.9rem;
   margin-bottom: 0.3rem;
   font-weight: 500;
@@ -135,7 +135,7 @@
 
 .showtimeValue {
   font-size: 1rem;
-  color: var(--text);
+  color: var(--conf-text);
   font-weight: 500;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .sectionTitle {
-  color: var(--muted);
+  color: var(--conf-muted);
   font-size: 0.95rem;
   margin-bottom: 0.8rem;
   text-align: center;
@@ -243,7 +243,7 @@
 .primaryButton {
   flex: 1;
   padding: 1rem;
-  background: linear-gradient(135deg, var(--accent) 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--conf-accent) 0%, #764ba2 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -263,7 +263,7 @@
 .secondaryButton {
   padding: 1rem 1.5rem;
   background: transparent;
-  color: var(--text);
+  color: var(--conf-text);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   cursor: pointer;
@@ -290,7 +290,7 @@
   width: 50px;
   height: 50px;
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top: 3px solid var(--accent);
+  border-top: 3px solid var(--conf-accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1.5rem;
@@ -307,7 +307,7 @@
 }
 
 .errorTitle {
-  color: var(--text);
+  color: var(--conf-text);
   margin-bottom: 1rem;
   font-size: 1.3rem;
 }
@@ -319,7 +319,7 @@
   background: rgba(255, 0, 0, 0.05);
   border-radius: 8px;
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--conf-muted);
   max-height: 200px;
   overflow: auto;
   border: 1px solid rgba(255, 0, 0, 0.1);
