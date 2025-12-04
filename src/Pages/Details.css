@@ -1,184 +1,329 @@
-/* color pallete - trying to keep it cute and purpley, purply? */
-:root{
-  --bg: #0b1020;
-  --bg-2:#0b0f1a;
-  --text:#eef2ff;
-  --muted:#b9c1d9;
-  --accent:#cc12cc;
-  --card: #0f152c;
-  --chip: #16203b;
+/* Showroom Selector Styles */
+.details_showroom-section {
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
-/* Details page */
-.details{
-  min-height: 100svh;
-  background: var(--bg);
+.details_subtitle {
+  font-size: 1.3rem;
   color: var(--text);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
 }
 
-/* Details Info like cast... */
-.details_info p {
-  margin: 0.5rem 0; /* space between each line */
-  line-height: 1.5; /* make it a bit taller */
-}
-
-.details_section {
-  margin-bottom: 2rem; /* space between sections */
-}
-
-
-/* Movie banner section */
-.details_banner{
-  height: 400px;
-  background-position: center;
-  background-size: cover;
-  position: relative;
-}
-
-/* Image gallery section */
-.details_gallery{
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  padding: 40px 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.details_gallery-img{
-  height: 150px;
-  border-radius: 12px;
-  background: var(--card);
-  background-position: center;
-  background-size: cover;
-}
-
-/* Content sections */
-.details_content{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px 60px;
-}
-
-/* Section headers */
-.details_section{
-  margin-bottom: 40px;
-}
-
-.details_section-title{
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: var(--text);
-}
-
-/* About section */
-.details_description{
-  line-height: 1.6;
-  color: var(--muted);
-  font-size: 16px;
-}
-
-/* Genre tags */
-.details_genres{
+.details_showrooms {
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.details_genre-tag{
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: rgba(204,18,204,.12);
-  border: 1px solid rgba(204,18,204,.35);
+.details_showroom-btn {
+  background: var(--card);
+  border: 1px solid rgba(204, 18, 204, 0.3); /* Purple outline */
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  max-width: 220px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.details_showroom-btn:hover {
+  background: rgba(204, 18, 204, 0.1);
+  border-color: rgba(204, 18, 204, 0.5); /* Brighter purple on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(204, 18, 204, 0.3);
+}
+
+.details_showroom-btn--active {
+  background: rgba(204, 18, 204, 0.18);
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgba(204, 18, 204, 0.25);
+}
+
+.details_showroom-btn--active:hover {
+  background: rgba(204, 18, 204, 0.25);
+  border-color: var(--accent);
+}
+
+.details_showroom-btn--active .showroom-name {
   color: #e9c6f0;
-  font-size: 14px;
 }
 
-/* Trailer section */
-.details_trailer-container{
-  position: relative;
-  width: 100%;
-  height: 0;
-  padding-bottom: 56.25%; /* kinda depends on aspect ratio im ngl im not sure */
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--card);
+.details_showroom-btn--active .showroom-location {
+  color: rgba(233, 198, 240, 0.9);
 }
 
-.details_trailer-iframe{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
+.details_showroom-btn--active .showroom-screen {
+  color: #e9c6f0;
+  background: rgba(233, 198, 240, 0.2);
 }
 
-/* Showtimes section */
-.details_days{
+.showroom-info {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
-.details_day-btn{
+.showroom-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.showroom-location {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.showroom-screen {
+  font-size: 0.8rem;
+  color: #e9c6f0;
+  background: rgba(204, 18, 204, 0.15);
+  padding: 0.3rem 0.7rem;
+  border-radius: 12px;
+  align-self: center;
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+
+.selected-showroom-info {
+  background: rgba(204, 18, 204, 0.1);
+  border-left: 3px solid var(--accent);
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.selected-showroom-info p {
+  margin: 0;
+  color: #e9c6f0;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.selected-showroom-info strong {
+  color: var(--accent);
+}
+
+.no-showtimes-message {
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--card);
+  border-radius: 10px;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+  border: 1px dashed rgba(204, 18, 204, 0.3); /* Purple dashed border */
+}
+
+/* Center the showtimes section */
+.details_section:has(.details_days) {
+  text-align: center;
+}
+
+.details_days {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.details_day-btn {
   padding: 10px 20px;
   border-radius: 8px;
   background: transparent;
-  border: 1px solid rgba(255,255,255,.2);
+  border: 1px solid rgba(204, 18, 204, 0.3); /* Purple outline */
   color: var(--text);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.details_day-btn--active{
-  background: rgba(204,18,204,.18);
-  border-color: #cc12cc;
+.details_day-btn--active {
+  background: rgba(204, 18, 204, 0.18);
+  border-color: var(--accent);
 }
 
-.details_day-btn:hover{
-  transform: translateY(-1px);
+.details_day-btn:hover {
+  background: rgba(204, 18, 204, 0.1);
+  border-color: rgba(204, 18, 204, 0.5);
+  transform: translateY(-2px);
 }
 
-.details_times{
+.details_times {
   display: flex;
-  gap: 12px;
+  justify-content: center;
   flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
 }
 
-.details_time-btn{
+.details_time-btn {
   padding: 12px 24px;
   border-radius: 8px;
   background: var(--chip);
-  border: 1px solid rgba(255,255,255,.1);
+  border: 1px solid rgba(204, 18, 204, 0.3); /* Purple outline */
   color: var(--text);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.details_time-btn:hover{
-  background: rgba(204,18,204,.25);
-  transform: translateY(-1px);
+.details_time-btn:hover {
+  background: rgba(204, 18, 204, 0.25);
+  border-color: rgba(204, 18, 204, 0.5);
+  transform: translateY(-2px);
 }
 
-/* Book tickets button */
-.details_book-section{
-  text-align: center;
-  margin-top: 60px;
-}
-
-.details_book-btn{
-  padding: 16px 32px;
-  font-size: 18px;
+/* ===== NEW: PRIMARY BOOK BUTTON STYLES ===== */
+.details_book-btn-primary {
+  padding: 18px 40px;
+  font-size: 1.2rem;
+  font-weight: 600;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(90deg, #8b14d1, #cc12cc);
-  color: var(--text);
+  background: linear-gradient(135deg, #8b14d1 0%, #cc12cc 50%, #a020f0 100%);
+  color: white;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(139, 20, 209, 0.4);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-top: 1rem;
 }
 
-.details_book-btn:hover{
-  transform: translateY(-2px);
+.details_book-btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.details_book-btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(139, 20, 209, 0.6);
+  background: linear-gradient(135deg, #9a2ae0 0%, #d61ed6 50%, #b030f8 100%);
+}
+
+.details_book-btn-primary:hover::before {
+  left: 100%;
+}
+
+.details_book-btn-primary:active {
+  transform: translateY(-1px) scale(1);
+  box-shadow: 0 6px 20px rgba(139, 20, 209, 0.5);
+}
+
+.details_book-btn-primary:focus {
+  outline: 2px solid rgba(204, 18, 204, 0.5);
+  outline-offset: 4px;
+}
+
+/* NEW: Coming Soon Text with different class */
+.coming-soon-text-primary {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.3rem;
+  color: var(--muted);
+  font-style: italic;
+  background: rgba(204, 18, 204, 0.05);
+  border-radius: 12px;
+  border: 1px dashed rgba(204, 18, 204, 0.3);
+  max-width: 500px;
+  margin: 2rem auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .details_showrooms {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .details_showroom-btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 0.8rem;
+  }
+  
+  .details_days {
+    gap: 0.5rem;
+  }
+  
+  .details_times {
+    gap: 0.5rem;
+  }
+  
+  /* NEW: Responsive for primary button */
+  .details_book-btn-primary {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+  }
+  
+  .coming-soon-text-primary {
+    font-size: 1.2rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .details_showroom-btn {
+    min-width: auto;
+    max-width: 100%;
+  }
+  
+  .details_subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .showroom-name {
+    font-size: 0.95rem;
+  }
+  
+  .showroom-location {
+    font-size: 0.8rem;
+  }
+  
+  .details_day-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .details_time-btn {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+  }
+  
+  /* NEW: Responsive for primary button */
+  .details_book-btn-primary {
+    padding: 14px 28px;
+    font-size: 1rem;
+    width: 90%;
+  }
+  
+  .coming-soon-text-primary {
+    font-size: 1.1rem;
+    padding: 1.5rem;
+    max-width: 90%;
+  }
 }

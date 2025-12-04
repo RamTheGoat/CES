@@ -1,201 +1,146 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import "./OrderHistory.css"; // Import your CSS
 
-export default function OrderHistory() {
-  const [bookings, setBookings] = useState([]);
+function OrderHistory() {
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchUserBookings();
+    const fetchOrders = async () => {
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) {
+        setError("You are not logged in.");
+        setLoading(false);
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+      const userId = user._id;
+      const token = localStorage.getItem("token");
+
+      try {
+        const res = await fetch(`http://localhost:4000/api/bookings/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+
+        const data = await res.json();
+        setOrders(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching bookings:", err);
+        setError("Failed to load your order history.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
   }, []);
 
-  const fetchUserBookings = async () => {
-    try {
-      setLoading(true);
-      // You'll need to get the current user's ID from auth context or localStorage
-      const userId = localStorage.getItem('userId') || 'current-user-id';
-      
-      const response = await fetch(`http://localhost:4000/api/bookings/user/${userId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch bookings');
-      }
-      
-      const data = await response.json();
-      setBookings(data);
-    } catch (err) {
-      setError(err.message);
-      console.error('Error fetching bookings:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const formatTime = (timeString) => {
-    if (!timeString) return '';
-    if (timeString.includes(':')) {
-      const [hours, minutes] = timeString.split(':');
-      const hour = parseInt(hours);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      const hour12 = hour % 12 || 12;
-      return `${hour12}:${minutes} ${ampm}`;
-    }
-    return timeString;
-  };
-
-  if (loading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h2>Loading your bookings...</h2>
+  if (loading) return (
+    <div className="orderHistoryPage">
+      <div className="loadingContainer">
+        <div className="loadingSpinner"></div>
+        <p>Loading your order history...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h3>Error: {error}</h3>
-        <button onClick={fetchUserBookings}>Try Again</button>
+  if (error) return (
+    <div className="orderHistoryPage">
+      <div className="errorMessage">
+        <h3>Error</h3>
+        <p>{error}</p>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ marginBottom: '30px' }}>My Bookings</h1>
-      
-      {bookings.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <h3>No bookings yet</h3>
-          <p>Start by booking your first movie!</p>
-          <Link to="/">
-            <button style={{
-              padding: '12px 24px',
-              background: 'var(--accent)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              marginTop: '20px'
-            }}>
-              Browse Movies
-            </button>
-          </Link>
-        </div>
-      ) : (
-        <div>
-          <div style={{ marginBottom: '20px', color: 'var(--muted)' }}>
-            Showing {bookings.length} booking{bookings.length !== 1 ? 's' : ''}
+    <div className="orderHistoryPage">
+      <div className="orderHistoryContainer">
+        <h1 className="pageTitle">Your Order History</h1>
+        
+        {orders.length === 0 ? (
+          <div className="noOrdersMessage">
+            <h3>No Bookings Found</h3>
+            <p>You haven't made any bookings yet. Start by exploring our movies!</p>
           </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            {bookings.map((booking) => {
-              const showtime = booking.showtime_id || {};
-              const showroom = showtime.showroom || {};
-              
-              return (
-                <div key={booking._id} style={{
-                  background: 'rgba(0, 0, 0, 0.1)',
-                  borderRadius: '10px',
-                  padding: '20px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <h3 style={{ marginBottom: '8px' }}>
-                        {showtime.movieTitle || 'Movie'}
-                      </h3>
-                      <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
-                        {showroom.name || 'Cinema'} • Screen {showroom.screenNumber || '1'}
-                      </div>
-                    </div>
-                    
-                    <div style={{
-                      background: booking.status === 'confirmed' ? '#4CAF50' : '#f44336',
-                      color: 'white',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontSize: '0.8rem',
-                      fontWeight: '500'
-                    }}>
-                      {booking.status || 'confirmed'}
+        ) : (
+          <div className="ordersGrid">
+            {orders.map((order) => (
+              <div key={order._id} className="orderCard">
+                <h2 className="movieTitle">
+                  {order.showtime_id?.movieTitle || "Unknown Movie"}
+                </h2>
+                
+                <div className="orderDetails">
+                  <div className="detailRow">
+                    <span className="detailLabel">Showtime:</span>
+                    <span className="detailValue">
+                      {order.showtime_id?.date 
+                        ? `${order.showtime_id.date} at ${order.showtime_id.time}`
+                        : "Unknown date/time"}
+                    </span>
+                  </div>
+                  
+                  <div className="detailRow">
+                    <span className="detailLabel">Seats:</span>
+                    <div className="detailValue">
+                      {order.seats?.length > 0 ? (
+                        <div className="seatsContainer">
+                          {order.seats.map((seat, index) => (
+                            <span key={index} className="seatBadge">
+                              {seat}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        "No seats selected"
+                      )}
                     </div>
                   </div>
                   
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '15px',
-                    marginTop: '15px'
-                  }}>
-                    <div>
-                      <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Date & Time</div>
-                      <div>
-                        {formatDate(showtime.date)} at {formatTime(showtime.time)}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Seats</div>
-                      <div>
-                        {booking.seats?.join(', ') || 'No seats specified'}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Total</div>
-                      <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-                        ${booking.total?.toFixed(2) || '0.00'}
-                      </div>
-                    </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Order Date:</span>
+                    <span className="detailValue">
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        : "Unknown"}
+                    </span>
                   </div>
                   
-                  <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
-                    <Link to={`/confirmation/${booking._id}`}>
-                      <button style={{
-                        padding: '8px 16px',
-                        background: 'transparent',
-                        color: 'var(--accent)',
-                        border: '1px solid var(--accent)',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '0.9rem'
-                      }}>
-                        View Details
-                      </button>
-                    </Link>
-                    
-                    {booking.status === 'confirmed' && (
-                      <button style={{
-                        padding: '8px 16px',
-                        background: 'transparent',
-                        color: '#f44336',
-                        border: '1px solid #f44336',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '0.9rem'
-                      }}>
-                        Cancel Booking
-                      </button>
-                    )}
-                  </div>
+                  {order.total > 0 && (
+                    <div className="detailRow">
+                      <span className="detailLabel">Total:</span>
+                      <span className="totalPrice">
+                        ${order.total.toFixed(2)}
+                        {order.discountApplied && (
+                          <span className="statusBadge statusCompleted">
+                            Saved ${order.discountAmount?.toFixed(2) || '0.00'}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-        </div>
-      )}
-    </main>
+        )}
+      </div>
+    </div>
   );
 }
+
+export default OrderHistory;

@@ -9,8 +9,11 @@ export default function Details() {
   const [movie, setMovie] = useState(null);
   const [dbShowtimes, setDbShowtimes] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
+  const [showrooms, setShowrooms] = useState([]);
+  const [selectedShowroom, setSelectedShowroom] = useState(null);
+  const [loadingShowrooms, setLoadingShowrooms] = useState(true);
 
-  // Fetch movie and showtimes
+  // Fetch movie
   useEffect(() => {
     const fetchMovie = async () => {
       try {
@@ -22,24 +25,60 @@ export default function Details() {
       }
     };
 
-    const fetchShowtimes = async () => {
+    fetchMovie();
+  }, [id]);
+
+  // Fetch showrooms
+  useEffect(() => {
+    const fetchShowrooms = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/showtimes/${id}`);
+        setLoadingShowrooms(true);
+        const response = await fetch('http://localhost:4000/api/showrooms');
+        const data = await response.json();
+        setShowrooms(data);
+        
+        // Select first showroom by default if available
+        if (data.length > 0) {
+          setSelectedShowroom(data[0]);
+        }
+      } catch (error) {
+        console.error("Error fetching showrooms:", error);
+      } finally {
+        setLoadingShowrooms(false);
+      }
+    };
+
+    fetchShowrooms();
+  }, []);
+
+  // Fetch showtimes based on selected showroom
+  // In Details.jsx, update the fetchShowtimes useEffect:
+  useEffect(() => {
+    const fetchShowtimes = async () => {
+      if (!selectedShowroom || !movie) return;
+      
+      try {
+        // Fetch showtimes for this movie AND selected showroom
+        const res = await fetch(
+          `http://localhost:4000/api/showtimes/movie/${id}?showroom=${selectedShowroom._id}`
+        );
         const data = await res.json();
         setDbShowtimes(data);
 
         // Auto-select first available date
         if (data.length > 0) {
           setSelectedDate(data[0].date);
+        } else {
+          setSelectedDate("");
         }
       } catch (error) {
         console.error("Error loading showtimes:", error);
+        setDbShowtimes([]);
       }
     };
 
-    fetchMovie();
     fetchShowtimes();
-  }, [id]);
+  }, [id, selectedShowroom, movie]);
 
   if (!movie) return <p>Loading...</p>;
   if (!movie.title) {
@@ -129,53 +168,109 @@ export default function Details() {
           </div>
         </section>
 
-        {/* Showtimes Section */}
-        {isNowPlaying && availableDates.length > 0 && (
+        {/* Showrooms & Showtimes Section */}
+        {isNowPlaying && (
           <section className="details_section">
             <h2 className="details_section-title">Showtimes</h2>
 
-            {/* Dates */}
-            <div className="details_days">
-              {availableDates.map((date) => (
-                <button
-                  key={date}
-                  className={`details_day-btn ${selectedDate === date ? "details_day-btn--active" : ""}`}
-                  onClick={() => setSelectedDate(date)}
-                >
-                  {date}
-                </button>
-              ))}
+            {/* Showroom Selector */}
+            <div className="details_showroom-section">
+              <h3 className="details_subtitle">Select Cinema</h3>
+              
+              {loadingShowrooms ? (
+                <p>Loading cinemas...</p>
+              ) : showrooms.length > 0 ? (
+                <div className="details_showrooms">
+                  {showrooms.map((showroom) => (
+                    <button
+                      key={showroom._id}
+                      className={`details_showroom-btn ${
+                        selectedShowroom?._id === showroom._id 
+                          ? "details_showroom-btn--active" 
+                          : ""
+                      }`}
+                      onClick={() => setSelectedShowroom(showroom)}
+                    >
+                      <div className="showroom-info">
+                        <span className="showroom-name">{showroom.name}</span>
+                        <span className="showroom-location">{showroom.location}</span>
+                        {showroom.screenNumber && (
+                          <span className="showroom-screen">Screen {showroom.screenNumber}</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p>No cinemas available</p>
+              )}
             </div>
 
-            {/* Times */}
-            <div className="details_times">
-              {(showtimesByDate[selectedDate] || []).map((s) => (
-                <button
-                  key={s._id}
-                  className="details_time-btn"
-                  onClick={() =>
-                    navigate(`/booking/${s._id}`, { // <-- Pass showtimeId in URL
-                      state: {
-                        movieTitle: movie.title,
-                        showtime: s.time,
-                        date: selectedDate,
-                      },
-                    })
-                  }
-                >
-                  {s.time}
-                </button>
-              ))}
-            </div>
+            {/* Selected Showroom Info */}
+            {selectedShowroom && (
+              <div className="selected-showroom-info">
+                <p>
+                  <strong>Selected Cinema:</strong> {selectedShowroom.name}
+                  {selectedShowroom.location && ` • ${selectedShowroom.location}`}
+                  {selectedShowroom.screenNumber && ` • Screen ${selectedShowroom.screenNumber}`}
+                </p>
+              </div>
+            )}
+
+            {/* Dates (only show if we have showtimes) */}
+            {availableDates.length > 0 ? (
+              <>
+                <div className="details_days">
+                  {availableDates.map((date) => (
+                    <button
+                      key={date}
+                      className={`details_day-btn ${
+                        selectedDate === date ? "details_day-btn--active" : ""
+                      }`}
+                      onClick={() => setSelectedDate(date)}
+                    >
+                      {date}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Times */}
+                <div className="details_times">
+                  {(showtimesByDate[selectedDate] || []).map((s) => (
+                    <button
+                      key={s._id}
+                      className="details_time-btn"
+                      onClick={() =>
+                        navigate(`/booking/${s._id}`, {
+                          state: {
+                            movieTitle: movie.title,
+                            showtime: s.time,
+                            date: selectedDate,
+                            cinemaName: selectedShowroom?.name || "Cinema",
+                            showroomId: selectedShowroom?._id,
+                          },
+                        })
+                      }
+                    >
+                      {s.time}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : selectedShowroom ? (
+              <p className="no-showtimes-message">
+                No showtimes available at {selectedShowroom.name} for this movie.
+              </p>
+            ) : null}
           </section>
         )}
 
         {/* Book Button Section */}
         <section className="details_book-section">
           {isNowPlaying ? (
-            <button className="details_book-btn">Book Your Tickets Today!</button>
+            <button className="details_book-btn-primary">Book Your Tickets Today!</button>
           ) : (
-            <p className="coming-soon-text">Coming Soon</p>
+            <p className="coming-soon-text-primary">Coming Soon</p>
           )}
         </section>
       </div>

@@ -7,7 +7,6 @@ import Showtime from "../models/Showtime.js";
 import Ticket from "../models/Ticket.js";
 import User from "../models/User.js";
 import Promotion from "../models/Promotion.js";
-import Order from "../models/Order.js";
 
 const router = express.Router();
 
@@ -259,6 +258,39 @@ router.get("/promotions/validate/:code", async (req, res) => {
   } catch (err) {
     console.error("Promo validation error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+// GET /api/bookings/user/:userId
+router.get("/bookings/user/:userId", async (req, res) => {
+  try {
+    console.log("Fetching bookings for user:", req.params.userId);
+    
+    // Validate MongoDB ID format
+    if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
+      return res.status(400).json({ 
+        message: "Invalid user ID format" 
+      });
+    }
+
+    const bookings = await Booking.find({ user_id: req.params.userId })
+      .populate("showtime_id")
+      .populate({
+        path: "showtime_id",
+        populate: [{ path: "movieId", select: "title" }, { path: "showroom", select: "name location"}]
+      })
+      .sort({ createdAt: -1 });
+
+    console.log(`Found ${bookings.length} bookings for user ${req.params.userId}`);
+    
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching booking history:", error);
+    console.error("Error stack:", error.stack);
+    res.status(500).json({ 
+      message: "Failed to fetch booking history",
+      error: error.message 
+    });
   }
 });
 

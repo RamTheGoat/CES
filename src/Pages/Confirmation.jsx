@@ -11,6 +11,7 @@ export default function Confirmation() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Fetch booking details
   useEffect(() => {
     const fetchBookingDetails = async () => {
       const state = location.state || {};
@@ -23,7 +24,6 @@ export default function Confirmation() {
       
       // Priority 2: If booking data is passed from checkout
       if (state.booking) {
-        console.log("Booking data from state:", state.booking);
         setBookingDetails(state.booking);
         setLoading(false);
         return;
@@ -40,7 +40,6 @@ export default function Confirmation() {
       if (savedBooking) {
         try {
           const parsed = JSON.parse(savedBooking);
-          console.log("Booking data from localStorage:", parsed);
           setBookingDetails(parsed);
         } catch (err) {
           console.error("Error parsing saved booking:", err);
@@ -63,7 +62,6 @@ export default function Confirmation() {
   const fetchBookingById = async (id) => {
     try {
       setLoading(true);
-      console.log("Fetching booking with ID:", id);
       const response = await fetch(
         `http://localhost:4000/api/bookings/${id}`
       );
@@ -79,7 +77,6 @@ export default function Confirmation() {
       }
       
       const data = await response.json();
-      console.log("Booking API response:", data);
       
       // Check if your API returns the booking inside a 'booking' property or directly
       if (data.booking) {
@@ -100,14 +97,13 @@ export default function Confirmation() {
   const formatDate = (dateString) => {
     if (!dateString) return "";
     try {
-      // Fix for date being one day behind - create date in UTC
-      const date = new Date(dateString + 'T00:00:00'); // Add time to prevent timezone shift
+      const date = new Date(dateString + 'T00:00:00');
       return date.toLocaleDateString("en-US", {
         weekday: "short",
         month: "short",
         day: "numeric",
         year: "numeric",
-        timeZone: 'UTC' // Use UTC to prevent timezone issues
+        timeZone: 'UTC'
       });
     } catch (e) {
       console.error("Error formatting date:", e);
@@ -118,7 +114,6 @@ export default function Confirmation() {
   const formatTime = (timeString) => {
     if (!timeString) return "";
     try {
-      // If it's in 24-hour format like "21:00"
       if (timeString.includes(":")) {
         const [hours, minutes] = timeString.split(":");
         const hour = parseInt(hours);
@@ -127,7 +122,6 @@ export default function Confirmation() {
         return `${hour12}:${minutes.padStart(2, '0')} ${ampm}`;
       }
       
-      // If it's a full datetime string
       const date = new Date(timeString);
       return date.toLocaleTimeString("en-US", {
         hour: 'numeric',
@@ -142,31 +136,10 @@ export default function Confirmation() {
 
   if (loading) {
     return (
-      <main className="confirmationPage" style={{ padding: 20 }}>
-        <div className="loadingContainer" style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '60vh',
-          textAlign: 'center'
-        }}>
-          <div className="spinner" style={{
-            width: '40px',
-            height: '40px',
-            border: '3px solid rgba(255, 255, 255, 0.1)',
-            borderTop: '3px solid var(--accent)',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            marginBottom: '20px'
-          }}></div>
-          <h3 style={{ color: 'var(--text)' }}>Loading...</h3>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
+      <main className="confirmationPage">
+        <div className="loadingContainer">
+          <div className="loadingSpinner"></div>
+          <h3>Loading your booking details...</h3>
         </div>
       </main>
     );
@@ -174,35 +147,23 @@ export default function Confirmation() {
 
   if (error || !bookingDetails) {
     return (
-      <main className="confirmationPage" style={{ padding: 20 }}>
-        <div style={{
-          textAlign: 'center',
-          padding: '40px 20px'
-        }}>
-          <h3 style={{ color: 'var(--text)', marginBottom: '10px' }}>
+      <main className="confirmationPage">
+        <div className="errorContainer">
+          <h3 className="errorTitle">
             {error || "No booking found"}
           </h3>
-          <Link to="/">
-            <button style={{
-              padding: '12px 24px',
-              background: 'var(--accent)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              marginTop: '20px'
-            }}>
-              Browse Movies
-            </button>
+          <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
+            We couldn't find your booking details.
+          </p>
+          <Link to="/" className="primaryButton" style={{ display: 'inline-block' }}>
+            Browse Movies
           </Link>
         </div>
       </main>
     );
   }
 
-  console.log("Booking details for rendering:", bookingDetails);
-
-  // Extract data based on YOUR actual API response structure
+  // Extract data
   const {
     bookingId,
     total = 0,
@@ -210,69 +171,17 @@ export default function Confirmation() {
     showtime = {},
     seats = [],
     tickets = {},
-    status = 'confirmed',
-    user = {},
-    movieTitle,
-    theatreName,
-    screenNumber
+    status = 'confirmed'
   } = bookingDetails;
 
-  // Get cinema/theatre name - check multiple possible sources
-  // Check the showtime object first, then bookingDetails directly
-  const finalMovieTitle = showtime?.movieTitle || movieTitle || bookingDetails.movieTitle || "Movie";
-  
-  // Try to get theatre info from various possible locations in your data structure
-  let finalTheatreName = "Cinema";
-  let finalScreenNumber = "1";
-  
-  // Check all possible locations for theatre data
-  if (showtime?.theatre?.name) {
-    finalTheatreName = showtime.theatre.name;
-  } else if (showtime?.theatreName) {
-    finalTheatreName = showtime.theatreName;
-  } else if (theatreName) {
-    finalTheatreName = theatreName;
-  } else if (showtime?.theatre) {
-    finalTheatreName = showtime.theatre;
-  } else if (bookingDetails.theatreName) {
-    finalTheatreName = bookingDetails.theatreName;
-  } else if (bookingDetails.theatre?.name) {
-    finalTheatreName = bookingDetails.theatre.name;
-  }
-  
-  // Check all possible locations for screen number
-  if (showtime?.screenNumber) {
-    finalScreenNumber = showtime.screenNumber;
-  } else if (screenNumber) {
-    finalScreenNumber = screenNumber;
-  } else if (showtime?.screen) {
-    finalScreenNumber = showtime.screen;
-  } else if (bookingDetails.screenNumber) {
-    finalScreenNumber = bookingDetails.screenNumber;
-  } else if (showtime?.theatre?.screenNumber) {
-    finalScreenNumber = showtime.theatre.screenNumber;
-  }
-  
-  // Get date and time
-  const finalShowtimeDate = showtime?.date;
-  const finalShowtimeTime = showtime?.time;
+  // Get movie title
+  const showtimeData = bookingDetails.showtime || showtime || {};
+  const finalMovieTitle = showtimeData.movieTitle || bookingDetails.movieTitle || "Movie";
   
   // Get user info
+  const user = bookingDetails.user || {};
   const userName = user?.name || user?.username || "Customer";
   const userFirstName = userName.split(" ")[0];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'confirmed':
-        return '#4CAF50';
-      case 'cancelled':
-        return '#f44336';
-      case 'refunded':
-        return '#FF9800';
-      default:
-        return '#9E9E9E';
-    }
-  };
 
   // Calculate ticket totals
   let ticketCount = 0;
@@ -281,293 +190,112 @@ export default function Confirmation() {
   if (tickets && typeof tickets === 'object') {
     ticketCount = Object.values(tickets).reduce((sum, count) => sum + (count || 0), 0);
     
-    // Create ticket details for display
     if (tickets.adult > 0) ticketDetails.push({ type: 'Adult', count: tickets.adult, price: 12 });
     if (tickets.senior > 0) ticketDetails.push({ type: 'Senior', count: tickets.senior, price: 10 });
     if (tickets.child > 0) ticketDetails.push({ type: 'Child', count: tickets.child, price: 8 });
   }
 
+  const statusClass = status === 'confirmed' ? '' : 
+                     status === 'cancelled' ? 'statusCancelled' : 'statusRefunded';
+
   return (
-    <main className="confirmationPage" style={{ 
-      padding: '20px',
-      maxWidth: '600px',
-      margin: '0 auto'
-    }}>
-      {/* Simple Header with User's Name */}
-      <div style={{
-        textAlign: 'center',
-        marginBottom: '30px',
-        paddingBottom: '20px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <div style={{
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          background: getStatusColor(status),
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 15px',
-          fontSize: '30px',
-          color: 'white'
-        }}>
-          {status === 'confirmed' ? '✓' : status === 'cancelled' ? '✗' : '↺'}
-        </div>
-        <h2 style={{ 
-          marginBottom: '5px',
-          color: 'var(--text)',
-          fontSize: '1.5rem'
-        }}>
-          {status === 'confirmed' ? 'Booking Complete!' : 
-           status === 'cancelled' ? 'Booking Cancelled' : 
-           'Booking Refunded'}
-        </h2>
-        <p style={{
-          color: 'var(--muted)',
-          fontSize: '1rem',
-          marginBottom: '10px'
-        }}>
-          Thank you, {userFirstName}!
-        </p>
-        <p style={{
-          color: 'var(--muted)',
-          fontSize: '0.9rem'
-        }}>
-          {status === 'confirmed' 
-            ? 'Your tickets are reserved.'
-            : 'This booking has been ' + status + '.'}
-        </p>
-        {bookingId && (
-          <p style={{
-            color: 'var(--muted)',
-            fontSize: '0.8rem',
-            marginTop: '10px',
-            fontFamily: 'monospace',
-            background: 'rgba(0,0,0,0.2)',
-            padding: '5px 10px',
-            borderRadius: '4px',
-            display: 'inline-block'
-          }}>
-            ID: {bookingId}
+    <main className="confirmationPage">
+      <div className="confirmationContainer">
+        {/* Header */}
+        <div className={`confirmationHeader ${statusClass}`}>
+          <div className="statusIcon">
+            {status === 'confirmed' ? '✓' : status === 'cancelled' ? '✗' : '↺'}
+          </div>
+          <h1 className="confirmationTitle">
+            {status === 'confirmed' ? 'Booking Complete!' : 
+             status === 'cancelled' ? 'Booking Cancelled' : 
+             'Booking Refunded'}
+          </h1>
+          <p className="confirmationSubtitle">
+            Thank you, {userFirstName}! Your {status === 'confirmed' ? 'tickets are reserved.' : 'booking has been ' + status + '.'}
           </p>
-        )}
-      </div>
-
-      {/* Movie Details Card */}
-      <div style={{
-        background: 'rgba(0, 0, 0, 0.1)',
-        borderRadius: '12px',
-        padding: '20px',
-        marginBottom: '20px',
-        border: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <h3 style={{
-          marginBottom: '15px',
-          color: 'var(--text)',
-          fontSize: '1.3rem',
-          textAlign: 'center'
-        }}>
-          {finalMovieTitle}
-        </h3>
-        
-        {/* Showtime Info */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '15px',
-          marginBottom: '20px'
-        }}>
-          <div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '4px' }}>Cinema</div>
-            <div style={{ fontSize: '1rem', color: 'var(--text)', fontWeight: '500' }}>
-              {finalTheatreName}
-            </div>
-          </div>
-          
-          <div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '4px' }}>Screen</div>
-            <div style={{ fontSize: '1rem', color: 'var(--text)', fontWeight: '500' }}>
-              {finalScreenNumber}
-            </div>
-          </div>
-          
-          <div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '4px' }}>Date</div>
-            <div style={{ fontSize: '1rem', color: 'var(--text)', fontWeight: '500' }}>
-              {formatDate(finalShowtimeDate) || "Date not specified"}
-            </div>
-          </div>
-          
-          <div>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '4px' }}>Time</div>
-            <div style={{ fontSize: '1rem', color: 'var(--text)', fontWeight: '500' }}>
-              {formatTime(finalShowtimeTime) || "Time not specified"}
-            </div>
-          </div>
+          {bookingId && (
+            <div className="confirmationId">ID: {bookingId}</div>
+          )}
         </div>
 
-        {/* Seats - only show if we have seat data */}
-        {seats && Array.isArray(seats) && seats.length > 0 && (
-          <div style={{
-            marginBottom: '20px',
-            padding: '15px',
-            background: 'rgba(0, 0, 0, 0.2)',
-            borderRadius: '8px'
-          }}>
-            <div style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '8px' }}>
-              Seats ({seats.length})
+        {/* Movie Details Card */}
+        <div className="movieCard">
+          <h2 className="movieTitle">{finalMovieTitle}</h2>
+          
+          {/* Showtime Info - Removed Cinema and Screen */}
+          <div className="showtimeGrid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="showtimeItem">
+              <span className="showtimeLabel">Date</span>
+              <span className="showtimeValue">
+                {formatDate(showtimeData.date) || "Date not specified"}
+              </span>
             </div>
-            <div style={{ 
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-              justifyContent: 'center'
-            }}>
-              {seats.map((seat, index) => (
-                <div key={index} style={{
-                  padding: '6px 12px',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  borderRadius: '6px',
-                  fontSize: '0.95rem',
-                  minWidth: '40px',
-                  textAlign: 'center'
-                }}>
-                  {seat}
-                </div>
-              ))}
+            
+            <div className="showtimeItem">
+              <span className="showtimeLabel">Time</span>
+              <span className="showtimeValue">
+                {formatTime(showtimeData.time) || "Time not specified"}
+              </span>
             </div>
           </div>
-        )}
 
-        {/* Ticket Summary - only show if we have ticket data */}
-        {ticketDetails.length > 0 && (
-          <div style={{
-            padding: '15px',
-            background: 'rgba(0, 0, 0, 0.2)',
-            borderRadius: '8px',
-            marginBottom: '20px'
-          }}>
-            <div style={{ 
-              color: 'var(--muted)', 
-              fontSize: '0.9rem', 
-              marginBottom: '10px',
-              textAlign: 'center'
-            }}>
-              Tickets ({ticketCount})
+          {/* Seats */}
+          {seats && Array.isArray(seats) && seats.length > 0 && (
+            <div className="seatsSection">
+              <div className="sectionTitle">Seats ({seats.length})</div>
+              <div className="seatsContainer">
+                {seats.map((seat, index) => (
+                  <span key={index} className="seatBadge">{seat}</span>
+                ))}
+              </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {ticketDetails.map((ticket, index) => (
-                <div key={index} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{ticket.type} × {ticket.count}</span>
-                  <span>${(ticket.count * ticket.price).toFixed(2)}</span>
-                </div>
-              ))}
+          )}
+
+          {/* Ticket Summary */}
+          {ticketDetails.length > 0 && (
+            <div className="ticketsSection">
+              <div className="sectionTitle" style={{ textAlign: 'center' }}>
+                Tickets ({ticketCount})
+              </div>
+              <div style={{ marginTop: '0.8rem' }}>
+                {ticketDetails.map((ticket, index) => (
+                  <div key={index} className="ticketRow">
+                    <span>{ticket.type} × {ticket.count}</span>
+                    <span>${(ticket.count * ticket.price).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
+
+          {/* Total */}
+          <div className="totalSection">
+            <span className="totalLabel">Total</span>
+            <span className="totalAmount">${total.toFixed(2)}</span>
           </div>
-        )}
-
-        {/* Total */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingTop: '15px',
-          borderTop: `2px solid ${getStatusColor(status)}`
-        }}>
-          <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Total</span>
-          <span style={{ 
-            fontSize: '1.3rem', 
-            fontWeight: 'bold',
-            color: getStatusColor(status)
-          }}>
-            ${total.toFixed(2)}
-          </span>
+          
+          {discountApplied && (
+            <div className="discountBadge">
+              Discount applied to this booking
+            </div>
+          )}
         </div>
-        
-        {discountApplied && (
-          <div style={{
-            marginTop: '10px',
-            padding: '8px',
-            background: 'rgba(76, 175, 80, 0.1)',
-            borderRadius: '6px',
-            textAlign: 'center',
-            fontSize: '0.9rem',
-            color: '#4CAF50'
-          }}>
-            Discount applied to this booking
-          </div>
-        )}
-      </div>
 
-      {/* Action Buttons */}
-      <div style={{
-        display: 'flex',
-        gap: '10px',
-        justifyContent: 'center'
-      }}>
-        <Link to="/" style={{ textDecoration: 'none', flex: 1 }}>
-          <button
-            style={{
-              width: '100%',
-              padding: '12px',
-              background: 'var(--accent)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '0.95rem'
-            }}
-          >
+        {/* Action Buttons */}
+        <div className="actionButtons">
+          <Link to="/" className="primaryButton">
             Back to Home
+          </Link>
+          
+          <button
+            onClick={() => window.print()}
+            className="secondaryButton"
+          >
+            Print Tickets
           </button>
-        </Link>
-        
-        <button
-          onClick={() => window.print()}
-          style={{
-            padding: '12px 20px',
-            background: 'transparent',
-            color: 'var(--text)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '0.95rem'
-          }}
-        >
-          Print
-        </button>
-      </div>
-
-      {/* Debug Info - will help us see what data we're actually getting */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{
-          marginTop: '20px',
-          padding: '10px',
-          background: 'rgba(255, 0, 0, 0.1)',
-          borderRadius: '6px',
-          fontSize: '0.8rem',
-          color: 'var(--muted)',
-          maxHeight: '200px',
-          overflow: 'auto'
-        }}>
-          <div><strong>Debug Info:</strong></div>
-          <div>Booking ID: {bookingId}</div>
-          <div>Movie: {finalMovieTitle}</div>
-          <div>Cinema: {finalTheatreName}</div>
-          <div>Screen: {finalScreenNumber}</div>
-          <div>Raw Date: {finalShowtimeDate}</div>
-          <div>Formatted Date: {formatDate(finalShowtimeDate)}</div>
-          <div>Raw Time: {finalShowtimeTime}</div>
-          <div>Formatted Time: {formatTime(finalShowtimeTime)}</div>
-          <div>User: {userName}</div>
-          <div>Status: {status}</div>
-          <div>Total: ${total}</div>
-          <div>Seats: {JSON.stringify(seats)}</div>
-          <div>Tickets: {JSON.stringify(tickets)}</div>
-          <div>Showtime Object: {JSON.stringify(showtime).substring(0, 100)}...</div>
         </div>
-      )}
+      </div>
     </main>
   );
 }

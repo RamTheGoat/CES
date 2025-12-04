@@ -102,8 +102,6 @@ const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
 };
 
 const Profile = () => {
-    // This will eventually use data from the login, for now use test user id
-    //const userId = "68fd5bd183469bb90d227ac0";
     const navigate = useNavigate();
 
     const [userData, setUserData] = useState({});
