@@ -1,4 +1,4 @@
-/* color pallete */
+/* color palette */
 :root{
   --bg: #0b1020;
   --bg-2:#0b0f1a;
@@ -26,13 +26,14 @@
 }
 
 .checkoutSummary {
-    margin-top: 60px;
+  margin-top: 60px;
   background: var(--card);
   padding: 24px;
   width: 100%;
   max-width: 450px;
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Changed from #ddd */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Movie title & info */
@@ -40,11 +41,12 @@
   font-size: 1.6rem;
   font-weight: 600;
   margin-bottom: 6px;
+  color: var(--text);
 }
 
 .showtimeInfo {
   font-size: 0.95rem;
-  color: #656565;
+  color: var(--muted); /* Changed from #656565 */
   margin-bottom: 20px;
 }
 
@@ -52,50 +54,151 @@
 .OrderTitle {
   font-size: 1.3rem;
   margin-bottom: 10px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Changed from #ddd */
   padding-bottom: 6px;
+  color: var(--text);
 }
 
 /* Ticket types */
+.ticketTypes {
+  color: var(--text);
+}
+
 .ticketTypes div {
   margin: 2px 0;
+  color: var(--muted);
 }
 
 /* Seats */
 .seats {
   margin-top: 14px;
+  color: var(--muted);
 }
 
 /* Total cost */
 .totalCost {
   margin-top: 14px;
   font-size: 1.1rem;
+  color: var(--text);
+}
+
+.totalCost strong {
+  color: var(--accent);
 }
 
 /* Timer */
 .ticketTimer {
   margin-top: 14px;
-  background: #fff5cc;
+  background: rgba(255, 245, 204, 0.1); /* Updated for dark theme */
   padding: 10px;
   border-radius: 6px;
+  border: 1px solid rgba(255, 245, 204, 0.2);
 }
 
 .timeLeft {
-  color: var(--bg)
+  color: #ffd700; /* Gold color for timer */
 }
 
 .ticketTimer strong {
-  color: #b34a00;
+  color: #ffa500; /* Orange for emphasis */
+}
+
+.ticketTimer div[style*="color: red"] {
+  color: #ff6b6b !important;
+}
+
+/* Payment Section */
+.paymentSection {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.paymentSection h3 {
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.savedCardBlock {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.savedCardBlock label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.savedCardBlock label:last-child {
+  margin-bottom: 0;
+}
+
+.savedCardBlock input[type="radio"] {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+/* New Card Form */
+.newCardForm {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.newCardForm label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.newCardForm input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.newCardForm input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.newCardForm div[style*="display: flex"] {
+  margin-top: 12px;
+}
+
+.newCardForm div[style*="display: flex"] > div {
+  flex: 1;
 }
 
 /* Buttons */
+.decisionButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
 .decisionButtons button {
-  padding: 10px 16px;
+  padding: 12px 24px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 1rem;
-  color: var(--accent);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex: 1;
 }
 
 .decisionButtons button:first-child {
@@ -103,17 +206,108 @@
   color: white;
 }
 
+.decisionButtons button:first-child:hover:not(:disabled) {
+  background: #d42cd4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(204, 18, 204, 0.3);
+}
+
 .decisionButtons button:first-child:disabled {
-  background: #fa96f0;
+  background: rgba(204, 18, 204, 0.5);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .decisionButtons button:last-child {
-  background: #ddd;
-  color: black;
-  margin-left: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.decisionButtons button:hover:not(:disabled) {
-  opacity: 0.9;
+.decisionButtons button:last-child:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Error message */
+.newCardForm div[style*="color: red"] {
+  color: #ff6b6b !important;
+  margin-top: 12px;
+  padding: 8px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  font-size: 0.9rem;
+}
+
+/* Promo Code Section */
+.promoSection {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.promoSection h4 {
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.promoInput input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.promoInput input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.promoInput button {
+  padding: 10px 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.promoInput button:hover:not(:disabled) {
+  background: #d42cd4;
+}
+
+.promoInput button:disabled {
+  background: rgba(204, 18, 204, 0.5);
+  cursor: not-allowed;
+}
+
+.appliedPromo {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid #4CAF50;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.appliedPromo button {
+  background: transparent;
+  border: 1px solid #4CAF50;
+  color: #4CAF50;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.appliedPromo button:hover {
+  background: rgba(76, 175, 80, 0.2);
 }

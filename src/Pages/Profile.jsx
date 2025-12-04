@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./Profile.css";
 
 const PaymentCard = ({ card, newCard, onEdit, onDelete }) => {
@@ -489,6 +489,20 @@ const Profile = () => {
                             ) : <></>}
                         </div>
                     </div>
+
+                    <Link to="/orders">
+                        <button style={{
+                            padding: '12px 24px',
+                            background: 'var(--accent)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            marginTop: '20px'
+                        }}>
+                            View Order History
+                        </button>
+                    </Link>
 
                     {/* DELETE ACCOUNT DANGER SECTION */}
                     <div className="danger_zone">
