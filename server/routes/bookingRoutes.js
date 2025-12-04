@@ -57,9 +57,9 @@ router.get("/api/showtimes/:showtimeId/seats", async (req, res) => {
 
     // Send back the seat data
     res.json({
-      soldSeats,
-      heldBy, 
-      seatMap: showtime.seatMap || {}
+      soldSeats,      // Array of sold seats like ["A1", "B2"]
+      heldBy,         // Object like {"C3": "user123", "C4": "user123"}
+      seatMap: showtime.seatMap || {} // Include any existing seat map
     });
 
   } catch (err) {
