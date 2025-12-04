@@ -172,7 +172,6 @@ export default function Details() {
         {isNowPlaying && (
           <section className="details_section">
             <h2 className="details_section-title">Showtimes</h2>
-
             {/* Showroom Selector */}
             <div className="details_showroom-section">
               <h3 className="details_subtitle">Select Cinema</h3>
@@ -229,7 +228,7 @@ export default function Details() {
                       }`}
                       onClick={() => setSelectedDate(date)}
                     >
-                      {date}
+                      {new Date(date).toLocaleDateString("en-US", { dateStyle: "short" })}
                     </button>
                   ))}
                 </div>
